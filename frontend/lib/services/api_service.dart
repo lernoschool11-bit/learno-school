@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/post_model.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8000/api';
+  static const String baseUrl = 'https://learno-school-production.up.railway.app/api';
 
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();

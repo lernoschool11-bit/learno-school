@@ -58,7 +58,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     if (_selectedFileBytes == null) return null;
 
     final token = await _apiService.getToken();
-    final uri = Uri.parse('http://localhost:8000/api/upload');
+    final uri = Uri.parse('https://learno-school-production.up.railway.app/api/upload');
 
     final request = http.MultipartRequest('POST', uri);
     request.headers['Authorization'] = 'Bearer $token';
@@ -99,7 +99,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
       final token = await _apiService.getToken();
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/posts'),
+        Uri.parse('https://learno-school-production.up.railway.app/api/posts'),
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
         body: jsonEncode({
           'content': text.isEmpty ? '.' : text,
