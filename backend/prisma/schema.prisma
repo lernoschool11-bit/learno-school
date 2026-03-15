@@ -26,15 +26,28 @@ model User {
   school      String?
   directorate String?
   parentName  String?
+  avatarUrl   String?
+
+  grade       String?
+  section     String?
+
+  subjects    String[]
+  classes     String?
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  posts       Post[]
-  comments    Comment[]
-  assignments Assignment[]
-  submissions Submission[]
-  quizzes     Quiz[]
+  posts              Post[]
+  comments           Comment[]
+  likes              Like[]
+  assignments        Assignment[]
+  submissions        Submission[]
+  quizzes            Quiz[]
+  messages           Message[]
+  followers          Follow[]       @relation("Followers")
+  following          Follow[]       @relation("Following")
+  notifications      Notification[] @relation("UserNotifications")
+  sentNotifications  Notification[] @relation("ActorNotifications")
 }
 
 enum PostType {
@@ -60,6 +73,21 @@ model Post {
   updatedAt DateTime @updatedAt
 
   comments  Comment[]
+  likes     Like[]
+}
+
+model Like {
+  id        String   @id @default(uuid())
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
 }
 
 model Comment {
@@ -71,6 +99,36 @@ model Comment {
 
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+
+  followerId  String
+  follower    User     @relation("Following", fields: [followerId], references: [id])
+
+  followingId String
+  following   User     @relation("Followers", fields: [followingId], references: [id])
+
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  postId    String?
+
+  userId    String
+  user      User     @relation("UserNotifications", fields: [userId], references: [id])
+
+  actorId   String
+  actor     User     @relation("ActorNotifications", fields: [actorId], references: [id])
 
   createdAt DateTime @default(now())
 }
@@ -122,4 +180,16 @@ model Question {
 
   quizId        String
   quiz          Quiz     @relation(fields: [quizId], references: [id])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  roomId    String
+  content   String
+  type      String   @default("text")
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
 }

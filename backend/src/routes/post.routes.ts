@@ -1,13 +1,32 @@
 import { Router } from 'express';
-import { createPost, getFeed } from '../controllers/postController';
+import { 
+  createPost, 
+  getFeed, 
+  toggleLike, 
+  getComments, 
+  addComment, 
+  deleteComment,
+  deletePost
+} from '../controllers/postController';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 
-// All content routes require authentication via Siraj SSO
 router.use(requireAuth);
 
-router.post('/', createPost);
+// Feed & Create
 router.get('/feed', getFeed);
+router.post('/', createPost);
+
+// Delete Post
+router.delete('/:id', deletePost);
+
+// Like
+router.post('/:id/like', toggleLike);
+
+// Comments
+router.get('/:id/comments', getComments);
+router.post('/:id/comments', addComment);
+router.delete('/:id/comments/:commentId', deleteComment);
 
 export default router;

@@ -10,7 +10,10 @@ const app = express();
 
 // Security Middleware (SOP §11 Security Framework)
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true,
+}));
 app.use(helmet());
 app.use(apiLimiter);          // Rate limiting
 app.use(sanitizeInput);       // XSS input sanitization

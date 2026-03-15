@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'register_screen.dart';
-import '../main.dart'; // To access MainNavigation
+import 'forgot_password_screen.dart';
+import '../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,18 +12,19 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _nationalIdController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _apiService = ApiService();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   Future<void> _login() async {
-    final nationalId = _nationalIdController.text.trim();
+    final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    if (nationalId.length != 10 || int.tryParse(nationalId) == null) {
+    if (email.isEmpty || !email.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرقم الوطني يجب أن يتكون من 10 أرقام')),
+        const SnackBar(content: Text('الرجاء إدخال بريد إلكتروني صحيح')),
       );
       return;
     }
@@ -35,9 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() => _isLoading = true);
-    
-    final success = await _apiService.login(nationalId, password);
-    
+    final success = await _apiService.login(email, password);
     setState(() => _isLoading = false);
 
     if (success) {
@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Incorrect National ID or Password')),
+          const SnackBar(content: Text('البريد الإلكتروني أو كلمة المرور غير صحيحة')),
         );
       }
     }
@@ -68,59 +68,102 @@ class _LoginScreenState extends State<LoginScreen> {
               const Icon(Icons.school, size: 80, color: Color(0xFF0A2342)),
               const SizedBox(height: 24),
               const Text(
-                'منصة سراج التعليمية',
+                'Learno',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF0A2342),
                 ),
               ),
+              const Text(
+                'المنصة التعليمية',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
               const SizedBox(height: 48),
+
+              // البريد الإلكتروني
               TextField(
-                controller: _nationalIdController,
-                keyboardType: TextInputType.number,
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
-                  labelText: 'الرقم الوطني (National ID)',
+                  labelText: 'البريد الإلكتروني',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
+                  prefixIcon: Icon(Icons.email),
                 ),
               ),
               const SizedBox(height: 16),
+
+              // كلمة المرور
               TextField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
                   labelText: 'كلمة المرور',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
+
+              // نسيت كلمة المرور
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                    );
+                  },
+                  child: const Text('نسيت كلمة المرور؟'),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // زر تسجيل الدخول
               ElevatedButton(
                 onPressed: _isLoading ? null : _login,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0A2342),
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: _isLoading 
+                child: _isLoading
                     ? const SizedBox(
-                        height: 24, 
-                        width: 24, 
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
-                    : const Text('تسجيل الدخول', style: TextStyle(fontSize: 18, color: Colors.white)),
+                    : const Text(
+                        'تسجيل الدخول',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
               ),
               const SizedBox(height: 16),
+
+              // إنشاء حساب
               TextButton(
                 onPressed: () {
                   Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (_) => const RegisterScreen())
+                    context,
+                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
                   );
                 },
                 child: const Text('ليس لديك حساب؟ سجل الآن'),
-              )
+              ),
             ],
           ),
         ),
