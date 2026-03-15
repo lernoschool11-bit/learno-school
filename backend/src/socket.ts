@@ -56,7 +56,7 @@ export const initSocket = (httpServer: HttpServer) => {
           },
         });
 
-        const history = messages.map((m) => ({
+        const history = messages.map((m: any) => ({
           id: m.id,
           roomId: m.roomId,
           content: m.content,
