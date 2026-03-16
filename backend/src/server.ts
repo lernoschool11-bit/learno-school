@@ -1,5 +1,8 @@
 import dotenv from "dotenv";
-dotenv.config();
+
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 import http from "http";
 import app from "./app";
