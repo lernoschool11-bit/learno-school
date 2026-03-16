@@ -18,11 +18,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   final TextEditingController _contentController = TextEditingController();
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
+  String _loadingText = 'جاري الرفع...';
   String _selectedType = 'TEXT';
   Uint8List? _selectedFileBytes;
   String? _selectedFileName;
   String? _selectedFileMime;
-  String? _uploadedUrl;
+
+  // Cloudinary credentials
+  static const String _cloudName = 'dlvxe1bjn';
+  static const String _uploadPreset = 'learno_unsigned';
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -34,7 +38,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         _selectedFileName = picked.name;
         _selectedFileMime = 'image/jpeg';
         _selectedType = 'IMAGE';
-        _uploadedUrl = null;
       });
     }
   }
@@ -49,19 +52,25 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         _selectedFileName = picked.name;
         _selectedFileMime = 'video/mp4';
         _selectedType = 'VIDEO';
-        _uploadedUrl = null;
       });
     }
   }
 
-  Future<String?> _uploadFile() async {
+  // رفع مباشر لـ Cloudinary
+  Future<String?> _uploadToCloudinary() async {
     if (_selectedFileBytes == null) return null;
 
-    final token = await _apiService.getToken();
-    final uri = Uri.parse('https://learno-school-production.up.railway.app/api/upload');
+    final isVideo = _selectedFileMime?.startsWith('video') == true;
+    final resourceType = isVideo ? 'video' : 'image';
+
+    setState(() => _loadingText = isVideo ? 'جاري رفع الفيديو...' : 'جاري رفع الصورة...');
+
+    final uri = Uri.parse(
+      'https://api.cloudinary.com/v1_1/$_cloudName/$resourceType/upload',
+    );
 
     final request = http.MultipartRequest('POST', uri);
-    request.headers['Authorization'] = 'Bearer $token';
+    request.fields['upload_preset'] = _uploadPreset;
     request.files.add(http.MultipartFile.fromBytes(
       'file',
       _selectedFileBytes!,
@@ -74,9 +83,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final data = jsonDecode(body);
 
     if (response.statusCode == 200) {
-      return data['url'];
+      return data['secure_url'];
     } else {
-      throw Exception(data['message'] ?? 'فشل رفع الملف');
+      throw Exception(data['error']?['message'] ?? 'فشل رفع الملف');
     }
   }
 
@@ -94,13 +103,18 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     try {
       String? mediaUrl;
       if (_selectedFileBytes != null) {
-        mediaUrl = await _uploadFile();
+        mediaUrl = await _uploadToCloudinary();
       }
+
+      setState(() => _loadingText = 'جاري النشر...');
 
       final token = await _apiService.getToken();
       final response = await http.post(
-        Uri.parse('https://learno-school-production.up.railway.app/api/posts'),
-        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+        Uri.parse('https://learno-school-production-2b55.up.railway.app/api/posts'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
         body: jsonEncode({
           'content': text.isEmpty ? '.' : text,
           'type': _selectedType,
@@ -114,9 +128,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       if (response.statusCode == 201) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم النشر بنجاح! ✅'), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('تم النشر بنجاح! ✅'),
+              backgroundColor: Colors.green,
+            ),
           );
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigation()));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
+          );
         }
       } else {
         final data = jsonDecode(response.body);
@@ -145,7 +165,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                ? Row(
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(_loadingText, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                    ],
+                  )
                 : ElevatedButton(
                     onPressed: _submitPost,
                     style: ElevatedButton.styleFrom(
@@ -194,7 +224,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
             ),
 
-            // معاينة الملف المختار
+            // معاينة الملف
             if (_selectedFileBytes != null) ...[
               const Divider(),
               Container(

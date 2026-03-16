@@ -9,14 +9,16 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET || '2UbvNvw7PgitHxlsWSm1uM3AhQA',
 });
 
-// تخزين مؤقت في الذاكرة
 const storage = multer.memoryStorage();
 
 export const upload = multer({
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
   fileFilter: (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime'];
+    const allowed = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      'video/mp4', 'video/quicktime', 'video/avi', 'video/mov'
+    ];
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -34,7 +36,12 @@ export const uploadToCloudinary = (
     const resourceType = mimetype.startsWith('video') ? 'video' : 'image';
 
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: resourceType },
+      {
+        folder,
+        resource_type: resourceType,
+        timeout: 120000, // 2 دقيقة
+        chunk_size: 6000000, // 6MB chunks
+      },
       (error, result) => {
         if (error) return reject(error);
         resolve(result!.secure_url);
