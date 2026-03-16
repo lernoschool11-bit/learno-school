@@ -24,7 +24,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   String? _selectedFileName;
   String? _selectedFileMime;
 
-  // Cloudinary credentials
   static const String _cloudName = 'dlvxe1bjn';
   static const String _uploadPreset = 'learno_unsigned';
 
@@ -56,7 +55,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
   }
 
-  // رفع مباشر لـ Cloudinary
   Future<String?> _uploadToCloudinary() async {
     if (_selectedFileBytes == null) return null;
 
@@ -85,7 +83,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     if (response.statusCode == 200) {
       return data['secure_url'];
     } else {
-      throw Exception(data['error']?['message'] ?? 'فشل رفع الملف');
+      throw Exception(data['error']?['message'] ?? 'فشل رفع الملف على Cloudinary');
     }
   }
 
@@ -109,6 +107,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       setState(() => _loadingText = 'جاري النشر...');
 
       final token = await _apiService.getToken();
+
       final response = await http.post(
         Uri.parse('https://learno-school-production-2b55.up.railway.app/api/posts'),
         headers: {
@@ -121,7 +120,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           'title': '',
           if (mediaUrl != null) 'mediaUrl': mediaUrl,
         }),
-      );
+      ).timeout(const Duration(seconds: 30));
 
       setState(() => _isLoading = false);
 
@@ -142,7 +141,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         final data = jsonDecode(response.body);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'فشل النشر')),
+            SnackBar(
+              content: Text(
+                '${data['message'] ?? data['error'] ?? 'فشل النشر'} - ${response.statusCode}',
+              ),
+            ),
           );
         }
       }
@@ -173,7 +176,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       ),
                       const SizedBox(width: 8),
-                      Text(_loadingText, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                      Text(
+                        _loadingText,
+                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
                     ],
                   )
                 : ElevatedButton(
@@ -191,7 +197,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // نوع المنشور
             Row(
               children: [
                 const Text('النوع: ', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -209,8 +214,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ],
             ),
             const SizedBox(height: 8),
-
-            // محتوى المنشور
             Expanded(
               child: TextField(
                 controller: _contentController,
@@ -223,8 +226,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 style: const TextStyle(fontSize: 16),
               ),
             ),
-
-            // معاينة الملف
             if (_selectedFileBytes != null) ...[
               const Divider(),
               Container(
@@ -260,7 +261,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 label: const Text('إزالة', style: TextStyle(color: Colors.red)),
               ),
             ],
-
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
