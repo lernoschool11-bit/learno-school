@@ -4,6 +4,26 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { AuthRequest } from "../middleware/auth";
 
+// ==================== تطبيع اسم المدرسة ====================
+const normalizeSchoolName = (name: string): string => {
+  return name
+    .trim()
+    .toLowerCase()
+    // إزالة كلمة مدرسة وتنويعاتها
+    .replace(/مدرسة\s*/g, '')
+    .replace(/مدرسه\s*/g, '')
+    .replace(/school\s*/g, '')
+    // إزالة كلمة للبنين/للبنات/للذكور/للاناث
+    .replace(/\s*للبنين/g, '')
+    .replace(/\s*للبنات/g, '')
+    .replace(/\s*للذكور/g, '')
+    .replace(/\s*للاناث/g, '')
+    .replace(/\s*للإناث/g, '')
+    // إزالة المسافات الزائدة
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export const register = async (req: Request, res: Response) => {
   try {
     const {
@@ -44,6 +64,9 @@ export const register = async (req: Request, res: Response) => {
 
     const finalNationalId = nationalId || `AUTO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
+    // تطبيع اسم المدرسة
+    const normalizedSchool = school ? normalizeSchoolName(school) : null;
+
     const user = await prisma.user.create({
       data: {
         nationalId: finalNationalId,
@@ -53,7 +76,7 @@ export const register = async (req: Request, res: Response) => {
         email,
         password: hashedPassword,
         role: role || 'STUDENT',
-        school: school || null,
+        school: normalizedSchool,
         grade: role === 'STUDENT' ? grade : null,
         section: role === 'STUDENT' ? section : null,
         subjects: { set: role === 'TEACHER' ? subjectsArray : [] },
