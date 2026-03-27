@@ -23,45 +23,25 @@ class SocketService {
 
     _socket!.connect();
 
-    _socket!.onConnect((_) {
-      print('Socket connected ✅');
-    });
-
-    _socket!.onDisconnect((_) {
-      print('Socket disconnected ❌');
-    });
-
-    _socket!.onError((data) {
-      print('Socket error: $data');
-    });
+    _socket!.onConnect((_) => print('Socket connected ✅'));
+    _socket!.onDisconnect((_) => print('Socket disconnected ❌'));
+    _socket!.onError((data) => print('Socket error: $data'));
   }
 
   void joinRoom(String roomId) {
     _socket?.emit('join_room', {'roomId': roomId});
   }
 
-  void sendMessage({
-    required String roomId,
-    required String content,
-    String type = 'text',
-  }) {
-    _socket?.emit('send_message', {
-      'roomId': roomId,
-      'content': content,
-      'type': type,
-    });
+  void sendMessage({required String roomId, required String content, String type = 'text'}) {
+    _socket?.emit('send_message', {'roomId': roomId, 'content': content, 'type': type});
   }
 
   void onMessage(Function(Map<String, dynamic>) callback) {
-    _socket?.on('new_message', (data) {
-      callback(Map<String, dynamic>.from(data));
-    });
+    _socket?.on('new_message', (data) => callback(Map<String, dynamic>.from(data)));
   }
 
   void onRoomHistory(Function(List<dynamic>) callback) {
-    _socket?.on('room_history', (data) {
-      callback(List<dynamic>.from(data));
-    });
+    _socket?.on('room_history', (data) => callback(List<dynamic>.from(data)));
   }
 
   void disconnect() {

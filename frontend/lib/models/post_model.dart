@@ -1,25 +1,25 @@
 class PostModel {
   final String id;
-  final String authorId;
   final String title;
   final String content;
+  final String authorId;
   final String authorName;
   final String authorRole;
   final String school;
   final String type;
   final String timeAgo;
-  final String? authorAvatar;
   int likes;
   int comments;
-  bool isLiked;
   final String? mediaUrl;
+  final String? authorAvatar;
+  bool isLiked;
   final List<CommentModel> commentsList;
 
   PostModel({
     required this.id,
-    required this.authorId,
     required this.title,
     required this.content,
+    required this.authorId,
     required this.authorName,
     required this.authorRole,
     required this.school,
@@ -27,9 +27,9 @@ class PostModel {
     required this.timeAgo,
     required this.likes,
     required this.comments,
-    this.isLiked = false,
     this.mediaUrl,
     this.authorAvatar,
+    this.isLiked = false,
     this.commentsList = const [],
   });
 
@@ -37,22 +37,21 @@ class PostModel {
     final commentsList = (json['comments'] as List<dynamic>? ?? [])
         .map((c) => CommentModel.fromJson(c))
         .toList();
-
     return PostModel(
       id: json['id'] ?? '',
-      authorId: json['author']?['id'] ?? '',
       title: json['title'] ?? '',
       content: json['content'] ?? '',
+      authorId: json['author']?['id'] ?? '',
       authorName: json['author']?['fullName'] ?? 'مستخدم غير معروف',
       authorRole: json['author']?['role'] ?? 'STUDENT',
       school: json['author']?['school'] ?? 'غير محدد',
       type: json['type'] ?? 'TEXT',
       timeAgo: _calculateTimeAgo(json['createdAt']),
       likes: json['likesCount'] ?? 0,
-      comments: json['commentsCount'] ?? 0,
-      isLiked: json['isLiked'] ?? false,
+      comments: json['commentsCount'] ?? (json['comments'] as List?)?.length ?? 0,
       mediaUrl: json['mediaUrl'],
       authorAvatar: json['author']?['avatarUrl'],
+      isLiked: json['isLiked'] ?? false,
       commentsList: commentsList,
     );
   }
@@ -71,8 +70,8 @@ class PostModel {
 
 class CommentModel {
   final String id;
-  final String authorId;
   final String content;
+  final String authorId;
   final String authorName;
   final String authorRole;
   final String? authorAvatar;
@@ -80,8 +79,8 @@ class CommentModel {
 
   CommentModel({
     required this.id,
-    required this.authorId,
     required this.content,
+    required this.authorId,
     required this.authorName,
     required this.authorRole,
     this.authorAvatar,
@@ -91,8 +90,8 @@ class CommentModel {
   factory CommentModel.fromJson(Map<String, dynamic> json) {
     return CommentModel(
       id: json['id'] ?? '',
-      authorId: json['author']?['id'] ?? '',
       content: json['content'] ?? '',
+      authorId: json['author']?['id'] ?? '',
       authorName: json['author']?['fullName'] ?? 'مستخدم غير معروف',
       authorRole: json['author']?['role'] ?? 'STUDENT',
       authorAvatar: json['author']?['avatarUrl'],
