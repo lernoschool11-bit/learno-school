@@ -6,6 +6,7 @@ import {
   searchUsers,
   updateProfile,
   changePassword,
+  getUserById,
 } from '../controllers/authController';
 import { forgotPassword, resetPassword } from '../controllers/passwordResetController';
 import { requireAuth } from '../middleware/auth';
@@ -16,6 +17,7 @@ router.post("/login", login);
 router.post("/register", register);
 router.get("/me", requireAuth, getMe);
 router.get("/search", requireAuth, searchUsers);
+router.get("/user/:id", requireAuth, getUserById);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.put("/update-profile", requireAuth, updateProfile);
