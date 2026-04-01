@@ -32,12 +32,12 @@ class ApiService {
   }
 
   // ---------------- LOGIN ----------------
-  Future<bool> login(String nationalId, String password) async {
+  Future<bool> login(String email, String password) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: _headers(null),
-        body: jsonEncode({'nationalId': nationalId, 'password': password}),
+        body: jsonEncode({'email': email, 'password': password}),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
