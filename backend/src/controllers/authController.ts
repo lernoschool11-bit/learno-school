@@ -9,17 +9,14 @@ const normalizeSchoolName = (name: string): string => {
   return name
     .trim()
     .toLowerCase()
-    // إزالة كلمة مدرسة وتنويعاتها
     .replace(/مدرسة\s*/g, '')
     .replace(/مدرسه\s*/g, '')
     .replace(/school\s*/g, '')
-    // إزالة كلمة للبنين/للبنات/للذكور/للاناث
     .replace(/\s*للبنين/g, '')
     .replace(/\s*للبنات/g, '')
     .replace(/\s*للذكور/g, '')
     .replace(/\s*للاناث/g, '')
     .replace(/\s*للإناث/g, '')
-    // إزالة المسافات الزائدة
     .replace(/\s+/g, ' ')
     .trim();
 };
@@ -64,7 +61,6 @@ export const register = async (req: Request, res: Response) => {
 
     const finalNationalId = nationalId || `AUTO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // تطبيع اسم المدرسة
     const normalizedSchool = school ? normalizeSchoolName(school) : null;
 
     const user = await prisma.user.create({
@@ -276,6 +272,37 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     return res.json({ message: "تم تغيير كلمة المرور بنجاح" });
   } catch (error) {
     console.error("changePassword error:", error);
+    return res.status(500).json({ message: "خطأ في السيرفر" });
+  }
+};
+
+// ==================== GET USER BY ID ====================
+export const getUserById = async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.params.id as string; // ← الإصلاح هنا
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        fullName: true,
+        username: true,
+        role: true,
+        school: true,
+        grade: true,
+        section: true,
+        subjects: true,
+        avatarUrl: true,
+        createdAt: true,
+        _count: { select: { posts: true } }
+      }
+    });
+
+    if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
+
+    return res.json({ ...user, postsCount: user._count.posts });
+  } catch (error) {
+    console.error("getUserById error:", error);
     return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
