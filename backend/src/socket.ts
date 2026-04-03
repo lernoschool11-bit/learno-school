@@ -38,12 +38,12 @@ export const initSocket = (httpServer: HttpServer) => {
     const user = (socket as any).user;
     console.log(`✅ ${user.fullName} connected`);
 
-    // انضم لغرفة
+    // ════════ الغرف العامة (موجود مسبقاً) ════════
+
     socket.on('join_room', async ({ roomId }) => {
       socket.join(roomId);
       console.log(`${user.fullName} joined room: ${roomId}`);
 
-      // جيب آخر 50 رسالة من قاعدة البيانات
       try {
         const messages = await prisma.message.findMany({
           where: { roomId },
@@ -75,12 +75,10 @@ export const initSocket = (httpServer: HttpServer) => {
       }
     });
 
-    // استقبل رسالة جديدة
     socket.on('send_message', async ({ roomId, content, type = 'text' }) => {
       if (!content || !roomId) return;
 
       try {
-        // احفظ الرسالة في قاعدة البيانات
         const saved = await prisma.message.create({
           data: {
             roomId,
@@ -107,11 +105,66 @@ export const initSocket = (httpServer: HttpServer) => {
           time: `${saved.createdAt.getHours()}:${saved.createdAt.getMinutes().toString().padStart(2, '0')}`,
         };
 
-        // أرسل الرسالة لكل أعضاء الغرفة
         io.to(roomId).emit('new_message', message);
       } catch (err) {
         console.error('Error saving message:', err);
       }
+    });
+
+    // ════════ الرسائل الخاصة (جديد) ════════
+
+    // المستخدم ينضم لغرفته الخاصة
+    socket.on('join_direct', () => {
+      socket.join(`dm_${user.id}`);
+      console.log(`${user.fullName} joined DM room`);
+    });
+
+    // إرسال رسالة خاصة
+    socket.on('send_direct_message', async ({ conversationId, content }) => {
+      if (!content || !conversationId) return;
+
+      try {
+        const conversation = await prisma.conversation.findFirst({
+          where: {
+            id: conversationId,
+            status: 'ACCEPTED',
+            OR: [{ senderId: user.id }, { receiverId: user.id }],
+          },
+        });
+
+        if (!conversation) return;
+
+        const saved = await prisma.directMessage.create({
+          data: { conversationId, senderId: user.id, content },
+          include: {
+            sender: { select: { id: true, fullName: true, username: true, avatarUrl: true } },
+          },
+        });
+
+        const message = {
+          id: saved.id,
+          conversationId: saved.conversationId,
+          content: saved.content,
+          senderId: saved.senderId,
+          sender: saved.sender,
+          createdAt: saved.createdAt,
+        };
+
+        const receiverId =
+          conversation.senderId === user.id
+            ? conversation.receiverId
+            : conversation.senderId;
+
+        io.to(`dm_${user.id}`).emit('new_direct_message', message);
+        io.to(`dm_${receiverId}`).emit('new_direct_message', message);
+      } catch (err) {
+        console.error('Error saving direct message:', err);
+      }
+    });
+
+    // إشعار بطلب محادثة جديد
+    socket.on('notify_dm_request', ({ receiverId }) => {
+      io.to(`dm_${receiverId}`).emit('new_dm_request');
     });
 
     socket.on('disconnect', () => {

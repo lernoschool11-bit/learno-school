@@ -48,6 +48,11 @@ model User {
   following          Follow[]       @relation("Following")
   notifications      Notification[] @relation("UserNotifications")
   sentNotifications  Notification[] @relation("ActorNotifications")
+
+  // الرسائل الخاصة
+  sentConversations     Conversation[]  @relation("SentConversations")
+  receivedConversations Conversation[]  @relation("ReceivedConversations")
+  directMessages        DirectMessage[]
 }
 
 enum PostType {
@@ -192,4 +197,42 @@ model Message {
   user      User     @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
+}
+
+// ════════ الرسائل الخاصة ════════
+
+enum ConversationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Conversation {
+  id         String             @id @default(uuid())
+  status     ConversationStatus @default(PENDING)
+
+  senderId   String
+  sender     User               @relation("SentConversations", fields: [senderId], references: [id])
+
+  receiverId String
+  receiver   User               @relation("ReceivedConversations", fields: [receiverId], references: [id])
+
+  messages   DirectMessage[]
+
+  createdAt  DateTime           @default(now())
+
+  @@unique([senderId, receiverId])
+}
+
+model DirectMessage {
+  id             String       @id @default(uuid())
+  content        String
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+
+  createdAt      DateTime     @default(now())
 }
