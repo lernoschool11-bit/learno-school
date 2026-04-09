@@ -7,6 +7,7 @@ import {
   updateProfile,
   changePassword,
   getUserById,
+  toggleFollow,
 } from '../controllers/authController';
 import { forgotPassword, resetPassword } from '../controllers/passwordResetController';
 import { requireAuth } from '../middleware/auth';
@@ -18,6 +19,7 @@ router.post("/register", register);
 router.get("/me", requireAuth, getMe);
 router.get("/search", requireAuth, searchUsers);
 router.get("/user/:id", requireAuth, getUserById);
+router.post("/follow/:userId", requireAuth, toggleFollow);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.put("/update-profile", requireAuth, updateProfile);

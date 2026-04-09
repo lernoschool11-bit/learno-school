@@ -220,6 +220,7 @@ model Conversation {
   messages   DirectMessage[]
 
   createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
 
   @@unique([senderId, receiverId])
 }

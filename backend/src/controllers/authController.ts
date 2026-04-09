@@ -306,3 +306,48 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
+// ==================== TOGGLE FOLLOW ====================
+export const toggleFollow = async (req: Request, res: Response) => {
+  try {
+    const followerId = (req as any).user.id;
+    const followingId = req.params.userId;
+
+    if (followerId === followingId) {
+      return res.status(400).json({ message: 'لا يمكنك متابعة نفسك' });
+    }
+
+    const existing = await prisma.follow.findFirst({
+      where: { followerId, followingId },
+    });
+
+    if (existing) {
+      await prisma.follow.delete({ where: { id: existing.id } });
+    } else {
+      await prisma.follow.create({
+        data: { followerId, followingId },
+      });
+
+      // إشعار للشخص المتابَع
+      await prisma.notification.create({
+        data: {
+          userId: followingId,
+          actorId: followerId,
+          type: 'FOLLOW',
+          message: 'بدأ بمتابعتك',
+        },
+      });
+    }
+
+    const followersCount = await prisma.follow.count({
+      where: { followingId },
+    });
+
+    res.json({
+      isFollowing: !existing,
+      followersCount,
+    });
+  } catch (err) {
+    console.error('toggleFollow error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
