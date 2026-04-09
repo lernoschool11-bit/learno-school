@@ -6,6 +6,7 @@ import 'screens/create_post_screen.dart';
 import 'screens/community_screen.dart';
 import 'screens/profile_screen.dart';
 import 'services/api_service.dart';
+import 'services/socket_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -105,6 +106,12 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    SocketService().connect();
+  }
 
   final List<Widget> _screens = [
     const HomeScreen(),

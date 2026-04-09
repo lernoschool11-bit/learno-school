@@ -276,4 +276,91 @@ class ApiService {
       throw Exception("Failed to load community");
     } catch (e) { throw Exception('Network error'); }
   }
+
+  // ---------------- DIRECT MESSAGES ----------------
+  Future<Map<String, dynamic>> sendDmRequest(String receiverId) async {
+    try {
+      final token = await getToken();
+      final response = await http.post(
+        Uri.parse('$baseUrl/dm/request/$receiverId'),
+        headers: _headers(token),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      }
+      return {};
+    } catch (e) {
+      debugPrint('sendDmRequest error: $e');
+      return {};
+    }
+  }
+
+  Future<bool> respondDmRequest(String conversationId, String action) async {
+    try {
+      final token = await getToken();
+      final response = await http.put(
+        Uri.parse('$baseUrl/dm/request/$conversationId'),
+        headers: _headers(token),
+        body: jsonEncode({'action': action}),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('respondDmRequest error: $e');
+      return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getConversations() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/dm'),
+        headers: _headers(token),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((c) => Map<String, dynamic>.from(c)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getConversations error: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getDmRequests() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/dm/requests'),
+        headers: _headers(token),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((r) => Map<String, dynamic>.from(r)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getDmRequests error: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getDirectMessages(String conversationId) async {
+    try {
+      final token = await getToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/dm/$conversationId/messages'),
+        headers: _headers(token),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((m) => Map<String, dynamic>.from(m)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getDirectMessages error: $e');
+      return [];
+    }
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../models/post_model.dart';
 import '../widgets/post_card.dart';
+import 'chat_detail_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;
@@ -17,6 +18,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Map<String, dynamic>? _profile;
   bool _isLoading = true;
   bool _followLoading = false;
+  bool _msgLoading = false;
   String _currentUserId = '';
 
   @override
@@ -51,6 +53,39 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       _profile!['followersCount'] = result['followersCount'];
       _followLoading = false;
     });
+  }
+
+  Future<void> _openDm() async {
+    if (_msgLoading) return;
+    setState(() => _msgLoading = true);
+    try {
+      final conv = await _api.sendDmRequest(widget.userId);
+      if (!mounted) return;
+      if (conv.isNotEmpty && conv['id'] != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatDetailScreen(
+              conversationId: conv['id'],
+              otherUserName: _profile!['fullName'] ?? 'مستخدم',
+              currentUserId: _currentUserId,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذر فتح المحادثة، حاول مرة أخرى')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('حدث خطأ، تحقق من الاتصال')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _msgLoading = false);
+    }
   }
 
   @override
@@ -123,13 +158,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     const SizedBox(height: 4),
                     Text(
                       '@${_profile!['username'] ?? ''}',
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 13),
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: isTeacher ? Colors.teal : Colors.white.withAlpha(50),
+                        color: isTeacher
+                            ? Colors.teal
+                            : Colors.white.withAlpha(50),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -138,31 +177,64 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // زر المتابعة
+                    // أزرار المتابعة والمراسلة
                     if (!isMe)
-                      ElevatedButton.icon(
-                        onPressed: _followLoading ? null : _toggleFollow,
-                        icon: _followLoading
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Icon(
-                                isFollowing ? Icons.person_remove : Icons.person_add,
-                                size: 18,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: _followLoading ? null : _toggleFollow,
+                            icon: _followLoading
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Icon(
+                                    isFollowing
+                                        ? Icons.person_remove
+                                        : Icons.person_add,
+                                    size: 18,
+                                  ),
+                            label:
+                                Text(isFollowing ? 'إلغاء المتابعة' : 'متابعة'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  isFollowing ? Colors.red : Colors.white,
+                              foregroundColor: isFollowing
+                                  ? Colors.white
+                                  : const Color(0xFF0A2342),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                        label: Text(isFollowing ? 'إلغاء المتابعة' : 'متابعة'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isFollowing ? Colors.red : Colors.white,
-                          foregroundColor: isFollowing ? Colors.white : const Color(0xFF0A2342),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          ElevatedButton.icon(
+                            onPressed: _msgLoading ? null : _openDm,
+                            icon: _msgLoading
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFF0A2342),
+                                    ),
+                                  )
+                                : const Icon(Icons.message, size: 18),
+                            label: const Text('مراسلة'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF0A2342),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                   ],
                 ),
@@ -175,11 +247,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    _statCard('المنشورات', '${_profile!['postsCount'] ?? 0}', Icons.article),
+                    _statCard('المنشورات',
+                        '${_profile!['postsCount'] ?? 0}', Icons.article),
                     const SizedBox(width: 12),
-                    _statCard('المتابعون', '${_profile!['followersCount'] ?? 0}', Icons.people),
+                    _statCard('المتابعون',
+                        '${_profile!['followersCount'] ?? 0}', Icons.people),
                     const SizedBox(width: 12),
-                    _statCard('يتابع', '${_profile!['followingCount'] ?? 0}', Icons.person_add),
+                    _statCard('يتابع',
+                        '${_profile!['followingCount'] ?? 0}', Icons.person_add),
                   ],
                 ),
               ),
@@ -190,10 +265,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   child: Column(
                     children: [
-                      _infoTile(Icons.school, 'المدرسة', _profile!['school'] ?? 'غير محدد'),
+                      _infoTile(Icons.school, 'المدرسة',
+                          _profile!['school'] ?? 'غير محدد'),
                       if (!isTeacher && _profile!['grade'] != null) ...[
                         const Divider(height: 1),
                         _infoTile(
@@ -202,7 +279,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           'الصف ${_profile!['grade']} - شعبة ${_profile!['section'] ?? ''}',
                         ),
                       ],
-                      if (isTeacher && (_profile!['subjects'] as List?)?.isNotEmpty == true) ...[
+                      if (isTeacher &&
+                          (_profile!['subjects'] as List?)?.isNotEmpty ==
+                              true) ...[
                         const Divider(height: 1),
                         _infoTile(
                           Icons.book,
@@ -283,7 +362,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 color: Color(0xFF0A2342),
               ),
             ),
-            Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            Text(label,
+                style: const TextStyle(color: Colors.grey, fontSize: 12)),
           ],
         ),
       ),
@@ -293,10 +373,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget _infoTile(IconData icon, String label, String value) {
     return ListTile(
       leading: Icon(icon, color: const Color(0xFF0A2342)),
-      title: Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      title:
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       subtitle: Text(
         value,
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        style:
+            const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
       ),
     );
   }

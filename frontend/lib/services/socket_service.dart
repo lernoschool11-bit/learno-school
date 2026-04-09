@@ -23,10 +23,15 @@ class SocketService {
 
     _socket!.connect();
 
-    _socket!.onConnect((_) => print('Socket connected ✅'));
+    _socket!.onConnect((_) {
+      print('Socket connected ✅');
+      joinDirect(); // انضم لغرفتك الخاصة تلقائياً
+    });
     _socket!.onDisconnect((_) => print('Socket disconnected ❌'));
     _socket!.onError((data) => print('Socket error: $data'));
   }
+
+  // ════════ الغرف العامة ════════
 
   void joinRoom(String roomId) {
     _socket?.emit('join_room', {'roomId': roomId});
@@ -42,6 +47,32 @@ class SocketService {
 
   void onRoomHistory(Function(List<dynamic>) callback) {
     _socket?.on('room_history', (data) => callback(List<dynamic>.from(data)));
+  }
+
+  // ════════ الرسائل الخاصة ════════
+
+  void joinDirect() {
+    _socket?.emit('join_direct');
+  }
+
+  void sendDirectMessage({required String conversationId, required String content}) {
+    _socket?.emit('send_direct_message', {
+      'conversationId': conversationId,
+      'content': content,
+    });
+  }
+
+  void onDirectMessage(Function(Map<String, dynamic>) callback) {
+    _socket?.off('new_direct_message'); // إزالة المستمعين القديمين
+    _socket?.on('new_direct_message', (data) => callback(Map<String, dynamic>.from(data)));
+  }
+
+  void notifyDmRequest(String receiverId) {
+    _socket?.emit('notify_dm_request', {'receiverId': receiverId});
+  }
+
+  void onNewDmRequest(Function() callback) {
+    _socket?.on('new_dm_request', (_) => callback());
   }
 
   void disconnect() {

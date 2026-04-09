@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../models/post_model.dart';
 import '../widgets/post_card.dart';
 import 'notifications_screen.dart';
+import 'direct_messages_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -112,6 +113,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
             ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.mail_outline),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DirectMessagesScreen()),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
