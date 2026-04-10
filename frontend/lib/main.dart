@@ -7,6 +7,8 @@ import 'screens/community_screen.dart';
 import 'screens/profile_screen.dart';
 import 'services/api_service.dart';
 import 'services/socket_service.dart';
+import 'theme/app_theme.dart';
+import 'widgets/mac_dock.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,15 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Learno',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0A2342)),
-        useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0A2342),
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
-      ),
+      theme: AppTheme.darkTheme,
       home: const AuthWrapper(),
     );
   }
@@ -128,18 +122,15 @@ class _MainNavigationState extends State<MainNavigation> {
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: MacDock(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF0A2342),
-        unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'البحث'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: 'نشر'),
-          BottomNavigationBarItem(icon: Icon(Icons.groups), label: 'مجتمعي'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'حسابي'),
+          MacDockItem(icon: Icons.home, label: 'الرئيسية'),
+          MacDockItem(icon: Icons.search, label: 'البحث'),
+          MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'),
+          MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
+          MacDockItem(icon: Icons.person, label: 'حسابي'),
         ],
       ),
     );

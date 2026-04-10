@@ -3,6 +3,7 @@ import '../models/post_model.dart';
 import '../services/api_service.dart';
 import '../screens/user_profile_screen.dart';
 import 'video_player_widget.dart';
+import 'three_d_transformer.dart';
 
 class PostCard extends StatefulWidget {
   final PostModel post;
@@ -166,7 +167,8 @@ class _PostCardState extends State<PostCard> {
     final isTeacher = widget.post.authorRole == 'TEACHER';
     final isMyPost = widget.post.authorId == widget.currentUserId;
 
-    return Card(
+    return ThreeDTransformer(
+      child: Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -384,8 +386,9 @@ class _PostCardState extends State<PostCard> {
           ],
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Color _getTypeColor(String type) {
     switch (type) {

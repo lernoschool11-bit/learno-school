@@ -3,6 +3,8 @@ import '../services/api_service.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import '../main.dart';
+import '../widgets/login_character_widget.dart';
+import '../widgets/glass_card.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -59,13 +61,19 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.school, size: 80, color: Color(0xFF0A2342)),
+              const SizedBox(height: 20),
+              // Character tracking pointer and reacting to password visibility
+              Center(
+                child: LoginCharacterWidget(
+                  isPasswordVisible: !_obscurePassword,
+                ),
+              ),
               const SizedBox(height: 24),
               const Text(
                 'Learno',
@@ -73,7 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0A2342),
                 ),
               ),
               const Text(
@@ -83,32 +90,39 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 48),
 
-              // البريد الإلكتروني
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'البريد الإلكتروني',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // كلمة المرور
-              TextField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'كلمة المرور',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+              // Glassmorphism wrapper for inputs
+              GlassCard(
+                padding: const EdgeInsets.all(16),
+                margin: EdgeInsets.zero,
+                child: Column(
+                  children: [
+                    // البريد الإلكتروني
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'البريد الإلكتروني',
+                        prefixIcon: Icon(Icons.email),
+                      ),
                     ),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                  ),
+                    const SizedBox(height: 16),
+
+                    // كلمة المرور
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: 'كلمة المرور',
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                          ),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 8),
@@ -131,13 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
               // زر تسجيل الدخول
               ElevatedButton(
                 onPressed: _isLoading ? null : _login,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0A2342),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
                 child: _isLoading
                     ? const SizedBox(
                         height: 24,
@@ -149,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       )
                     : const Text(
                         'تسجيل الدخول',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                        style: TextStyle(fontSize: 18),
                       ),
               ),
               const SizedBox(height: 16),
