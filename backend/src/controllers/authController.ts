@@ -279,7 +279,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 // ==================== GET USER BY ID ====================
 export const getUserById = async (req: AuthRequest, res: Response) => {
   try {
-    const id = req.params.id as string; // ← الإصلاح هنا
+    const id = req.params.id as string;
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -306,28 +306,34 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
+
 // ==================== TOGGLE FOLLOW ====================
 export const toggleFollow = async (req: Request, res: Response) => {
   try {
-    const followerId = (req as any).user.id;
-    const followingId = req.params.userId;
+    const followerId = (req as any).user.id as string;
+    const followingId = req.params.userId as string;
 
     if (followerId === followingId) {
       return res.status(400).json({ message: 'لا يمكنك متابعة نفسك' });
     }
 
     const existing = await prisma.follow.findFirst({
-      where: { followerId, followingId },
+      where: {
+        followerId: followerId,
+        followingId: followingId,
+      },
     });
 
     if (existing) {
       await prisma.follow.delete({ where: { id: existing.id } });
     } else {
       await prisma.follow.create({
-        data: { followerId, followingId },
+        data: {
+          followerId: followerId,
+          followingId: followingId,
+        },
       });
 
-      // إشعار للشخص المتابَع
       await prisma.notification.create({
         data: {
           userId: followingId,
@@ -339,7 +345,7 @@ export const toggleFollow = async (req: Request, res: Response) => {
     }
 
     const followersCount = await prisma.follow.count({
-      where: { followingId },
+      where: { followingId: followingId },
     });
 
     res.json({

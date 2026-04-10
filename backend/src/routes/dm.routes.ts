@@ -5,29 +5,26 @@ import { Request, Response } from 'express';
 
 const router = Router();
 
-// فتح أو إنشاء محادثة مباشرة (بدون نظام طلبات)
+// فتح او انشاء محادثة مباشرة
 router.post('/request/:receiverId', requireAuth, async (req: Request, res: Response) => {
   try {
-    const senderId = (req as any).user.id;
-    const receiverId = req.params.receiverId;
+    const senderId = (req as any).user.id as string;
+    const receiverId = req.params.receiverId as string;
 
     if (senderId === receiverId) {
       return res.status(400).json({ message: 'لا يمكنك مراسلة نفسك' });
     }
 
-    // ابحث عن محادثة موجودة بين المستخدمين
     const existing = await prisma.conversation.findFirst({
       where: {
         OR: [
-          { senderId, receiverId },
+          { senderId: senderId, receiverId: receiverId },
           { senderId: receiverId, receiverId: senderId },
         ],
       },
     });
 
-    // إذا موجودة ارجعها مباشرة (بغض النظر عن الـ status)
     if (existing) {
-      // إذا كانت REJECTED أو PENDING، حوّلها لـ ACCEPTED
       if (existing.status !== 'ACCEPTED') {
         const updated = await prisma.conversation.update({
           where: { id: existing.id },
@@ -38,9 +35,12 @@ router.post('/request/:receiverId', requireAuth, async (req: Request, res: Respo
       return res.json(existing);
     }
 
-    // إنشاء محادثة جديدة مباشرة كـ ACCEPTED
     const conversation = await prisma.conversation.create({
-      data: { senderId, receiverId, status: 'ACCEPTED' },
+      data: {
+        senderId: senderId,
+        receiverId: receiverId,
+        status: 'ACCEPTED',
+      },
     });
 
     res.status(201).json(conversation);
@@ -50,14 +50,15 @@ router.post('/request/:receiverId', requireAuth, async (req: Request, res: Respo
   }
 });
 
-// قبول أو رفض طلب المحادثة
+// قبول او رفض طلب المحادثة
 router.put('/request/:conversationId', requireAuth, async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.id as string;
+    const conversationId = req.params.conversationId as string;
     const { action } = req.body;
 
     const conversation = await prisma.conversation.findFirst({
-      where: { id: req.params.conversationId, receiverId: userId },
+      where: { id: conversationId, receiverId: userId },
     });
 
     if (!conversation) return res.status(404).json({ message: 'الطلب غير موجود' });
@@ -76,7 +77,7 @@ router.put('/request/:conversationId', requireAuth, async (req: Request, res: Re
 // جلب كل المحادثات
 router.get('/', requireAuth, async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.id as string;
 
     const conversations = await prisma.conversation.findMany({
       where: {
@@ -103,7 +104,7 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
 // جلب الطلبات الواردة
 router.get('/requests', requireAuth, async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.id as string;
 
     const requests = await prisma.conversation.findMany({
       where: { receiverId: userId, status: 'PENDING' },
@@ -121,11 +122,12 @@ router.get('/requests', requireAuth, async (req: Request, res: Response) => {
 // جلب رسائل محادثة معينة
 router.get('/:conversationId/messages', requireAuth, async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.id as string;
+    const conversationId = req.params.conversationId as string;
 
     const conversation = await prisma.conversation.findFirst({
       where: {
-        id: req.params.conversationId,
+        id: conversationId,
         OR: [{ senderId: userId }, { receiverId: userId }],
       },
     });
@@ -133,7 +135,7 @@ router.get('/:conversationId/messages', requireAuth, async (req: Request, res: R
     if (!conversation) return res.status(403).json({ message: 'غير مصرح' });
 
     const messages = await prisma.directMessage.findMany({
-      where: { conversationId: req.params.conversationId },
+      where: { conversationId: conversationId },
       orderBy: { createdAt: 'asc' },
       include: {
         sender: { select: { id: true, fullName: true, username: true, avatarUrl: true } },

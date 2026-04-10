@@ -4,8 +4,8 @@ import prisma from '../lib/prisma';
 // إرسال طلب محادثة
 export const sendRequest = async (req: Request, res: Response) => {
   try {
-    const senderId = (req as any).user.id;
-    const { receiverId } = req.body;
+    const senderId = (req as any).user.id as string;
+    const receiverId = req.body.receiverId as string;
 
     if (senderId === receiverId)
       return res.status(400).json({ message: 'لا يمكنك مراسلة نفسك' });
@@ -13,7 +13,7 @@ export const sendRequest = async (req: Request, res: Response) => {
     const existing = await prisma.conversation.findFirst({
       where: {
         OR: [
-          { senderId, receiverId },
+          { senderId: senderId, receiverId: receiverId },
           { senderId: receiverId, receiverId: senderId },
         ],
       },
@@ -23,7 +23,7 @@ export const sendRequest = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'الطلب موجود مسبقاً', conversation: existing });
 
     const conversation = await prisma.conversation.create({
-      data: { senderId, receiverId },
+      data: { senderId: senderId, receiverId: receiverId },
       include: {
         sender: { select: { id: true, fullName: true, username: true, avatarUrl: true } },
         receiver: { select: { id: true, fullName: true, username: true, avatarUrl: true } },
@@ -39,8 +39,9 @@ export const sendRequest = async (req: Request, res: Response) => {
 // قبول أو رفض الطلب
 export const respondRequest = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
-    const { conversationId, status } = req.body; // status: ACCEPTED | REJECTED
+    const userId = (req as any).user.id as string;
+    const conversationId = req.body.conversationId as string;
+    const status = req.body.status as string;
 
     const conversation = await prisma.conversation.findFirst({
       where: { id: conversationId, receiverId: userId, status: 'PENDING' },
@@ -51,7 +52,7 @@ export const respondRequest = async (req: Request, res: Response) => {
 
     const updated = await prisma.conversation.update({
       where: { id: conversationId },
-      data: { status },
+      data: { status: status as any },
       include: {
         sender: { select: { id: true, fullName: true, username: true, avatarUrl: true } },
         receiver: { select: { id: true, fullName: true, username: true, avatarUrl: true } },
@@ -67,7 +68,7 @@ export const respondRequest = async (req: Request, res: Response) => {
 // جلب المحادثات المقبولة
 export const getConversations = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.id as string;
 
     const conversations = await prisma.conversation.findMany({
       where: {
@@ -94,7 +95,7 @@ export const getConversations = async (req: Request, res: Response) => {
 // جلب الطلبات الواردة
 export const getPendingRequests = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).user.id as string;
 
     const requests = await prisma.conversation.findMany({
       where: { receiverId: userId, status: 'PENDING' },
@@ -113,8 +114,8 @@ export const getPendingRequests = async (req: Request, res: Response) => {
 // جلب رسائل محادثة
 export const getMessages = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
-    const { conversationId } = req.params;
+    const userId = (req as any).user.id as string;
+    const conversationId = req.params.conversationId as string;
 
     const conversation = await prisma.conversation.findFirst({
       where: {
@@ -128,7 +129,7 @@ export const getMessages = async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'غير مسموح' });
 
     const messages = await prisma.directMessage.findMany({
-      where: { conversationId },
+      where: { conversationId: conversationId },
       include: {
         sender: { select: { id: true, fullName: true, username: true, avatarUrl: true } },
       },
