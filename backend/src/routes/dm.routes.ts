@@ -5,7 +5,7 @@ import { Request, Response } from 'express';
 
 const router = Router();
 
-// إرسال طلب محادثة
+// فتح أو إنشاء محادثة مباشرة (بدون نظام طلبات)
 router.post('/request/:receiverId', requireAuth, async (req: Request, res: Response) => {
   try {
     const senderId = (req as any).user.id;
@@ -15,6 +15,7 @@ router.post('/request/:receiverId', requireAuth, async (req: Request, res: Respo
       return res.status(400).json({ message: 'لا يمكنك مراسلة نفسك' });
     }
 
+    // ابحث عن محادثة موجودة بين المستخدمين
     const existing = await prisma.conversation.findFirst({
       where: {
         OR: [
@@ -24,14 +25,27 @@ router.post('/request/:receiverId', requireAuth, async (req: Request, res: Respo
       },
     });
 
-    if (existing) return res.json(existing);
+    // إذا موجودة ارجعها مباشرة (بغض النظر عن الـ status)
+    if (existing) {
+      // إذا كانت REJECTED أو PENDING، حوّلها لـ ACCEPTED
+      if (existing.status !== 'ACCEPTED') {
+        const updated = await prisma.conversation.update({
+          where: { id: existing.id },
+          data: { status: 'ACCEPTED' },
+        });
+        return res.json(updated);
+      }
+      return res.json(existing);
+    }
 
+    // إنشاء محادثة جديدة مباشرة كـ ACCEPTED
     const conversation = await prisma.conversation.create({
-      data: { senderId, receiverId, status: 'PENDING' },
+      data: { senderId, receiverId, status: 'ACCEPTED' },
     });
 
     res.status(201).json(conversation);
   } catch (err) {
+    console.error('DM request error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -40,7 +54,7 @@ router.post('/request/:receiverId', requireAuth, async (req: Request, res: Respo
 router.put('/request/:conversationId', requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
-    const { action } = req.body; // 'ACCEPTED' or 'REJECTED'
+    const { action } = req.body;
 
     const conversation = await prisma.conversation.findFirst({
       where: { id: req.params.conversationId, receiverId: userId },
@@ -112,7 +126,6 @@ router.get('/:conversationId/messages', requireAuth, async (req: Request, res: R
     const conversation = await prisma.conversation.findFirst({
       where: {
         id: req.params.conversationId,
-        status: 'ACCEPTED',
         OR: [{ senderId: userId }, { receiverId: userId }],
       },
     });
