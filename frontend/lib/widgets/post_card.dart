@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/post_model.dart';
 import '../services/api_service.dart';
 import '../screens/user_profile_screen.dart';
@@ -189,12 +190,18 @@ class _PostCardState extends State<PostCard> {
               onTap: () => _openUserProfile(widget.post.authorId),
               child: Text(
                 widget.post.authorName,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
               ),
             ),
             subtitle: Text(
               '${isTeacher ? 'معلم' : 'طالب'} • ${widget.post.school}\n${widget.post.timeAgo}',
-              style: const TextStyle(fontSize: 12),
+              style: TextStyle(
+                fontSize: 12,
+                color: AppTheme.textSecondary,
+              ),
             ),
             isThreeLine: true,
             trailing: Row(

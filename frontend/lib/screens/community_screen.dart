@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/socket_service.dart';
+import '../theme/app_theme.dart';
 import 'user_profile_screen.dart';
 
 class CommunityScreen extends StatefulWidget {
@@ -139,33 +140,37 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    if (_error != null) return Scaffold(body: Center(child: Text(_error!)));
+    if (_isLoading) return Scaffold(backgroundColor: AppTheme.oledBlack, body: Center(child: CircularProgressIndicator(color: AppTheme.neonCyan)));
+    if (_error != null) return Scaffold(backgroundColor: AppTheme.oledBlack, body: Center(child: Text(_error!, style: TextStyle(color: AppTheme.textPrimary))));
 
     return Scaffold(
+      backgroundColor: AppTheme.oledBlack,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0A2342),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('مجتمعي', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('مجتمعي', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
             if (_communityData != null)
               Text(
                 'الصف ${_communityData!['grade']} - شعبة ${_communityData!['section']}',
-                style: const TextStyle(fontSize: 12, color: Colors.white70),
+                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
               ),
           ],
         ),
         actions: [
           IconButton(
-            icon: Icon(_showMembers ? Icons.chat : Icons.people),
+            icon: Icon(_showMembers ? Icons.chat : Icons.people, color: AppTheme.neonCyan),
             onPressed: () => setState(() => _showMembers = !_showMembers),
             tooltip: _showMembers ? 'المحادثة' : 'الأعضاء',
           ),
         ],
       ),
-      body: _showMembers ? _buildMembersList() : _buildChat(),
+      body: Padding(
+        padding: const EdgeInsets.only(bottom: 100), // Avoid MacDock overlap
+        child: _showMembers ? _buildMembersList() : _buildChat(),
+      ),
     );
   }
 
@@ -181,19 +186,19 @@ class _CommunityScreenState extends State<CommunityScreen> {
       children: [
         Container(
           padding: const EdgeInsets.all(12),
-          color: const Color(0xFF0A2342).withAlpha(15),
+          color: AppTheme.surfaceDark,
           child: Row(
             children: [
-              const Icon(Icons.people, color: Color(0xFF0A2342), size: 20),
+              const Icon(Icons.people, color: AppTheme.neonCyan, size: 20),
               const SizedBox(width: 8),
               Text(
                 '${allMembers.length} عضو',
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
               ),
               const SizedBox(width: 16),
-              Text(
-                '${teachers.length} معلم · ${students.length} طالب',
-                style: const TextStyle(color: Colors.grey, fontSize: 13),
+              const Text(
+                'معلم · طالب',
+                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
               ),
             ],
           ),
@@ -271,8 +276,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
         // إيموجي سريعة
         Container(
-          height: 44,
-          color: Colors.grey.shade50,
+          height: 48,
+          color: AppTheme.surfaceDark,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -291,13 +296,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
         // حقل الإرسال
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: const EdgeInsets.only(left: 8, right: 8, top: 6, bottom: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surfaceDark,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withAlpha(50),
-                blurRadius: 4,
+                color: Colors.black.withAlpha(100),
+                blurRadius: 10,
                 offset: const Offset(0, -2),
               ),
             ],
@@ -307,14 +312,19 @@ class _CommunityScreenState extends State<CommunityScreen> {
               Expanded(
                 child: TextField(
                   controller: _messageController,
+                  style: const TextStyle(color: AppTheme.textPrimary),
                   decoration: InputDecoration(
                     hintText: 'اكتب رسالة...',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: AppTheme.dividerColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide(color: AppTheme.dividerColor),
                     ),
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: AppTheme.oledBlack,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   ),
                   onSubmitted: _sendMessage,
@@ -323,9 +333,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
               ),
               const SizedBox(width: 8),
               CircleAvatar(
-                backgroundColor: const Color(0xFF0A2342),
+                backgroundColor: AppTheme.neonCyan,
                 child: IconButton(
-                  icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                  icon: const Icon(Icons.send, color: AppTheme.oledBlack, size: 20),
                   onPressed: () => _sendMessage(_messageController.text),
                 ),
               ),
@@ -343,7 +353,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
     final fullName = message['fullName'] as String? ?? '؟';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -354,7 +364,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               child: _buildAvatar(
                 name: fullName,
                 avatarUrl: avatarUrl,
-                backgroundColor: const Color(0xFF0A2342),
+                backgroundColor: AppTheme.surfaceDark,
                 radius: 14,
                 fontSize: 11,
               ),
@@ -363,15 +373,19 @@ class _CommunityScreenState extends State<CommunityScreen> {
           ],
           Flexible(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isMe ? const Color(0xFF0A2342) : Colors.grey.shade200,
+                color: AppTheme.surfaceDark,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
                   bottomLeft: isMe ? const Radius.circular(16) : Radius.zero,
                   bottomRight: isMe ? Radius.zero : const Radius.circular(16),
                 ),
+                border: isMe 
+                    ? Border.all(color: AppTheme.neonCyan.withAlpha(100), width: 1)
+                    : Border.all(color: AppTheme.dividerColor, width: 1),
+                boxShadow: isMe ? AppTheme.neonCyanGlow : [],
               ),
               child: Column(
                 crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -381,26 +395,26 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       onTap: () => _openUserProfile(userId),
                       child: Text(
                         fullName,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade600,
+                          color: AppTheme.neonCyan,
                         ),
                       ),
                     ),
                   Text(
                     message['content'] ?? '',
-                    style: TextStyle(
-                      color: isMe ? Colors.white : Colors.black87,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
                       fontSize: 15,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     message['time'] ?? '',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 10,
-                      color: isMe ? Colors.white60 : Colors.grey.shade500,
+                      color: AppTheme.textSecondary,
                     ),
                   ),
                 ],

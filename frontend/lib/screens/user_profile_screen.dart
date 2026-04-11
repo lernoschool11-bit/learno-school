@@ -47,12 +47,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Future<void> _toggleFollow() async {
     if (_followLoading) return;
     setState(() => _followLoading = true);
-    final result = await _api.toggleFollow(widget.userId);
-    setState(() {
-      _profile!['isFollowing'] = result['isFollowing'];
-      _profile!['followersCount'] = result['followersCount'];
-      _followLoading = false;
-    });
+    try {
+      final result = await _api.toggleFollow(widget.userId);
+      if (result.containsKey('isFollowing')) {
+        setState(() {
+          _profile!['isFollowing'] = result['isFollowing'];
+          _profile!['followersCount'] = result['followersCount'];
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذر تنفيذ العملية، حاول مرة أخرى')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _followLoading = false);
+    }
   }
 
   Future<void> _openDm() async {
@@ -137,14 +148,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     CircleAvatar(
                       radius: 45,
                       backgroundColor: Colors.white.withAlpha(50),
-                      child: Text(
-                        (_profile!['fullName'] as String? ?? '؟')[0],
-                        style: const TextStyle(
-                          fontSize: 36,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      backgroundImage: (_profile!['avatarUrl'] != null &&
+                              (_profile!['avatarUrl'] as String).isNotEmpty)
+                          ? NetworkImage(_profile!['avatarUrl'])
+                          : null,
+                      child: (_profile!['avatarUrl'] == null ||
+                              (_profile!['avatarUrl'] as String).isEmpty)
+                          ? Text(
+                              (_profile!['fullName'] as String? ?? '؟')[0],
+                              style: const TextStyle(
+                                fontSize: 36,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
                     ),
                     const SizedBox(height: 12),
                     Text(

@@ -63,55 +63,52 @@ class _MacDockState extends State<MacDock> with SingleTickerProviderStateMixin {
     final items = widget.items;
     final count = items.length;
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: MouseRegion(
-          onExit: (_) => setState(() => _pointerX = null),
-          onHover: (e) => _updatePointer(e.localPosition.dx, count),
-          child: GestureDetector(
-            onPanUpdate: (d) => _updatePointer(d.localPosition.dx, count),
-            onPanEnd: (_) => setState(() => _pointerX = null),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  height: _dockHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceDark.withAlpha(180),
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(
-                      color: Colors.white.withAlpha(25),
-                      width: 1.2,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: MouseRegion(
+        onExit: (_) => setState(() => _pointerX = null),
+        onHover: (e) => _updatePointer(e.localPosition.dx, count),
+        child: GestureDetector(
+          onPanUpdate: (d) => _updatePointer(d.localPosition.dx, count),
+          onPanEnd: (_) => setState(() => _pointerX = null),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                height: _dockHeight,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceDark.withAlpha(180),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: Colors.white.withAlpha(25),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.neonCyan.withAlpha(20),
+                      blurRadius: 30,
+                      spreadRadius: 2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.neonCyan.withAlpha(20),
-                        blurRadius: 30,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: List.generate(count, (i) {
-                      final scale = _scaleFor(i, count);
-                      final isActive = widget.currentIndex == i;
-                      return _DockIcon(
-                        item: items[i],
-                        scale: scale,
-                        isActive: isActive,
-                        spacing: _iconSpacing,
-                        onTap: () => widget.onTap(i),
-                      );
-                    }),
-                  ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: List.generate(count, (i) {
+                    final scale = _scaleFor(i, count);
+                    final isActive = widget.currentIndex == i;
+                    return _DockIcon(
+                      item: items[i],
+                      scale: scale,
+                      isActive: isActive,
+                      spacing: _iconSpacing,
+                      onTap: () => widget.onTap(i),
+                    );
+                  }),
                 ),
               ),
             ),
@@ -144,7 +141,7 @@ class _MacDockState extends State<MacDock> with SingleTickerProviderStateMixin {
 }
 
 /// Individual dock icon with animated scale
-class _DockIcon extends StatelessWidget {
+class _DockIcon extends StatefulWidget {
   final MacDockItem item;
   final double scale;
   final bool isActive;
@@ -160,18 +157,32 @@ class _DockIcon extends StatelessWidget {
   });
 
   @override
+  State<_DockIcon> createState() => _DockIconState();
+}
+
+class _DockIconState extends State<_DockIcon> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final size = _MacDockState._baseIconSize * scale;
+    final size = _MacDockState._baseIconSize * widget.scale;
+    final pressScale = _isPressed ? 0.85 : 1.0;
 
     return GestureDetector(
-      onTap: onTap,
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: spacing),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
+      child: AnimatedScale(
+        scale: pressScale,
+        duration: const Duration(milliseconds: 100),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: widget.spacing),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
@@ -179,10 +190,10 @@ class _DockIcon extends StatelessWidget {
               height: size + 12,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isActive
+                color: widget.isActive
                     ? AppTheme.neonCyan.withAlpha(30)
                     : Colors.transparent,
-                boxShadow: isActive
+                boxShadow: widget.isActive
                     ? [
                         BoxShadow(
                           color: AppTheme.neonCyan.withAlpha(60),
@@ -193,9 +204,9 @@ class _DockIcon extends StatelessWidget {
                     : [],
               ),
               child: Icon(
-                item.icon,
+                widget.item.icon,
                 size: size,
-                color: isActive
+                color: widget.isActive
                     ? AppTheme.neonCyan
                     : AppTheme.textSecondary,
               ),
@@ -204,12 +215,12 @@ class _DockIcon extends StatelessWidget {
             // Active dot
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
-              width: isActive ? 5 : 0,
-              height: isActive ? 5 : 0,
+              width: widget.isActive ? 5 : 0,
+              height: widget.isActive ? 5 : 0,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppTheme.neonCyan,
-                boxShadow: isActive
+                boxShadow: widget.isActive
                     ? [
                         BoxShadow(
                           color: AppTheme.neonCyan.withAlpha(120),
@@ -223,6 +234,7 @@ class _DockIcon extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

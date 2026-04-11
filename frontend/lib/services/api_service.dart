@@ -196,6 +196,7 @@ class ApiService {
       final token = await getToken();
       final response = await http.post(Uri.parse('$baseUrl/auth/follow/$userId'), headers: _headers(token));
       if (response.statusCode == 200) return jsonDecode(response.body);
+      debugPrint('toggleFollow failed: ${response.statusCode} ${response.body}');
       return {};
     } catch (e) { debugPrint('toggleFollow error: $e'); return {}; }
   }
@@ -285,8 +286,13 @@ class ApiService {
         Uri.parse('$baseUrl/dm/request/$receiverId'),
         headers: _headers(token),
       );
+      debugPrint('sendDmRequest status: ${response.statusCode}');
+      debugPrint('sendDmRequest body: ${response.body}');
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
+        final data = jsonDecode(response.body);
+        // تأكد إن الـ id موجود
+        if (data['id'] != null) return data;
+        return {};
       }
       return {};
     } catch (e) {

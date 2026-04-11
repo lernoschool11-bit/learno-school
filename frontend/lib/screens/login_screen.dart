@@ -5,6 +5,8 @@ import 'forgot_password_screen.dart';
 import '../main.dart';
 import '../widgets/login_character_widget.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/luxury_button.dart';
+import '../theme/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -142,22 +144,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
 
-              // زر تسجيل الدخول
-              ElevatedButton(
-                onPressed: _isLoading ? null : _login,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Text(
-                        'تسجيل الدخول',
-                        style: TextStyle(fontSize: 18),
-                      ),
+              LuxuryButton(
+                label: 'تسجيل الدخول',
+                isLoading: _isLoading,
+                onPressed: _login,
               ),
               const SizedBox(height: 16),
 

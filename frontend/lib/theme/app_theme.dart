@@ -39,6 +39,12 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
+  static const LinearGradient buttonGradient = LinearGradient(
+    colors: [neonCyan, Color(0xFF0080FF)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
   // ── Shadow presets ────────────────────────────────────────────
   static List<BoxShadow> get neonCyanGlow => [
     BoxShadow(
@@ -101,7 +107,7 @@ class AppTheme {
         shadowColor: neonCyan.withAlpha(30),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: dividerColor.withAlpha(80)),
+          side: const BorderSide(color: dividerColor, width: 0.5),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
@@ -140,11 +146,11 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: neonCyan,
-          side: const BorderSide(color: neonCyan, width: 1.5),
+          side: const BorderSide(color: neonCyan, width: 0.5),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         ),
       ),
 
@@ -152,30 +158,30 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceDark,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         hintStyle: const TextStyle(color: textHint),
         labelStyle: const TextStyle(color: textSecondary),
         prefixIconColor: neonCyan,
         suffixIconColor: textSecondary,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: dividerColor),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: dividerColor, width: 0.5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: dividerColor),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: dividerColor, width: 0.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: neonCyan, width: 2),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: neonCyan, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: errorRed),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: errorRed, width: 0.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: errorRed, width: 2),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: errorRed, width: 1.5),
         ),
       ),
 

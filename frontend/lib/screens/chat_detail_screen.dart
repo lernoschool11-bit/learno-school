@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/socket_service.dart';
+import '../theme/app_theme.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final String conversationId;
@@ -126,27 +127,27 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.oledBlack,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0A2342),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Row(
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: Colors.white.withAlpha(50),
+              backgroundColor: AppTheme.surfaceDark,
               child: Text(
                 widget.otherUserName.isNotEmpty
                     ? widget.otherUserName[0]
                     : '؟',
                 style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
+                    color: AppTheme.neonCyan, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(width: 10),
             Text(
               widget.otherUserName,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
             ),
           ],
         ),
@@ -155,32 +156,35 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         children: [
           // الرسائل
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _messages.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'ابدأ المحادثة الآن! 👋',
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 0),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: AppTheme.neonCyan))
+                  : _messages.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'ابدأ المحادثة الآن! 👋',
+                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+                          ),
+                        )
+                      : ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 16),
+                          itemCount: _messages.length,
+                          itemBuilder: (context, index) {
+                            final msg = _messages[index];
+                            final isMe = _isMe(msg);
+                            return _buildMessage(msg, isMe);
+                          },
                         ),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 16),
-                        itemCount: _messages.length,
-                        itemBuilder: (context, index) {
-                          final msg = _messages[index];
-                          final isMe = _isMe(msg);
-                          return _buildMessage(msg, isMe);
-                        },
-                      ),
+            ),
           ),
 
           // حقل الكتابة
           Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            color: AppTheme.surfaceDark,
+            padding: const EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 108), // Avoid MacDock overlap
             child: SafeArea(
               child: Row(
                 children: [
@@ -189,16 +193,21 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       controller: _msgController,
                       textDirection: TextDirection.rtl,
                       maxLines: null,
+                      style: const TextStyle(color: AppTheme.textPrimary),
                       decoration: InputDecoration(
                         hintText: 'اكتب رسالة...',
                         hintTextDirection: TextDirection.rtl,
                         filled: true,
-                        fillColor: const Color(0xFFF5F7FA),
+                        fillColor: AppTheme.oledBlack,
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 10),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(color: AppTheme.dividerColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide(color: AppTheme.dividerColor),
                         ),
                       ),
                       onSubmitted: (_) => _sendMessage(),
@@ -211,16 +220,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       width: 46,
                       height: 46,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF0A2342),
+                        color: AppTheme.neonCyan,
                         shape: BoxShape.circle,
                       ),
                       child: _isSending
                           ? const Padding(
                               padding: EdgeInsets.all(12),
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white),
+                                  strokeWidth: 2, color: AppTheme.oledBlack),
                             )
-                          : const Icon(Icons.send, color: Colors.white, size: 20),
+                          : const Icon(Icons.send, color: AppTheme.oledBlack, size: 20),
                     ),
                   ),
                 ],
@@ -236,9 +245,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 12),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.72,
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         child: Column(
           crossAxisAlignment:
@@ -248,34 +257,31 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isMe ? const Color(0xFF0A2342) : Colors.white,
+                color: AppTheme.surfaceDark,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(18),
                   topRight: const Radius.circular(18),
                   bottomLeft: Radius.circular(isMe ? 18 : 4),
                   bottomRight: Radius.circular(isMe ? 4 : 18),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(15),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                border: isMe 
+                    ? Border.all(color: AppTheme.neonCyan.withAlpha(100), width: 1)
+                    : Border.all(color: AppTheme.dividerColor, width: 1),
+                boxShadow: isMe ? AppTheme.neonCyanGlow : [],
               ),
               child: Text(
                 msg['content'] ?? '',
                 textDirection: TextDirection.rtl,
-                style: TextStyle(
-                  color: isMe ? Colors.white : Colors.black87,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
                   fontSize: 15,
                 ),
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               _formatTime(msg['createdAt'] as String?),
-              style: const TextStyle(color: Colors.grey, fontSize: 11),
+              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11),
             ),
           ],
         ),

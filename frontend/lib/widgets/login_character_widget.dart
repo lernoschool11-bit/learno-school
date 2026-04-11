@@ -318,21 +318,3 @@ class _Eye extends StatelessWidget {
   }
 }
 
-/// AnimatedBuilder is just a convenience alias for AnimatedWidget
-class AnimatedBuilder extends AnimatedWidget {
-  final Widget Function(BuildContext, Widget?) builder;
-
-  const AnimatedBuilder({
-    super.key,
-    required super.listenable,
-    required this.builder,
-  }) : super();
-
-  @override
-  Widget build(BuildContext context) {
-    return builder(context, null);
-  }
-
-  // Override listenable getter for convenience
-  Animation<double> get animation => listenable as Animation<double>;
-}

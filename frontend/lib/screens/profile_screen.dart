@@ -1,5 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/luxury_button.dart';
 import '../widgets/post_card.dart';
 import '../models/post_model.dart';
 import 'login_screen.dart';
@@ -146,11 +149,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.oledBlack,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.black.withAlpha(120),
+        elevation: 0,
+        centerTitle: false,
+        flexibleSpace: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(color: Colors.transparent),
+          ),
+        ),
         title: const Text('الملف الشخصي'),
         actions: [
           IconButton(icon: const Icon(Icons.edit), onPressed: _openEditProfile),
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _fetchProfile),
           IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
         ],
       ),
@@ -338,15 +351,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // زر تسجيل الخروج
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ElevatedButton.icon(
+              child: LuxuryButton(
+                label: 'تسجيل الخروج',
                 onPressed: _logout,
-                icon: const Icon(Icons.logout, color: Colors.white),
-                label: const Text('تسجيل الخروج', style: TextStyle(color: Colors.white, fontSize: 16)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                icon: Icons.logout,
               ),
             ),
 

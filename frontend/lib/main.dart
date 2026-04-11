@@ -66,8 +66,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF0A2342),
+      return Scaffold(
+        backgroundColor: AppTheme.oledBlack,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -75,13 +75,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
               Text(
                 'Learno',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 24),
-              CircularProgressIndicator(color: Colors.white),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(color: AppTheme.neonCyan),
             ],
           ),
         ),
@@ -118,19 +118,30 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: MacDock(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          MacDockItem(icon: Icons.home, label: 'الرئيسية'),
-          MacDockItem(icon: Icons.search, label: 'البحث'),
-          MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'),
-          MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
-          MacDockItem(icon: Icons.person, label: 'حسابي'),
+      backgroundColor: AppTheme.oledBlack,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 100), // Reserve space for MacDock
+            child: IndexedStack(
+              index: _currentIndex,
+              children: _screens,
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: MacDock(
+              currentIndex: _currentIndex,
+              onTap: (index) => setState(() => _currentIndex = index),
+              items: const [
+                MacDockItem(icon: Icons.home, label: 'الرئيسية'),
+                MacDockItem(icon: Icons.search, label: 'البحث'),
+                MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'),
+                MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
+                MacDockItem(icon: Icons.person, label: 'حسابي'),
+              ],
+            ),
+          ),
         ],
       ),
     );

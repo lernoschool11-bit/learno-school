@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 import 'chat_detail_screen.dart';
 
 class DirectMessagesScreen extends StatefulWidget {
@@ -83,19 +84,20 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.oledBlack,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0A2342),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text(
           'الرسائل',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white60,
+          indicatorColor: AppTheme.neonCyan,
+          labelColor: AppTheme.neonCyan,
+          unselectedLabelColor: AppTheme.textSecondary,
+          dividerColor: AppTheme.dividerColor,
           tabs: [
             const Tab(text: 'المحادثات'),
             Tab(
@@ -109,12 +111,12 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.red,
+                        color: AppTheme.errorRed,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         '${_requests.length}',
-                        style: const TextStyle(fontSize: 11),
+                        style: const TextStyle(fontSize: 11, color: AppTheme.textPrimary),
                       ),
                     ),
                   ],
@@ -124,15 +126,18 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen>
           ],
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildConversationsList(),
-                _buildRequestsList(),
-              ],
-            ),
+      body: Padding(
+        padding: const EdgeInsets.only(bottom: 100), // Avoid MacDock overlap
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: AppTheme.neonCyan))
+            : TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildConversationsList(),
+                  _buildRequestsList(),
+                ],
+              ),
+      ),
     );
   }
 

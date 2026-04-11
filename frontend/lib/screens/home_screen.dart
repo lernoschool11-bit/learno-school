@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/post_model.dart';
 import '../widgets/post_card.dart';
@@ -74,10 +76,26 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent, // Let MainNavigation handle the background
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text(
+        backgroundColor: Colors.black.withAlpha(120),
+        elevation: 0,
+        centerTitle: false,
+        flexibleSpace: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(color: Colors.transparent),
+          ),
+        ),
+        title: Text(
           'Learno',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          style: TextStyle(
+            fontWeight: FontWeight.bold, 
+            fontSize: 24,
+            letterSpacing: -0.5,
+            color: AppTheme.neonCyan,
+          ),
         ),
         actions: [
           // زر الإشعارات مع العداد
@@ -157,10 +175,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (_posts.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'لا يوجد منشورات بعد',
-          style: TextStyle(fontSize: 18, color: Colors.grey),
+          style: TextStyle(fontSize: 18, color: AppTheme.textSecondary),
         ),
       );
     }
