@@ -141,7 +141,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     ? widget.otherUserName[0]
                     : '؟',
                 style: const TextStyle(
-                    color: AppTheme.neonCyan, fontWeight: FontWeight.bold),
+                    color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(width: 10),
@@ -159,7 +159,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 0),
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: AppTheme.neonCyan))
+                  ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
                   : _messages.isEmpty
                       ? const Center(
                           child: Text(
@@ -220,7 +220,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       width: 46,
                       height: 46,
                       decoration: const BoxDecoration(
-                        color: AppTheme.neonCyan,
+                        color: AppTheme.primaryColor,
                         shape: BoxShape.circle,
                       ),
                       child: _isSending
@@ -265,9 +265,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   bottomRight: Radius.circular(isMe ? 4 : 18),
                 ),
                 border: isMe 
-                    ? Border.all(color: AppTheme.neonCyan.withAlpha(100), width: 1)
+                    ? Border.all(color: AppTheme.primaryColor.withAlpha(100), width: 1)
                     : Border.all(color: AppTheme.dividerColor, width: 1),
-                boxShadow: isMe ? AppTheme.neonCyanGlow : [],
+                boxShadow: isMe ? AppTheme.primaryColorGlow : [],
               ),
               child: Text(
                 msg['content'] ?? '',

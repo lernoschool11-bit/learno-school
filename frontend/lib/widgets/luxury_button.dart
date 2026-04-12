@@ -65,7 +65,7 @@ class _LuxuryButtonState extends State<LuxuryButton> with SingleTickerProviderSt
                   ? []
                   : [
                       BoxShadow(
-                        color: AppTheme.neonCyan.withAlpha(80),
+                        color: AppTheme.primaryColor.withAlpha(80),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),

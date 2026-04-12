@@ -89,7 +89,7 @@ class _MacDockState extends State<MacDock> with SingleTickerProviderStateMixin {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.neonCyan.withAlpha(20),
+                      color: AppTheme.primaryColor.withAlpha(20),
                       blurRadius: 30,
                       spreadRadius: 2,
                     ),
@@ -191,12 +191,12 @@ class _DockIconState extends State<_DockIcon> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: widget.isActive
-                    ? AppTheme.neonCyan.withAlpha(30)
+                    ? AppTheme.primaryColor.withAlpha(30)
                     : Colors.transparent,
                 boxShadow: widget.isActive
                     ? [
                         BoxShadow(
-                          color: AppTheme.neonCyan.withAlpha(60),
+                          color: AppTheme.primaryColor.withAlpha(60),
                           blurRadius: 16,
                           spreadRadius: 1,
                         ),
@@ -207,7 +207,7 @@ class _DockIconState extends State<_DockIcon> {
                 widget.item.icon,
                 size: size,
                 color: widget.isActive
-                    ? AppTheme.neonCyan
+                    ? AppTheme.primaryColor
                     : AppTheme.textSecondary,
               ),
             ),
@@ -219,11 +219,11 @@ class _DockIconState extends State<_DockIcon> {
               height: widget.isActive ? 5 : 0,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.neonCyan,
+                color: AppTheme.primaryColor,
                 boxShadow: widget.isActive
                     ? [
                         BoxShadow(
-                          color: AppTheme.neonCyan.withAlpha(120),
+                          color: AppTheme.primaryColor.withAlpha(120),
                           blurRadius: 6,
                         ),
                       ]

@@ -155,7 +155,7 @@ class _LoginCharacterWidgetState extends State<LoginCharacterWidget>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppTheme.neonCyan.withAlpha(50),
+                    AppTheme.primaryColor.withAlpha(50),
                     AppTheme.neonMagenta.withAlpha(20),
                     Colors.transparent,
                   ],
@@ -176,11 +176,11 @@ class _LoginCharacterWidgetState extends State<LoginCharacterWidget>
                 ),
                 border: Border.all(
                   width: 2,
-                  color: AppTheme.neonCyan.withAlpha(100),
+                  color: AppTheme.primaryColor.withAlpha(100),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.neonCyan.withAlpha(40),
+                    color: AppTheme.primaryColor.withAlpha(40),
                     blurRadius: 24,
                     spreadRadius: 4,
                   ),
@@ -247,7 +247,7 @@ class _LoginCharacterWidgetState extends State<LoginCharacterWidget>
                 decoration: BoxDecoration(
                   color: coverEyes
                       ? AppTheme.neonMagenta.withAlpha(150)
-                      : AppTheme.neonCyan.withAlpha(150),
+                      : AppTheme.primaryColor.withAlpha(150),
                   borderRadius: BorderRadius.circular(coverEyes ? 6 : 4),
                 ),
               ),
@@ -276,7 +276,7 @@ class _Eye extends StatelessWidget {
         color: Colors.white.withAlpha(230),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.neonCyan.withAlpha(60),
+            color: AppTheme.primaryColor.withAlpha(60),
             blurRadius: 8,
           ),
         ],
@@ -300,10 +300,10 @@ class _Eye extends StatelessWidget {
                   height: 3,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppTheme.neonCyan,
+                    color: AppTheme.primaryColor,
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.neonCyan.withAlpha(180),
+                        color: AppTheme.primaryColor.withAlpha(180),
                         blurRadius: 4,
                       ),
                     ],

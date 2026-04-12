@@ -140,7 +140,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return Scaffold(backgroundColor: AppTheme.oledBlack, body: Center(child: CircularProgressIndicator(color: AppTheme.neonCyan)));
+    if (_isLoading) return Scaffold(backgroundColor: AppTheme.oledBlack, body: Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)));
     if (_error != null) return Scaffold(backgroundColor: AppTheme.oledBlack, body: Center(child: Text(_error!, style: TextStyle(color: AppTheme.textPrimary))));
 
     return Scaffold(
@@ -161,7 +161,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(_showMembers ? Icons.chat : Icons.people, color: AppTheme.neonCyan),
+            icon: Icon(_showMembers ? Icons.chat : Icons.people, color: AppTheme.primaryColor),
             onPressed: () => setState(() => _showMembers = !_showMembers),
             tooltip: _showMembers ? 'المحادثة' : 'الأعضاء',
           ),
@@ -189,7 +189,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
           color: AppTheme.surfaceDark,
           child: Row(
             children: [
-              const Icon(Icons.people, color: AppTheme.neonCyan, size: 20),
+              const Icon(Icons.people, color: AppTheme.primaryColor, size: 20),
               const SizedBox(width: 8),
               Text(
                 '${allMembers.length} عضو',
@@ -333,7 +333,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               ),
               const SizedBox(width: 8),
               CircleAvatar(
-                backgroundColor: AppTheme.neonCyan,
+                backgroundColor: AppTheme.primaryColor,
                 child: IconButton(
                   icon: const Icon(Icons.send, color: AppTheme.oledBlack, size: 20),
                   onPressed: () => _sendMessage(_messageController.text),
@@ -383,9 +383,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   bottomRight: isMe ? Radius.zero : const Radius.circular(16),
                 ),
                 border: isMe 
-                    ? Border.all(color: AppTheme.neonCyan.withAlpha(100), width: 1)
+                    ? Border.all(color: AppTheme.primaryColor.withAlpha(100), width: 1)
                     : Border.all(color: AppTheme.dividerColor, width: 1),
-                boxShadow: isMe ? AppTheme.neonCyanGlow : [],
+                boxShadow: isMe ? AppTheme.primaryColorGlow : [],
               ),
               child: Column(
                 crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -398,7 +398,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.neonCyan,
+                          color: AppTheme.primaryColor,
                         ),
                       ),
                     ),

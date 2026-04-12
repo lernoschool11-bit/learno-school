@@ -94,8 +94,8 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen>
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppTheme.neonCyan,
-          labelColor: AppTheme.neonCyan,
+          indicatorColor: AppTheme.primaryColor,
+          labelColor: AppTheme.primaryColor,
           unselectedLabelColor: AppTheme.textSecondary,
           dividerColor: AppTheme.dividerColor,
           tabs: [
@@ -129,7 +129,7 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen>
       body: Padding(
         padding: const EdgeInsets.only(bottom: 100), // Avoid MacDock overlap
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppTheme.neonCyan))
+            ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
             : TabBarView(
                 controller: _tabController,
                 children: [

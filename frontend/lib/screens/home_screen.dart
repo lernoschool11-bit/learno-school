@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
             fontWeight: FontWeight.bold, 
             fontSize: 24,
             letterSpacing: -0.5,
-            color: AppTheme.neonCyan,
+            color: AppTheme.primaryColor,
           ),
         ),
         actions: [

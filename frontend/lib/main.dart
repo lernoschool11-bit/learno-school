@@ -5,6 +5,7 @@ import 'screens/search_screen.dart';
 import 'screens/create_post_screen.dart';
 import 'screens/community_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/ai_chat_screen.dart';
 import 'services/api_service.dart';
 import 'services/socket_service.dart';
 import 'theme/app_theme.dart';
@@ -14,7 +15,12 @@ import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint("Firebase initialization failed: $e");
+    // Continue even if Firebase fails to allow UI testing or offline fallback
+  }
   runApp(const MyApp());
 }
 
@@ -85,7 +91,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                 ),
               ),
               const SizedBox(height: 24),
-              const CircularProgressIndicator(color: AppTheme.neonCyan),
+              const CircularProgressIndicator(color: AppTheme.primaryColor),
             ],
           ),
         ),
@@ -114,6 +120,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const SearchScreen(),
+    const AIChatScreen(),
     const CreatePostScreen(),
     const CommunityScreen(),
     const ProfileScreen(),
@@ -140,6 +147,7 @@ class _MainNavigationState extends State<MainNavigation> {
               items: const [
                 MacDockItem(icon: Icons.home, label: 'الرئيسية'),
                 MacDockItem(icon: Icons.search, label: 'البحث'),
+                MacDockItem(icon: Icons.auto_awesome, label: 'الذكاء الصناعي'),
                 MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'),
                 MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
                 MacDockItem(icon: Icons.person, label: 'حسابي'),
