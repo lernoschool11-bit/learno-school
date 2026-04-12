@@ -168,7 +168,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.only(bottom: 100), // Avoid MacDock overlap
+        padding: const EdgeInsets.only(bottom: 16), // Rely on MainNavigation for most of the dock space
         child: _showMembers ? _buildMembersList() : _buildChat(),
       ),
     );
