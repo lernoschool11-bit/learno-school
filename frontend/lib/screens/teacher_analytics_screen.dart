@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../theme/app_theme.dart';
 import '../main.dart';
+import 'login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TeacherAnalyticsScreen extends StatelessWidget {
   const TeacherAnalyticsScreen({super.key});
@@ -92,11 +94,15 @@ class TeacherAnalyticsScreen extends StatelessWidget {
               // Logout Button
               Center(
                 child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const AuthWrapper()),
-                      (route) => false,
-                    );
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.clear();
+                    if (context.mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => LoginScreen()),
+                        (route) => false,
+                      );
+                    }
                   },
                   icon: const Icon(Icons.logout, color: Colors.redAccent),
                   label: const Text(
