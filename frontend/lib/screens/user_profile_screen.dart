@@ -230,7 +230,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          /* const SizedBox(width: 8),
                           ElevatedButton.icon(
                             onPressed: _msgLoading ? null : _openDm,
                             icon: _msgLoading
@@ -251,7 +251,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                          ),
+                          ), */
                         ],
                       ),
                   ],

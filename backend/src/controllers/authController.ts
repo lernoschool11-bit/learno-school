@@ -145,13 +145,18 @@ export const getMe = async (req: AuthRequest, res: Response) => {
         avatarUrl: true,
         dob: true,
         createdAt: true,
-        _count: { select: { posts: true } }
+        _count: { select: { posts: true, followers: true, following: true } }
       }
     });
 
     if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
 
-    return res.json({ ...user, postsCount: user._count.posts });
+    return res.json({ 
+      ...user, 
+      postsCount: user._count.posts,
+      followersCount: user._count.followers,
+      followingCount: user._count.following,
+    });
   } catch (error) {
     console.error("GetMe error:", error);
     return res.status(500).json({ message: "خطأ في السيرفر" });
@@ -294,13 +299,73 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         subjects: true,
         avatarUrl: true,
         createdAt: true,
-        _count: { select: { posts: true } }
+        _count: { select: { posts: true, followers: true, following: true } },
+        posts: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            author: { select: { id: true, fullName: true, username: true, avatarUrl: true, role: true } },
+            _count: { select: { likes: true, comments: true } }
+          }
+        },
+        followers: {
+          take: 50,
+          include: {
+            follower: {
+              select: { id: true, fullName: true, username: true, avatarUrl: true, role: true }
+            }
+          }
+        },
+        following: {
+          take: 50,
+          include: {
+            following: {
+              select: { id: true, fullName: true, username: true, avatarUrl: true, role: true }
+            }
+          }
+        }
       }
     });
 
     if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
 
-    return res.json({ ...user, postsCount: user._count.posts });
+    // التحقق هل المستخدم العالمي يتابع هذا المستخدم
+    const isFollowing = await prisma.follow.findFirst({
+      where: {
+        followerId: req.user!.id,
+        followingId: id,
+      },
+    });
+
+    const flattenedPosts = (user.posts as any[]).map(post => ({
+      ...post,
+      likesCount: post._count.likes,
+      commentsCount: post._count.comments,
+      isLiked: false, // سنتركها false حالياً أو يمكن فحصها إذا لزم الأمر
+    }));
+
+    // تحسين لفحص الإعجاب لكل منشور
+    const userLikes = await prisma.like.findMany({
+      where: {
+        userId: req.user!.id,
+        postId: { in: (user.posts as any[]).map(p => p.id) }
+      }
+    });
+
+    const postsWithLiked = flattenedPosts.map(post => ({
+      ...post,
+      isLiked: userLikes.some(like => like.postId === post.id)
+    }));
+
+    return res.json({ 
+      ...user, 
+      postsCount: user._count.posts,
+      followersCount: user._count.followers,
+      followingCount: user._count.following,
+      isFollowing: !!isFollowing,
+      followers: user.followers.map(f => f.follower),
+      following: user.following.map(f => f.following),
+      posts: postsWithLiked,
+    });
   } catch (error) {
     console.error("getUserById error:", error);
     return res.status(500).json({ message: "خطأ في السيرفر" });

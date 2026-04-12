@@ -8,6 +8,7 @@ import '../models/post_model.dart';
 import 'login_screen.dart';
 import 'user_profile_screen.dart';
 import 'edit_profile_screen.dart';
+import 'admin_panel.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -117,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                         },
                         leading: CircleAvatar(
-                          backgroundColor: isTeacher ? Colors.teal : const Color(0xFF0A2342),
+                          backgroundColor: isTeacher ? Colors.teal : AppTheme.primaryColor,
                           backgroundImage: user['avatarUrl'] != null
                               ? NetworkImage(user['avatarUrl'])
                               : null,
@@ -133,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         trailing: Text(
                           isTeacher ? 'معلم' : 'طالب',
                           style: TextStyle(
-                            color: isTeacher ? Colors.teal : const Color(0xFF0A2342),
+                            color: isTeacher ? Colors.teal : AppTheme.primaryColor,
                             fontSize: 12,
                           ),
                         ),
@@ -163,6 +164,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         title: const Text('الملف الشخصي'),
         actions: [
+          if (_userProfile != null && _userProfile!['role'] == 'ADMIN')
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings, color: AppTheme.primaryColor),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminPanel())),
+            ),
           IconButton(icon: const Icon(Icons.edit), onPressed: _openEditProfile),
           IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
         ],
@@ -372,12 +378,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A2342).withAlpha(15),
+            color: AppTheme.primaryColor.withAlpha(15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
             children: [
-              Icon(icon, color: const Color(0xFF0A2342), size: 22),
+              Icon(icon, color: AppTheme.primaryColor, size: 22),
               const SizedBox(height: 6),
               Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0A2342))),
               Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/api_service.dart';
 import '../widgets/school_picker_widget.dart';
+import '../theme/app_theme.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -42,6 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
   String _tempGrade = '4';
   String _tempSection = 'أ';
+  final _teacherCodeController = TextEditingController();
 
   String? _validatePage1() {
     if (_fullNameController.text.trim().isEmpty) return 'الرجاء إدخال الاسم الكامل';
@@ -56,6 +59,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_dobController.text.trim().isEmpty) return 'الرجاء إدخال تاريخ الميلاد';
     if (_passwordController.text.length < 6) return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
     if (_passwordController.text != _confirmPasswordController.text) return 'كلمتا المرور غير متطابقتين';
+    if (_selectedRole == 'TEACHER' && _teacherCodeController.text.trim().isEmpty) {
+      return 'الرجاء إدخال رمز التحقق للمعلم';
+    }
     return null;
   }
 
@@ -89,7 +95,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.red));
       return;
     }
+
     setState(() => _isLoading = true);
+
+    // Dynamic Teacher Verification Logic
+    if (_selectedRole == 'TEACHER') {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection('system_control')
+            .doc('security_config')
+            .get();
+        
+        final validCode = doc.data()?['teacher_access_code'];
+        
+        if (_teacherCodeController.text.trim() != validCode) {
+          setState(() => _isLoading = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Invalid Teacher Access Code. Please contact your administrator.'),
+                backgroundColor: AppTheme.errorRed,
+              ),
+            );
+          }
+          return;
+        }
+      } catch (e) {
+        setState(() => _isLoading = false);
+        debugPrint('Firestore Error: $e');
+        return;
+      }
+    }
     final success = await _apiService.register(
       fullName: _fullNameController.text.trim(),
       nationalId: _nationalIdController.text.trim().isNotEmpty ? _nationalIdController.text.trim() : null,
@@ -130,9 +166,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Expanded(child: Container(height: 4, decoration: BoxDecoration(color: const Color(0xFF0A2342), borderRadius: BorderRadius.circular(2)))),
+                Expanded(child: Container(height: 4, decoration: BoxDecoration(color: AppTheme.primaryColor, borderRadius: BorderRadius.circular(2)))),
                 const SizedBox(width: 8),
-                Expanded(child: Container(height: 4, decoration: BoxDecoration(color: _currentPage == 1 ? const Color(0xFF0A2342) : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
+                Expanded(child: Container(height: 4, decoration: BoxDecoration(color: _currentPage == 1 ? AppTheme.primaryColor : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
               ],
             ),
           ),
@@ -163,6 +199,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(width: 12),
             Expanded(child: _buildRoleButton('TEACHER', 'معلم', Icons.person_pin)),
           ]),
+          if (_selectedRole == 'TEACHER') ...[
+            const SizedBox(height: 16),
+            _buildField(_teacherCodeController, 'رمز التحقق (للمعلمين فقط) *', Icons.verified_user_outlined),
+          ],
           const SizedBox(height: 20),
           _buildField(_fullNameController, 'الاسم الكامل *', Icons.person),
           const SizedBox(height: 16),
@@ -198,7 +238,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: _nextPage,
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0A2342), padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
             child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text('التالي', style: TextStyle(fontSize: 18, color: Colors.white)),
               SizedBox(width: 8),
@@ -230,7 +270,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: _grades.map((grade) => ChoiceChip(
                 label: Text('الصف $grade'),
                 selected: _selectedGrade == grade,
-                selectedColor: const Color(0xFF0A2342),
+                selectedColor: AppTheme.primaryColor,
                 labelStyle: TextStyle(color: _selectedGrade == grade ? Colors.white : Colors.black),
                 onSelected: (_) => setState(() => _selectedGrade = grade),
               )).toList(),
@@ -244,7 +284,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: ChoiceChip(
                   label: Text(section),
                   selected: _selectedSection == section,
-                  selectedColor: const Color(0xFF0A2342),
+                  selectedColor: AppTheme.primaryColor,
                   labelStyle: TextStyle(color: _selectedSection == section ? Colors.white : Colors.black),
                   onSelected: (_) => setState(() => _selectedSection = section),
                 ),
@@ -260,7 +300,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: _subjects.map((subject) => FilterChip(
                 label: Text(subject),
                 selected: _selectedSubjects.contains(subject),
-                selectedColor: const Color(0xFF0A2342),
+                selectedColor: AppTheme.primaryColor,
                 labelStyle: TextStyle(color: _selectedSubjects.contains(subject) ? Colors.white : Colors.black),
                 onSelected: (selected) {
                   setState(() { if (selected) _selectedSubjects.add(subject); else _selectedSubjects.remove(subject); });
@@ -277,7 +317,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 spacing: 8, runSpacing: 8,
                 children: _selectedClasses.map((cls) => Chip(
                   label: Text('صف ${cls['grade']} - ${cls['section']}'),
-                  backgroundColor: const Color(0xFF0A2342).withAlpha(25),
+                  backgroundColor: AppTheme.primaryColor.withAlpha(25),
                   deleteIcon: const Icon(Icons.close, size: 16),
                   onDeleted: () => setState(() => _selectedClasses.remove(cls)),
                 )).toList(),
@@ -289,7 +329,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ElevatedButton(
             onPressed: _isLoading ? null : _register,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0A2342),
+              backgroundColor: AppTheme.primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),

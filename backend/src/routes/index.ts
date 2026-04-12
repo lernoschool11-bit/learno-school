@@ -18,7 +18,7 @@ router.use('/community', communityRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/users', userRoutes);
 router.use('/notifications', notificationRoutes);
-router.use('/chat', chatRoutes);
-router.use('/dm', dmRoutes);
+// router.use('/chat', chatRoutes);
+// router.use('/dm', dmRoutes);
 
 export default router;

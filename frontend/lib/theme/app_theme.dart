@@ -18,7 +18,7 @@ class AppTheme {
   static const Color surfaceDark    = Color(0xFF121212);
   static const Color surfaceLight   = Color(0xFF1A1A1A);
   static const Color cardDark       = Color(0xFF1E1E1E);
-  static const Color neonCyan       = Color(0xFF00FFFF);
+  static const Color primaryColor   = Color(0xFF678D88);
   static const Color neonMagenta    = Color(0xFFFF00FF);
   static const Color textPrimary    = Color(0xFFFFFFFF);
   static const Color textSecondary  = Color(0xFFB0B0B0);
@@ -28,7 +28,7 @@ class AppTheme {
 
   // ── Gradient helpers ──────────────────────────────────────────
   static const LinearGradient neonGradient = LinearGradient(
-    colors: [neonCyan, neonMagenta],
+    colors: [primaryColor, neonMagenta],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -40,15 +40,24 @@ class AppTheme {
   );
 
   static const LinearGradient buttonGradient = LinearGradient(
-    colors: [neonCyan, Color(0xFF0080FF)],
+    colors: [primaryColor, Color(0xFF4A6B67)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
 
+  // ── Glassmorphism ─────────────────────────────────────────────
+  static BoxDecoration glassDecoration({double opacity = 0.1, double blur = 10.0}) {
+    return BoxDecoration(
+      color: Colors.white.withOpacity(opacity),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Colors.white.withOpacity(0.05)),
+    );
+  }
+
   // ── Shadow presets ────────────────────────────────────────────
-  static List<BoxShadow> get neonCyanGlow => [
+  static List<BoxShadow> get primaryColorGlow => [
     BoxShadow(
-      color: neonCyan.withAlpha(60),
+      color: primaryColor.withAlpha(60),
       blurRadius: 20,
       spreadRadius: 2,
     ),
@@ -75,10 +84,10 @@ class AppTheme {
       // Color scheme
       colorScheme: const ColorScheme.dark(
         surface: oledBlack,
-        primary: neonCyan,
+        primary: primaryColor,
         secondary: neonMagenta,
         error: errorRed,
-        onPrimary: oledBlack,
+        onPrimary: Colors.white,
         onSecondary: oledBlack,
         onSurface: textPrimary,
         onError: oledBlack,
@@ -97,14 +106,14 @@ class AppTheme {
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
         ),
-        iconTheme: IconThemeData(color: neonCyan),
+        iconTheme: IconThemeData(color: primaryColor),
       ),
 
       // Cards
       cardTheme: CardThemeData(
         color: surfaceDark,
         elevation: 4,
-        shadowColor: neonCyan.withAlpha(30),
+        shadowColor: primaryColor.withAlpha(30),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: dividerColor, width: 0.5),
@@ -115,8 +124,8 @@ class AppTheme {
       // Elevated buttons
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: neonCyan,
-          foregroundColor: oledBlack,
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
           textStyle: const TextStyle(
             fontSize: 16,
@@ -127,14 +136,14 @@ class AppTheme {
             borderRadius: BorderRadius.circular(14),
           ),
           elevation: 6,
-          shadowColor: neonCyan.withAlpha(80),
+          shadowColor: primaryColor.withAlpha(80),
         ),
       ),
 
       // Text buttons
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: neonCyan,
+          foregroundColor: primaryColor,
           textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -145,8 +154,8 @@ class AppTheme {
       // Outlined buttons
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: neonCyan,
-          side: const BorderSide(color: neonCyan, width: 0.5),
+          foregroundColor: primaryColor,
+          side: const BorderSide(color: primaryColor, width: 0.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -161,7 +170,7 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         hintStyle: const TextStyle(color: textHint),
         labelStyle: const TextStyle(color: textSecondary),
-        prefixIconColor: neonCyan,
+        prefixIconColor: primaryColor,
         suffixIconColor: textSecondary,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -173,7 +182,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: neonCyan, width: 1.5),
+          borderSide: const BorderSide(color: primaryColor, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -186,7 +195,7 @@ class AppTheme {
       ),
 
       // Icon theme
-      iconTheme: const IconThemeData(color: neonCyan, size: 24),
+      iconTheme: const IconThemeData(color: primaryColor, size: 24),
 
       // Divider
       dividerTheme: const DividerThemeData(
@@ -206,7 +215,7 @@ class AppTheme {
       // Bottom navigation (fallback – the MacDock replaces this)
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: surfaceDark,
-        selectedItemColor: neonCyan,
+        selectedItemColor: primaryColor,
         unselectedItemColor: textHint,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
@@ -230,22 +239,22 @@ class AppTheme {
 
       // Floating action button
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: neonCyan,
+        backgroundColor: primaryColor,
         foregroundColor: oledBlack,
         elevation: 8,
       ),
 
       // Progress indicators
       progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: neonCyan,
+        color: primaryColor,
         linearTrackColor: surfaceDark,
       ),
 
       // Tab bar
       tabBarTheme: TabBarThemeData(
-        labelColor: neonCyan,
+        labelColor: primaryColor,
         unselectedLabelColor: textHint,
-        indicatorColor: neonCyan,
+        indicatorColor: primaryColor,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: Colors.transparent,
         labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
@@ -255,7 +264,7 @@ class AppTheme {
       // Chip
       chipTheme: ChipThemeData(
         backgroundColor: surfaceDark,
-        selectedColor: neonCyan.withAlpha(40),
+        selectedColor: primaryColor.withAlpha(40),
         labelStyle: const TextStyle(color: textPrimary, fontSize: 13),
         side: const BorderSide(color: dividerColor),
         shape: RoundedRectangleBorder(

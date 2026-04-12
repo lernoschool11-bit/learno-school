@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
             ],
           ),
-          IconButton(
+          /* IconButton(
             icon: const Icon(Icons.mail_outline),
             onPressed: () {
               Navigator.push(
@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 MaterialPageRoute(builder: (_) => const DirectMessagesScreen()),
               );
             },
-          ),
+          ), */
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadData,
