@@ -76,9 +76,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
         bottom: _hasSearched
             ? TabBar(
                 controller: _tabController,
-                indicatorColor: Colors.white,
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white60,
+                indicatorColor: const Color(0xFF678D88),
+                labelColor: const Color(0xFF678D88),
+                unselectedLabelColor: Colors.white70,
                 tabs: [
                   Tab(text: 'الكل (${_postResults.length + _peopleResults.length})'),
                   Tab(text: 'أشخاص (${_peopleResults.length})'),
@@ -96,10 +96,11 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
               onSubmitted: _search,
               decoration: InputDecoration(
                 hintText: 'ابحث عن شخص أو محتوى...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: const TextStyle(color: Colors.grey),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF678D88)),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear, color: Colors.grey),
                         onPressed: () {
                           _searchController.clear();
                           setState(() {
@@ -110,16 +111,17 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                         },
                       )
                     : IconButton(
-                        icon: const Icon(Icons.send),
+                        icon: const Icon(Icons.send, color: Color(0xFF678D88)),
                         onPressed: () => _search(_searchController.text),
                       ),
                 filled: true,
-                fillColor: Colors.grey.shade100,
+                fillColor: Colors.white.withOpacity(0.05),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
               ),
+              style: const TextStyle(color: Colors.white),
               onChanged: (val) => setState(() {}),
             ),
           ),

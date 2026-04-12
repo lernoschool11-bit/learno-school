@@ -151,18 +151,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.oledBlack,
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black.withAlpha(120),
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: false,
-        flexibleSpace: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(color: Colors.transparent),
-          ),
-        ),
-        title: const Text('الملف الشخصي'),
+        centerTitle: true,
+        title: const Text('الملف الشخصي', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           if (_userProfile != null && _userProfile!['role'] == 'ADMIN')
             IconButton(
@@ -215,7 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // الهيدر
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 32),
+              padding: const EdgeInsets.only(bottom: 32, top: 20),
               decoration: const BoxDecoration(
                 color: Color(0xFF0A2342),
                 borderRadius: BorderRadius.only(
@@ -224,21 +217,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // صورة البروفايل
+                  // صورة البروفايل - Centered and Fixed Distortion
                   GestureDetector(
                     onTap: _openEditProfile,
-                    child: CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Colors.white.withAlpha(50),
-                      backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withOpacity(0.2), width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                        image: avatarUrl != null 
+                          ? DecorationImage(
+                              image: NetworkImage(avatarUrl),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                        color: Colors.white.withAlpha(50),
+                      ),
                       child: avatarUrl == null
-                          ? Text(
-                              (_userProfile!['fullName'] as String? ?? '؟')[0],
-                              style: const TextStyle(
-                                fontSize: 40,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                          ? Center(
+                              child: Text(
+                                (_userProfile!['fullName'] as String? ?? '؟')[0],
+                                style: const TextStyle(
+                                  fontSize: 40,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             )
                           : null,

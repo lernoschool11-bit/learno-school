@@ -185,8 +185,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 : ElevatedButton(
                     onPressed: _submitPost,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF0A2342),
+                      backgroundColor: const Color(0xFF678D88),
+                      foregroundColor: Colors.white,
                     ),
                     child: const Text('نشر'),
                   ),
@@ -221,9 +221,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 expands: true,
                 decoration: const InputDecoration(
                   hintText: 'ماذا تريد أن تشارك؟',
+                  hintStyle: TextStyle(color: Colors.grey),
                   border: InputBorder.none,
                 ),
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
             if (_selectedFileBytes != null) ...[

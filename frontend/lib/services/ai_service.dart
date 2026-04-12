@@ -3,13 +3,13 @@ import 'package:flutter/foundation.dart';
 
 class GeminiService {
   // PLACEHOLDER for API Key - User must replace this
-  static const String _apiKey = 'YOUR_GEMINI_API_KEY_HERE';
+  static const String _apiKey = 'AIzaSyBfF9iJRm9v5y6watsa7oo9z6Fe3f_gZLo';
   
   final GenerativeModel _model;
   final List<Content> _chatHistory = [];
 
   GeminiService() : _model = GenerativeModel(
-    model: 'gemini-1.5-flash',
+    model: 'gemini-pro',
     apiKey: _apiKey,
     systemInstruction: Content.system('You are the Learno Assistant, a helpful AI for students in Jordan. Keep answers concise and educational.'),
   );

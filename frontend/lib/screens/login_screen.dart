@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
+import 'teacher_analytics_screen.dart';
 import '../main.dart';
 import '../widgets/login_character_widget.dart';
 import '../widgets/glass_card.dart';
@@ -41,6 +42,18 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() => _isLoading = true);
+    
+    // DEMO BYPASS: Check for hardcoded Admin account
+    if (email == 'admin@learno.com' && password == 'admin123') {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const TeacherAnalyticsScreen()),
+        );
+      }
+      return;
+    }
+
     final success = await _apiService.login(email, password);
     setState(() => _isLoading = false);
 
