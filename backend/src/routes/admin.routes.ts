@@ -50,5 +50,14 @@ router.delete('/users/:id', authMiddleware, principalOnly, async (req: any, res)
     res.status(500).json({ message: 'خطأ في الحذف' });
   }
 });
+router.post('/verify-teacher-code', async (req, res) => {
+  try {
+    const { code } = req.body;
+    const validCode = process.env.TEACHER_CODE ?? 'learno2024';
+    res.json({ valid: code === validCode });
+  } catch (e) {
+    res.status(500).json({ message: 'خطأ' });
+  }
+});
 
 export default router;
