@@ -299,12 +299,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
           ),
         ),
 
-        // حقل الإرسال
         SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 95),
-            child: Container(
-              padding: const EdgeInsets.only(left: 8, right: 8, top: 6, bottom: 8),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               decoration: BoxDecoration(
                 color: AppTheme.surfaceDark,
                 boxShadow: [
@@ -349,7 +346,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   ),
                 ],
               ),
-            ),
           ),
         ),
       ],

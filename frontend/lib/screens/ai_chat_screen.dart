@@ -85,38 +85,35 @@ class _AIChatScreenState extends State<AIChatScreen> {
           // Glassmorphism Input
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 95),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      decoration: AppTheme.glassDecoration(opacity: 0.1),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _messageController,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: const InputDecoration(
-                                hintText: 'Ask anything...',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                              ),
-                              onSubmitted: (_) => _sendMessage(),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    decoration: AppTheme.glassDecoration(opacity: 0.1),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _messageController,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              hintText: 'Ask anything...',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
                             ),
+                            onSubmitted: (_) => _sendMessage(),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.send_rounded, color: AppTheme.primaryColor),
-                            onPressed: _sendMessage,
-                          ),
-                        ],
-                      ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.send_rounded, color: AppTheme.primaryColor),
+                          onPressed: _sendMessage,
+                        ),
+                      ],
                     ),
                   ),
                 ),

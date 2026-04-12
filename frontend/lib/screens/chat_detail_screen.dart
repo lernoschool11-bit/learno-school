@@ -186,11 +186,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
           // حقل الكتابة
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 95),
-              child: Container(
-                color: AppTheme.surfaceDark,
-                padding: const EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 8),
+          child: Container(
+            color: AppTheme.surfaceDark,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: Row(
                   children: [
                     Expanded(
@@ -239,7 +237,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     ),
                   ],
                 ),
-              ),
             ),
           ),
         ],
