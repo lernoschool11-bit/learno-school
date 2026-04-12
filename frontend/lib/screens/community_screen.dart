@@ -269,8 +269,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
               : ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(12),
-                  itemCount: _messages.length,
-                  itemBuilder: (context, index) => _buildMessageBubble(_messages[index]),
+                  itemCount: _messages.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == _messages.length) {
+                      return const SizedBox(height: 110);
+                    }
+                    return _buildMessageBubble(_messages[index]);
+                  },
                 ),
         ),
 
@@ -295,51 +300,56 @@ class _CommunityScreenState extends State<CommunityScreen> {
         ),
 
         // حقل الإرسال
-        Container(
-          padding: const EdgeInsets.only(left: 8, right: 8, top: 6, bottom: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceDark,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(100),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  style: const TextStyle(color: AppTheme.textPrimary),
-                  decoration: InputDecoration(
-                    hintText: 'اكتب رسالة...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: AppTheme.dividerColor),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: AppTheme.dividerColor),
-                    ),
-                    filled: true,
-                    fillColor: AppTheme.oledBlack,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 95),
+            child: Container(
+              padding: const EdgeInsets.only(left: 8, right: 8, top: 6, bottom: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceDark,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(100),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
                   ),
-                  onSubmitted: _sendMessage,
-                  textInputAction: TextInputAction.send,
-                ),
+                ],
               ),
-              const SizedBox(width: 8),
-              CircleAvatar(
-                backgroundColor: AppTheme.primaryColor,
-                child: IconButton(
-                  icon: const Icon(Icons.send, color: AppTheme.oledBlack, size: 20),
-                  onPressed: () => _sendMessage(_messageController.text),
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      style: const TextStyle(color: AppTheme.textPrimary),
+                      decoration: InputDecoration(
+                        hintText: 'اكتب رسالة...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide(color: AppTheme.dividerColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide(color: AppTheme.dividerColor),
+                        ),
+                        filled: true,
+                        fillColor: AppTheme.oledBlack,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      ),
+                      onSubmitted: _sendMessage,
+                      textInputAction: TextInputAction.send,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  CircleAvatar(
+                    backgroundColor: AppTheme.primaryColor,
+                    child: IconButton(
+                      icon: const Icon(Icons.send, color: AppTheme.oledBlack, size: 20),
+                      onPressed: () => _sendMessage(_messageController.text),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ],

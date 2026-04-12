@@ -9,7 +9,7 @@ class GeminiService {
   final List<Content> _chatHistory = [];
 
   GeminiService() : _model = GenerativeModel(
-    model: 'gemini-pro',
+    model: 'gemini-1.5-flash-latest',
     apiKey: _apiKey,
     systemInstruction: Content.system('You are the Learno Assistant, a helpful AI for students in Jordan. Keep answers concise and educational.'),
   );

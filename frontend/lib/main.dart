@@ -10,17 +10,24 @@ import 'services/api_service.dart';
 import 'services/socket_service.dart';
 import 'theme/app_theme.dart';
 import 'widgets/mac_dock.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Firebase initialization removed for emergency build bypass
-  runApp(const MyApp());
+  
+  final prefs = await SharedPreferences.getInstance();
+  final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  
+  const MyApp({super.key, this.isLoggedIn = false});
 
   @override
   Widget build(BuildContext context) {
@@ -28,37 +35,8 @@ class MyApp extends StatelessWidget {
       title: 'Learno',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const AuthWrapper(),
+      home: isLoggedIn ? const MainNavigation() : const LoginScreen(),
     );
-  }
-}
-
-class AuthWrapper extends StatefulWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  State<AuthWrapper> createState() => _AuthWrapperState();
-}
-
-class _AuthWrapperState extends State<AuthWrapper> {
-  // Enabled for demo: Start at LoginScreen to show dual-view login
-  bool _isLoading = false;
-  bool _isLoggedIn = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: AppTheme.oledBlack,
-        body: Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-      );
-    }
-    return _isLoggedIn ? const MainNavigation() : const LoginScreen();
   }
 }
 

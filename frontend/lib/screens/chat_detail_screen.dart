@@ -171,8 +171,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                           controller: _scrollController,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 16),
-                          itemCount: _messages.length,
+                          itemCount: _messages.length + 1,
                           itemBuilder: (context, index) {
+                            if (index == _messages.length) {
+                              return const SizedBox(height: 110);
+                            }
                             final msg = _messages[index];
                             final isMe = _isMe(msg);
                             return _buildMessage(msg, isMe);
@@ -182,57 +185,60 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           ),
 
           // حقل الكتابة
-          Container(
-            color: AppTheme.surfaceDark,
-            padding: const EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 108), // Avoid MacDock overlap
-            child: SafeArea(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _msgController,
-                      textDirection: TextDirection.rtl,
-                      maxLines: null,
-                      style: const TextStyle(color: AppTheme.textPrimary),
-                      decoration: InputDecoration(
-                        hintText: 'اكتب رسالة...',
-                        hintTextDirection: TextDirection.rtl,
-                        filled: true,
-                        fillColor: AppTheme.oledBlack,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide(color: AppTheme.dividerColor),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 95),
+              child: Container(
+                color: AppTheme.surfaceDark,
+                padding: const EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _msgController,
+                        textDirection: TextDirection.rtl,
+                        maxLines: null,
+                        style: const TextStyle(color: AppTheme.textPrimary),
+                        decoration: InputDecoration(
+                          hintText: 'اكتب رسالة...',
+                          hintTextDirection: TextDirection.rtl,
+                          filled: true,
+                          fillColor: AppTheme.oledBlack,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide(color: AppTheme.dividerColor),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide(color: AppTheme.dividerColor),
+                          ),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide(color: AppTheme.dividerColor),
+                        onSubmitted: (_) => _sendMessage(),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: _sendMessage,
+                      child: Container(
+                        width: 46,
+                        height: 46,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.primaryColor,
+                          shape: BoxShape.circle,
                         ),
+                        child: _isSending
+                            ? const Padding(
+                                padding: EdgeInsets.all(12),
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: AppTheme.oledBlack),
+                              )
+                            : const Icon(Icons.send, color: AppTheme.oledBlack, size: 20),
                       ),
-                      onSubmitted: (_) => _sendMessage(),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: _sendMessage,
-                    child: Container(
-                      width: 46,
-                      height: 46,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.primaryColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: _isSending
-                          ? const Padding(
-                              padding: EdgeInsets.all(12),
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: AppTheme.oledBlack),
-                            )
-                          : const Icon(Icons.send, color: AppTheme.oledBlack, size: 20),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

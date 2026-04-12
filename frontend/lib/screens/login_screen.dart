@@ -8,6 +8,7 @@ import '../widgets/login_character_widget.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/luxury_button.dart';
 import '../theme/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,8 +47,11 @@ class _LoginScreenState extends State<LoginScreen> {
     // DEMO BYPASS: Check for hardcoded Admin account
     if (email == 'admin@learno.com' && password == 'admin123') {
       setState(() => _isLoading = false);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
       if (mounted) {
-        Navigator.of(context).pushReplacement(
+        Navigator.pushReplacement(
+          context,
           MaterialPageRoute(builder: (_) => const TeacherAnalyticsScreen()),
         );
       }
@@ -58,6 +62,8 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const MainNavigation()),

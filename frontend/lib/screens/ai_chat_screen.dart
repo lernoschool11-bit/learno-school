@@ -67,8 +67,11 @@ class _AIChatScreenState extends State<AIChatScreen> {
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              itemCount: _messages.length,
+              itemCount: _messages.length + 1,
               itemBuilder: (context, index) {
+                if (index == _messages.length) {
+                  return const SizedBox(height: 110);
+                }
                 return _messages[index];
               },
             ),
@@ -80,44 +83,46 @@ class _AIChatScreenState extends State<AIChatScreen> {
             ),
             
           // Glassmorphism Input
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  decoration: AppTheme.glassDecoration(opacity: 0.1),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _messageController,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            hintText: 'Ask anything...',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 95),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      decoration: AppTheme.glassDecoration(opacity: 0.1),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _messageController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                hintText: 'Ask anything...',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                              ),
+                              onSubmitted: (_) => _sendMessage(),
+                            ),
                           ),
-                          onSubmitted: (_) => _sendMessage(),
-                        ),
+                          IconButton(
+                            icon: const Icon(Icons.send_rounded, color: AppTheme.primaryColor),
+                            onPressed: _sendMessage,
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.send_rounded, color: AppTheme.primaryColor),
-                        onPressed: _sendMessage,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          
-          // Navigation Safety Padding (100px)
-          const SizedBox(height: 100),
         ],
       ),
     );
