@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../school_data.dart';
 
 class SchoolPickerWidget extends StatefulWidget {
-  final Function(String school) onSelected;
+  final Function(String school, String district) onSelected;
   final String? initialValue;
 
   const SchoolPickerWidget({
@@ -87,7 +87,7 @@ class _SchoolPickerWidgetState extends State<SchoolPickerWidget> {
                         selectedTileColor: const Color(0xFF0A2342),
                         onTap: () {
                           setState(() => _selectedSchool = school);
-                          widget.onSelected(school);
+                          widget.onSelected(school, _selectedDirectorate!);
                         },
                         trailing: isSelected ? const Icon(Icons.check, color: Colors.white, size: 18) : null,
                       );

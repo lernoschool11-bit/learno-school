@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 
 class GeminiService {
   // PLACEHOLDER for API Key - User must replace this
-  static const String _apiKey = 'AIzaSyBfF9iJRm9v5y6watsa7oo9z6Fe3f_gZLo';
+  static const String _apiKey = 'AIzaSyD_c6RPpDgs9-aJP1aFYRme4Ki3F0UV28U';
   
   final GenerativeModel _model;
   final List<Content> _chatHistory = [];

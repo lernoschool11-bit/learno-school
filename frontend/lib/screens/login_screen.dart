@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'teacher_analytics_screen.dart';
+import 'admin_panel.dart';
 import '../main.dart';
 import '../widgets/login_character_widget.dart';
 import '../widgets/glass_card.dart';
@@ -52,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const TeacherAnalyticsScreen()),
+          MaterialPageRoute(builder: (_) => const AdminPanel()),
         );
       }
       return;
@@ -64,10 +65,33 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainNavigation()),
-        );
+      
+      // Fetch profile to check role
+      try {
+        final profile = await _apiService.getUserProfile();
+        final role = profile['role'];
+        
+        if (mounted) {
+          if (role == 'PRINCIPAL' || role == 'ADMIN') {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const AdminPanel()),
+            );
+          } else if (role == 'TEACHER') {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const TeacherAnalyticsScreen()),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const MainNavigation()),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
+          );
+        }
       }
     } else {
       if (mounted) {

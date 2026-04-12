@@ -157,7 +157,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         title: const Text('الملف الشخصي', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          if (_userProfile != null && _userProfile!['role'] == 'ADMIN')
+          if (_userProfile != null && (_userProfile!['role'] == 'ADMIN' || _userProfile!['role'] == 'PRINCIPAL'))
             IconButton(
               icon: const Icon(Icons.admin_panel_settings, color: AppTheme.primaryColor),
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminPanel())),
@@ -317,6 +317,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     _buildInfoTile(Icons.school, 'المدرسة', _userProfile!['school'] ?? 'غير محدد'),
+                    if (_userProfile!['directorate'] != null)
+                      _buildInfoTile(Icons.account_balance, 'المديرية', _userProfile!['directorate']),
                     if (!isTeacher && grade != null) ...[
                       const Divider(height: 1),
                       _buildInfoTile(Icons.class_, 'الصف والشعبة', 'الصف $grade - شعبة ${section ?? ''}'),

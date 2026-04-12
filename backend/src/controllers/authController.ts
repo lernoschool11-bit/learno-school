@@ -25,7 +25,8 @@ export const register = async (req: Request, res: Response) => {
   try {
     const {
       fullName, dob, username, email, password,
-      role, school, grade, section, subjects, classes
+      role, school, grade, section, subjects, classes,
+      district, school_name
     } = req.body;
 
     const nationalId = req.body.national_id || req.body.nationalId || null;
@@ -72,11 +73,12 @@ export const register = async (req: Request, res: Response) => {
         email,
         password: hashedPassword,
         role: role || 'STUDENT',
-        school: normalizedSchool,
+        school: normalizedSchool || school_name || school,
+        directorate: district,
         grade: role === 'STUDENT' ? grade : null,
         section: role === 'STUDENT' ? section : null,
-        subjects: { set: role === 'TEACHER' ? subjectsArray : [] },
-        classes: role === 'TEACHER' ? JSON.stringify(classesArray) : null,
+        subjects: { set: (role === 'TEACHER' || role === 'PRINCIPAL') ? subjectsArray : [] },
+        classes: (role === 'TEACHER' || role === 'PRINCIPAL') ? JSON.stringify(classesArray) : null,
       },
     });
 
@@ -139,6 +141,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
         email: true,
         role: true,
         school: true,
+        directorate: true,
         grade: true,
         section: true,
         subjects: true,

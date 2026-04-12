@@ -27,6 +27,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureConfirmPassword = true;
 
   String _selectedSchool = '';
+  String _selectedDistrict = '';
   String _selectedGrade = '4';
   String _selectedSection = 'أ';
   List<String> _selectedSubjects = [];
@@ -135,6 +136,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       password: _passwordController.text,
       role: _selectedRole,
       school: _selectedSchool,
+      district: _selectedDistrict,
       grade: _selectedRole == 'STUDENT' ? _selectedGrade : null,
       section: _selectedRole == 'STUDENT' ? _selectedSection : null,
       subjects: _selectedRole == 'TEACHER' ? _selectedSubjects : null,
@@ -258,7 +260,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         children: [
           // School Picker
           SchoolPickerWidget(
-            onSelected: (school) => setState(() => _selectedSchool = school),
+            onSelected: (school, district) => setState(() {
+              _selectedSchool = school;
+              _selectedDistrict = district;
+            }),
           ),
           const SizedBox(height: 20),
 

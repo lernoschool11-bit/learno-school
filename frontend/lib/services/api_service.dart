@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/post_model.dart';
 
 class ApiService {
@@ -51,13 +52,16 @@ class ApiService {
   Future<bool> register({
     required String fullName, required String? nationalId, required String dob,
     required String username, required String email, required String password,
-    required String role, required String school,
+    required String role, required String school, String? district,
     String? grade, String? section, List<String>? subjects, List<Map<String, String>>? classes,
   }) async {
     try {
       final body = {
         'fullName': fullName, 'dob': dob, 'username': username,
-        'email': email, 'password': password, 'role': role, 'school': school,
+        'email': email, 'password': password, 'role': role,
+        'school': school,
+        'school_name': school,
+        'district': district ?? '',
         if (nationalId != null && nationalId.isNotEmpty) 'nationalId': nationalId,
         if (grade != null) 'grade': grade,
         if (section != null) 'section': section,
@@ -65,7 +69,26 @@ class ApiService {
         if (classes != null) 'classes': classes,
       };
       final response = await http.post(Uri.parse('$baseUrl/auth/register'), headers: _headers(null), body: jsonEncode(body));
-      return response.statusCode == 200 || response.statusCode == 201;
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final userData = data['user'];
+        if (userData != null) {
+          // Sync to Firebase for Principal Management
+          await FirebaseFirestore.instance.collection('users').doc(userData['id'].toString()).set({
+            'fullName': fullName,
+            'email': email,
+            'role': role,
+            'school_name': school,
+            'district': district ?? '',
+            'grade': grade,
+            'section': section,
+            'createdAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        }
+        return true;
+      }
+      return false;
     } catch (e) { debugPrint('Register error: $e'); return false; }
   }
 
