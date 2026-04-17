@@ -115,7 +115,7 @@ export const getSchoolUsers = async (req: AuthRequest, res: Response) => {
 export const deleteSchoolUser = async (req: AuthRequest, res: Response) => {
     try {
         const { schoolId } = req.user!;
-        const targetUserId = req.params.userId;
+        const targetUserId = String(req.params.userId);
 
         if (!schoolId) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
 
