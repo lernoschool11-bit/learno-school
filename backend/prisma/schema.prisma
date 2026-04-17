@@ -25,6 +25,8 @@ model User {
   password    String
   phoneNumber String?
   school      String?
+  schoolId    String?
+  linkedSchool School? @relation(fields: [schoolId], references: [id])
   directorate String?
   parentName  String?
   avatarUrl   String?
@@ -56,6 +58,22 @@ model User {
   directMessages        DirectMessage[]
 }
 
+model School {
+  id                String   @id @default(uuid())
+  name              String   @unique
+  adminEmail        String   @unique
+  adminPassword     String // Should be hashed, but used for initial setup
+  isPasswordChanged Boolean  @default(false)
+  teacherSecretCode String   @default("teacher123")
+  logoUrl           String?
+  
+  users             User[]
+  posts             Post[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 enum PostType {
   TEXT
   IMAGE
@@ -73,6 +91,9 @@ model Post {
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
 
+  schoolId  String?
+  school    School?  @relation(fields: [schoolId], references: [id])
+
   expiresAt DateTime?
 
   createdAt DateTime @default(now())
@@ -81,6 +102,7 @@ model Post {
   comments  Comment[]
   likes     Like[]
 }
+
 
 model Like {
   id        String   @id @default(uuid())

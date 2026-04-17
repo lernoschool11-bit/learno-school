@@ -11,6 +11,7 @@ export interface AuthRequest extends Request {
         id: string;
         role: Role;
         nationalId: string;
+        schoolId?: string | null;
     };
 }
 
@@ -27,8 +28,9 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
         // Quick validation via DB to ensure user hasn't been revoked
         const user = await prisma.user.findUnique({
             where: { id: decoded.id },
-            select: { id: true, role: true, nationalId: true }
+            select: { id: true, role: true, nationalId: true, schoolId: true }
         });
+
 
         if (!user) return res.status(401).json({ error: 'User not found or access revoked' });
 
@@ -58,3 +60,5 @@ export const requireRole = (allowedRoles: Role[]) => {
         next();
     };
 };
+
+export const authMiddleware = requireAuth;

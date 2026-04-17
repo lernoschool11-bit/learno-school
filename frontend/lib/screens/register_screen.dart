@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/api_service.dart';
 import '../widgets/school_picker_widget.dart';
 import '../theme/app_theme.dart';
@@ -99,22 +98,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = true);
 
-    // Dynamic Teacher Verification Logic
+    // التحقق من رمز المعلم عن طريق الـ API
     if (_selectedRole == 'TEACHER') {
       try {
-        final doc = await FirebaseFirestore.instance
-            .collection('system_control')
-            .doc('security_config')
-            .get();
-        
-        final validCode = doc.data()?['teacher_access_code'];
-        
-        if (_teacherCodeController.text.trim() != validCode) {
+        final isValid = await _apiService.verifyTeacherCode(_teacherCodeController.text.trim());
+        if (!isValid) {
           setState(() => _isLoading = false);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Invalid Teacher Access Code. Please contact your administrator.'),
+                content: Text('رمز المعلم غير صحيح. تواصل مع المدير.'),
                 backgroundColor: AppTheme.errorRed,
               ),
             );
@@ -123,10 +116,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       } catch (e) {
         setState(() => _isLoading = false);
-        debugPrint('Firestore Error: $e');
         return;
       }
     }
+
     final success = await _apiService.register(
       fullName: _fullNameController.text.trim(),
       nationalId: _nationalIdController.text.trim().isNotEmpty ? _nationalIdController.text.trim() : null,
@@ -142,7 +135,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       subjects: _selectedRole == 'TEACHER' ? _selectedSubjects : null,
       classes: _selectedRole == 'TEACHER' ? _selectedClasses : null,
     );
+
     setState(() => _isLoading = false);
+
     if (success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إنشاء الحساب بنجاح!'), backgroundColor: Colors.green));
@@ -258,7 +253,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // School Picker
           SchoolPickerWidget(
             onSelected: (school, district) => setState(() {
               _selectedSchool = school;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
-import 'teacher_analytics_screen.dart';
 import 'admin_panel.dart';
 import '../main.dart';
 import '../widgets/login_character_widget.dart';
@@ -10,6 +9,7 @@ import '../widgets/glass_card.dart';
 import '../widgets/luxury_button.dart';
 import '../theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'force_password_change_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,12 +44,13 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() => _isLoading = true);
-    
-    // DEMO BYPASS: Check for hardcoded Admin account
+
+    // DEMO BYPASS: Admin hardcoded
     if (email == 'admin@learno.com' && password == 'admin123') {
-      setState(() => _isLoading = false);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('userRole', 'ADMIN');
+      setState(() => _isLoading = false);
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -59,47 +60,54 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final success = await _apiService.login(email, password);
+    final data = await _apiService.login(email, password);
     setState(() => _isLoading = false);
 
-    if (success) {
+    if (data.isNotEmpty) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
-      
-      // Fetch profile to check role
-      try {
-        final profile = await _apiService.getUserProfile();
-        final role = profile['role'];
-        
-        if (mounted) {
-          if (role == 'PRINCIPAL' || role == 'ADMIN') {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const AdminPanel()),
-            );
-          } else if (role == 'TEACHER') {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const TeacherAnalyticsScreen()),
-            );
-          } else {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const MainNavigation()),
-            );
-          }
-        }
-      } catch (e) {
-        if (mounted) {
+
+      final user = data['user'];
+      final role = user['role'] as String? ?? 'STUDENT';
+      final bool needsPasswordChange = user['needsPasswordChange'] ?? false;
+
+      await prefs.setString('userRole', role);
+      await prefs.setString('userSchool', user['school'] ?? '');
+
+      if (mounted) {
+        if (needsPasswordChange) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => ForcePasswordChangeScreen(userData: user),
+            ),
+          );
+        } else if (role == 'PRINCIPAL' || role == 'ADMIN') {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
+          );
+        } else {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const MainNavigation()),
           );
         }
       }
     } else {
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('البريد الإلكتروني أو كلمة المرور غير صحيحة')),
+          const SnackBar(
+            content: Text('البريد الإلكتروني أو كلمة المرور غير صحيحة'),
+          ),
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -113,7 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              // Character tracking pointer and reacting to password visibility
               Center(
                 child: LoginCharacterWidget(
                   isPasswordVisible: !_obscurePassword,
@@ -135,13 +142,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 48),
 
-              // Glassmorphism wrapper for inputs
               GlassCard(
                 padding: const EdgeInsets.all(16),
                 margin: EdgeInsets.zero,
                 child: Column(
                   children: [
-                    // البريد الإلكتروني
                     TextField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -151,8 +156,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
-                    // كلمة المرور
                     TextField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
@@ -161,9 +164,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         prefixIcon: const Icon(Icons.lock),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          onPressed: () =>
+                              setState(() => _obscurePassword = !_obscurePassword),
                         ),
                       ),
                     ),
@@ -172,14 +178,14 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 8),
 
-              // نسيت كلمة المرور
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                      MaterialPageRoute(
+                          builder: (_) => const ForgotPasswordScreen()),
                     );
                   },
                   child: const Text('نسيت كلمة المرور؟'),
@@ -194,7 +200,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
 
-              // إنشاء حساب
               TextButton(
                 onPressed: () {
                   Navigator.push(

@@ -100,6 +100,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
         type: type || 'TEXT',
         expiresAt: postExpiresAt,
         authorId: userId,
+        schoolId: req.user!.schoolId,
       },
       include: {
         author: {
@@ -298,8 +299,12 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    if (post.authorId !== userId) {
+    if (post.authorId !== userId && req.user!.role !== Role.PRINCIPAL) {
       return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    if (req.user!.role === Role.PRINCIPAL && post.schoolId !== req.user!.schoolId) {
+      return res.status(403).json({ error: 'Not authorized for this school' });
     }
 
     await prisma.post.delete({ where: { id: postId } });

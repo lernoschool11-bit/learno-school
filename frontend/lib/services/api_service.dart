@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/post_model.dart';
 
 class ApiService {
@@ -33,7 +32,7 @@ class ApiService {
   }
 
   // ---------------- LOGIN ----------------
-  Future<bool> login(String email, String password) async {
+  Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
@@ -42,10 +41,13 @@ class ApiService {
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['token'] != null) { await saveToken(data['token']); return true; }
+        if (data['token'] != null) { 
+          await saveToken(data['token']); 
+          return data; 
+        }
       }
-      return false;
-    } catch (e) { debugPrint('Login error: $e'); return false; }
+      return {};
+    } catch (e) { debugPrint('Login error: $e'); return {}; }
   }
 
   // ---------------- REGISTER ----------------
@@ -69,26 +71,7 @@ class ApiService {
         if (classes != null) 'classes': classes,
       };
       final response = await http.post(Uri.parse('$baseUrl/auth/register'), headers: _headers(null), body: jsonEncode(body));
-      
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        final userData = data['user'];
-        if (userData != null) {
-          // Sync to Firebase for Principal Management
-          await FirebaseFirestore.instance.collection('users').doc(userData['id'].toString()).set({
-            'fullName': fullName,
-            'email': email,
-            'role': role,
-            'school_name': school,
-            'district': district ?? '',
-            'grade': grade,
-            'section': section,
-            'createdAt': FieldValue.serverTimestamp(),
-          }, SetOptions(merge: true));
-        }
-        return true;
-      }
-      return false;
+      return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) { debugPrint('Register error: $e'); return false; }
   }
 
@@ -313,15 +296,11 @@ class ApiService {
       debugPrint('sendDmRequest body: ${response.body}');
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        // تأكد إن الـ id موجود
         if (data['id'] != null) return data;
         return {};
       }
       return {};
-    } catch (e) {
-      debugPrint('sendDmRequest error: $e');
-      return {};
-    }
+    } catch (e) { debugPrint('sendDmRequest error: $e'); return {}; }
   }
 
   Future<bool> respondDmRequest(String conversationId, String action) async {
@@ -333,46 +312,31 @@ class ApiService {
         body: jsonEncode({'action': action}),
       );
       return response.statusCode == 200;
-    } catch (e) {
-      debugPrint('respondDmRequest error: $e');
-      return false;
-    }
+    } catch (e) { debugPrint('respondDmRequest error: $e'); return false; }
   }
 
   Future<List<Map<String, dynamic>>> getConversations() async {
     try {
       final token = await getToken();
-      final response = await http.get(
-        Uri.parse('$baseUrl/dm'),
-        headers: _headers(token),
-      );
+      final response = await http.get(Uri.parse('$baseUrl/dm'), headers: _headers(token));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((c) => Map<String, dynamic>.from(c)).toList();
       }
       return [];
-    } catch (e) {
-      debugPrint('getConversations error: $e');
-      return [];
-    }
+    } catch (e) { debugPrint('getConversations error: $e'); return []; }
   }
 
   Future<List<Map<String, dynamic>>> getDmRequests() async {
     try {
       final token = await getToken();
-      final response = await http.get(
-        Uri.parse('$baseUrl/dm/requests'),
-        headers: _headers(token),
-      );
+      final response = await http.get(Uri.parse('$baseUrl/dm/requests'), headers: _headers(token));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((r) => Map<String, dynamic>.from(r)).toList();
       }
       return [];
-    } catch (e) {
-      debugPrint('getDmRequests error: $e');
-      return [];
-    }
+    } catch (e) { debugPrint('getDmRequests error: $e'); return []; }
   }
 
   Future<List<Map<String, dynamic>>> getDirectMessages(String conversationId) async {
@@ -387,9 +351,109 @@ class ApiService {
         return data.map((m) => Map<String, dynamic>.from(m)).toList();
       }
       return [];
-    } catch (e) {
-      debugPrint('getDirectMessages error: $e');
-      return [];
-    }
+    } catch (e) { debugPrint('getDirectMessages error: $e'); return []; }
   }
+
+  // ---------------- ADMIN ----------------
+  Future<Map<String, dynamic>> getAdminStats() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(Uri.parse('$baseUrl/admin/stats'), headers: _headers(token));
+      if (response.statusCode == 200) return jsonDecode(response.body);
+      throw Exception('Failed to load stats');
+    } catch (e) { debugPrint('getAdminStats error: $e'); throw Exception('Network error'); }
+  }
+
+  Future<List<dynamic>> getAdminUsers(String role) async {
+    try {
+      final token = await getToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/users?role=$role'),
+        headers: _headers(token),
+      );
+      if (response.statusCode == 200) return jsonDecode(response.body);
+      return [];
+    } catch (e) { debugPrint('getAdminUsers error: $e'); return []; }
+  }
+
+  Future<void> deleteAdminUser(String userId) async {
+    try {
+      final token = await getToken();
+      await http.delete(Uri.parse('$baseUrl/admin/users/$userId'), headers: _headers(token));
+    } catch (e) { debugPrint('deleteAdminUser error: $e'); }
+  }
+  Future<bool> verifyTeacherCode(String code, {String? schoolName}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/verify-teacher-code'),
+        headers: _headers(null),
+        body: jsonEncode({'code': code, if (schoolName != null) 'name': schoolName}),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['valid'] ?? false;
+      }
+      return false;
+    } catch (e) { debugPrint('verifyTeacherCode error: $e'); return false; }
+  }
+
+  // ---------------- SCHOOL ADMIN ----------------
+  Future<bool> forcePasswordChange(String newPassword) async {
+    try {
+      final token = await getToken();
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/force-password-change'),
+        headers: _headers(token),
+        body: jsonEncode({'newPassword': newPassword}),
+      );
+      return response.statusCode == 200;
+    } catch (e) { return false; }
+  }
+
+  Future<String?> getTeacherCode() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(Uri.parse('$baseUrl/admin/teacher-code'), headers: _headers(token));
+      if (response.statusCode == 200) return jsonDecode(response.body)['code'];
+      return null;
+    } catch (e) { return null; }
+  }
+
+  Future<bool> updateTeacherCode(String newCode) async {
+    try {
+      final token = await getToken();
+      final response = await http.put(
+        Uri.parse('$baseUrl/admin/teacher-code'),
+        headers: _headers(token),
+        body: jsonEncode({'newCode': newCode}),
+      );
+      return response.statusCode == 200;
+    } catch (e) { return false; }
+  }
+
+  Future<List<dynamic>> getSchoolUsers() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(Uri.parse('$baseUrl/admin/school-users'), headers: _headers(token));
+      if (response.statusCode == 200) return jsonDecode(response.body);
+      return [];
+    } catch (e) { return []; }
+  }
+
+  Future<bool> deleteSchoolUser(String userId) async {
+    try {
+      final token = await getToken();
+      final response = await http.delete(Uri.parse('$baseUrl/admin/school-users/$userId'), headers: _headers(token));
+      return response.statusCode == 200;
+    } catch (e) { return false; }
+  }
+
+  Future<List<dynamic>> getSchoolPosts() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(Uri.parse('$baseUrl/admin/school-posts'), headers: _headers(token));
+      if (response.statusCode == 200) return jsonDecode(response.body);
+      return [];
+    } catch (e) { return []; }
+  }
+
 }

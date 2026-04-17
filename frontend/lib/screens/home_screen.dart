@@ -75,9 +75,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final String? schoolName = _posts.isNotEmpty ? _posts.first.school : null;
+
     return Scaffold(
       backgroundColor: Colors.transparent, // Let MainNavigation handle the background
       extendBodyBehindAppBar: true,
+
       appBar: AppBar(
         backgroundColor: Colors.black.withAlpha(120),
         elevation: 0,
@@ -88,15 +91,27 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(color: Colors.transparent),
           ),
         ),
-        title: Text(
-          'Learno',
-          style: TextStyle(
-            fontWeight: FontWeight.bold, 
-            fontSize: 24,
-            letterSpacing: -0.5,
-            color: AppTheme.primaryColor,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Learno',
+              style: TextStyle(
+                fontWeight: FontWeight.bold, 
+                fontSize: 24,
+                letterSpacing: -0.5,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            if (schoolName != null)
+              Text(
+                schoolName,
+                style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.normal),
+              ),
+          ],
         ),
+
         actions: [
           // زر الإشعارات مع العداد
           Stack(

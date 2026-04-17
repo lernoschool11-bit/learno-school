@@ -1,84 +1,39 @@
-# سراج — Siraj Educational Social Learning Platform
-### الهاشمية الأردنية | Hashemite Kingdom of Jordan
+# 🎓 Learno: Multi-School Educational Platform
 
-A secure, teacher-governed digital learning ecosystem integrated with the **Siraj Educational Platform** of the Jordanian Ministry of Education.
+**Learno** is a premium, multi-tenant social and educational ecosystem designed specifically for modern schools. It provides a secure, high-fidelity environment where students, teachers, and principals can interact, share resources, and manage school communities with precision.
 
----
+## 🛡️ Multi-School Security & Architecture
+Unlike standard social platforms, Learno implements a strict **Multi-Tenant Architecture**:
+- **Isolated Communities**: Each school has its own private "Digital Campus." Posts and users are strictly bound to their respective `schoolId`.
+- **Principal Oversight**: School admins (Principals) have exclusive moderation capabilities within their institution.
+- **Dynamic Teacher Codes**: Secure registration workflow using principal-managed rotation codes.
 
-## 📁 Project Structure
-```
-Antigravith@school_11/
-├── backend/          # Node.js + Express + TypeScript + Prisma 7 + PostgreSQL
-└── frontend/         # Flutter (Android + iOS)
-```
+## 🚀 Technology Stack
+- **Frontend**: Flutter (3.x) with a luxury OLED-centric Pulse UI.
+- **Backend**: Node.js & Express (TypeScript).
+- **Database**: PostgreSQL with Prisma ORM for type-safe management.
+- **Real-Time**: Socket.io for notifications and community interaction.
+- **AI Integration**: Custom Gemini AI integrations for educational assistance.
 
-## 🚀 Getting Started
+## 📋 Core Administrative Capabilities
+- **Access Management**: Principal-driven rotation of teacher registration codes.
+- **Content Moderation**: Global "Principal View" to delete sensitive or inappropriate content within the school feed.
+- **User Governance**: Capability to suspend or remove user accounts belonging to the managed school.
+- **Branding**: Dynamic UI scaling that reflects the school's identity upon login.
+
+## 🛠️ Setup & Installation
 
 ### Backend
-```bash
-cd backend
+1. `cd backend`
+2. `npm install`
+3. Configure your `.env` (DATABASE_URL, JWT_SECRET).
+4. `npx prisma db push`
+5. `npm run dev`
 
-# Copy and configure environment
-cp .env .env.local
-# Edit DATABASE_URL in .env
-
-# Run database migrations (requires PostgreSQL running)
-npx prisma migrate dev --name init
-
-# Start development server (port 8000)
-npm run dev
-```
-
-### Frontend
-```bash
-cd frontend
-
-# Run on connected device / emulator
-flutter run
-```
+### Frontend (Flutter)
+1. `cd frontend`
+2. `flutter pub get`
+3. `flutter run`
 
 ---
-
-## 🔐 API Endpoints
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/api/auth/sso/mock` | None | Siraj SSO login mock |
-| `POST` | `/api/posts/` | Required | Create post/story/video |
-| `GET`  | `/api/posts/feed` | Required | Get educational feed |
-| `POST` | `/api/academic/assignments` | Teacher | Create assignment |
-| `GET`  | `/api/academic/assignments` | Required | List assignments |
-| `POST` | `/api/academic/assignments/submit` | Student | Submit assignment |
-| `POST` | `/api/academic/assignments/grade` | Teacher | Grade submission |
-| `POST` | `/api/academic/quizzes` | Teacher | Create MCQ quiz |
-| `GET`  | `/api/academic/quizzes` | Required | List quizzes |
-| `GET`  | `/api/academic/quizzes/:id` | Required | Take quiz |
-
----
-
-## 🧪 Running Tests
-```bash
-cd backend
-npm test
-```
-
----
-
-## 🎨 Brand Identity
-
-| Token | Value |
-|-------|-------|
-| Primary | `#0A2342` (Dark Blue) |
-| Secondary | `#000000` (Black) |
-| Background | `#FFFFFF` (White) |
-
----
-
-## 🔒 Security
-
-- JWT-based session tokens (8h expiry)
-- Rate limiting: 100 req/15min (API), 10 req/15min (Auth)
-- Input sanitization (XSS protection)
-- RBAC: `STUDENT`, `TEACHER`, `ADMIN`
-- TLS 1.3 in transit (infrastructure-level)
-- AES-256 for storage (infrastructure-level)
+*Developed with excellence for the next generation of Jordanian education.*

@@ -1,63 +1,52 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/auth';
-import { prisma } from '../lib/prisma';
+import { requireAuth, requireRole } from '../middleware/auth';
+import { Role } from '@prisma/client';
+import prisma from '../lib/prisma';
+import * as schoolController from '../controllers/schoolController';
 
 const router = Router();
 
-// middleware يتحقق إن المستخدم PRINCIPAL
-const principalOnly = async (req: any, res: any, next: any) => {
-  if (req.user?.role !== 'PRINCIPAL') {
-    return res.status(403).json({ message: 'غير مصرح' });
-  }
-  next();
-};
+// ==================== PRINCIPAL ROUTES ====================
 
-// إحصائيات المدرسة
-router.get('/stats', authMiddleware, principalOnly, async (req: any, res) => {
-  try {
-    const school = req.user.school;
-    const [teacherCount, studentCount] = await Promise.all([
-      prisma.user.count({ where: { school, role: 'TEACHER' } }),
-      prisma.user.count({ where: { school, role: 'STUDENT' } }),
-    ]);
-    res.json({ teacherCount, studentCount });
-  } catch (e) {
-    res.status(500).json({ message: 'خطأ في السيرفر' });
-  }
-});
+// Force Change Initial Password
+router.post('/force-password-change', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.changeInitialPassword);
 
-// قائمة المستخدمين
-router.get('/users', authMiddleware, principalOnly, async (req: any, res) => {
-  try {
-    const school = req.user.school;
-    const role = req.query.role as string;
-    const users = await prisma.user.findMany({
-      where: { school, role: role as any },
-      select: { id: true, fullName: true, email: true, role: true, grade: true, section: true },
-    });
-    res.json(users);
-  } catch (e) {
-    res.status(500).json({ message: 'خطأ في السيرفر' });
-  }
-});
+// Teacher Secret Code Management
+router.get('/teacher-code', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getTeacherSecretCode);
+router.put('/teacher-code', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.updateTeacherSecretCode);
 
-// حذف مستخدم
-router.delete('/users/:id', authMiddleware, principalOnly, async (req: any, res) => {
-  try {
-    await prisma.user.delete({ where: { id: req.params.id as string } });
-    res.json({ message: 'تم الحذف' });
-  } catch (e) {
-    res.status(500).json({ message: 'خطأ في الحذف' });
-  }
-});
+// User Management
+router.get('/school-users', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolUsers);
+router.delete('/school-users/:userId', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.deleteSchoolUser);
+
+// Post Moderation
+router.get('/school-posts', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolPosts);
+
+// Verify Teacher Code (Public - used during registration)
 router.post('/verify-teacher-code', async (req, res) => {
-  try {
-    const { code } = req.body;
-    const validCode = process.env.TEACHER_CODE ?? 'learno2024';
-    res.json({ valid: code === validCode });
-  } catch (e) {
-    res.status(500).json({ message: 'خطأ' });
-  }
+    try {
+        const { code, name } = req.body;
+        // In a multi-school system, we should verify it against the specific school
+        // But for now, if name is provided, find that school
+        const school = await prisma.school.findFirst({
+            where: {
+                OR: [
+                    { name: name },
+                    { teacherSecretCode: code }
+                ]
+            }
+        });
+        
+        if (!school) return res.json({ valid: false });
+        
+        res.json({ 
+            valid: school.teacherSecretCode === code,
+            schoolId: school.id,
+            schoolName: school.name
+        });
+    } catch (e) {
+        res.status(500).json({ message: 'خطأ' });
+    }
 });
 
-export default router;
+export default router;

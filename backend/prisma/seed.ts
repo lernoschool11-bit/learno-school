@@ -4,34 +4,58 @@ import bcrypt from 'bcrypt';
 
 async function main() {
 
-    const testNationalId = "1234567890";
-    const testPassword = "123456";
+    const schools = [
+        { name: "Marj Al-Hamam", email: "admin@marj.edu.jo", password: "password123", code: "MARJ2024" },
+        { name: "Irbid Secondary", email: "admin@irbid.edu.jo", password: "password123", code: "IRBID2024" },
+        { name: "Amman Academy", email: "admin@amman.edu.jo", password: "password123", code: "AMMAN2024" },
+    ];
 
-    const hashedPassword = await bcrypt.hash(testPassword, 10);
-
-    const existingUser = await prisma.user.findUnique({
-        where: { nationalId: testNationalId }
-    });
-
-    if (!existingUser) {
-        await prisma.user.create({
-            data: {
-                nationalId: testNationalId,
-                password: hashedPassword,
-                fullName: 'Test User',
-                username: 'testuser',
-                email: 'testuser@school.jo',
-                dob: '2000-01-01',
-                role: 'STUDENT',
-            }
+    for (const school of schools) {
+        let dbSchool = await prisma.school.findUnique({
+            where: { name: school.name }
         });
 
-        console.log(`Test user created
-National ID: 1234567890
-Password: 123456`);
-    } else {
-        console.log('Test user already exists.');
+        if (!dbSchool) {
+            const hashedAdminPassword = await bcrypt.hash(school.password, 10);
+            dbSchool = await prisma.school.create({
+                data: {
+                    name: school.name,
+                    adminEmail: school.email,
+                    adminPassword: hashedAdminPassword,
+                    teacherSecretCode: school.code,
+                    isPasswordChanged: false,
+                }
+            });
+            console.log(`School ${school.name} created`);
+        }
+
+        // Create/Update the Principal user for this school
+        const hashedUserPassword = await bcrypt.hash(school.password, 10);
+        await prisma.user.upsert({
+            where: { email: school.email },
+            update: {
+                password: hashedUserPassword,
+                role: 'PRINCIPAL',
+                school: school.name,
+                schoolId: dbSchool.id,
+            },
+            create: {
+                nationalId: `ADMIN_${school.name.toUpperCase().replace(/\s/g, '_')}`,
+                fullName: `${school.name} Principal`,
+                username: `admin_${school.name.toLowerCase().replace(/\s/g, '_')}`,
+                email: school.email,
+                password: hashedUserPassword,
+                role: 'PRINCIPAL',
+                school: school.name,
+                schoolId: dbSchool.id,
+            }
+        });
+        console.log(`Principal for ${school.name} synced`);
     }
+
+
+
+
 }
 
 main()

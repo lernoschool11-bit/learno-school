@@ -29,13 +29,15 @@ export const register = async (req: Request, res: Response) => {
       district, school_name
     } = req.body;
 
+    const emailLower = email?.toLowerCase().trim();
+
     const nationalId = req.body.national_id || req.body.nationalId || null;
 
     if (!password || !fullName || !username || !email) {
       return res.status(400).json({ message: "جميع الحقول المطلوبة يجب ملؤها" });
     }
 
-    const whereConditions: any[] = [{ username }, { email }];
+    const whereConditions: any[] = [{ username }, { email: emailLower }];
     if (nationalId) whereConditions.push({ nationalId });
 
     const existingUser = await prisma.user.findFirst({
@@ -70,7 +72,7 @@ export const register = async (req: Request, res: Response) => {
         fullName,
         username,
         dob,
-        email,
+        email: emailLower,
         password: hashedPassword,
         role: role || 'STUDENT',
         school: normalizedSchool || school_name || school,
@@ -99,20 +101,30 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    if (email) email = email.toLowerCase().trim();
 
     if (!email || !password) {
       return res.status(400).json({ message: "البريد الإلكتروني وكلمة المرور مطلوبان" });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      include: { linkedSchool: true }
+    });
     if (!user) return res.status(401).json({ error: "البريد الإلكتروني غير موجود" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: "كلمة المرور غير صحيحة" });
 
+    // Check if school admin needs to change password
+    let needsPasswordChange = false;
+    if (user.role === 'PRINCIPAL' && user.linkedSchool && !user.linkedSchool.isPasswordChanged) {
+        needsPasswordChange = true;
+    }
+
     const token = jwt.sign(
-      { id: user.id, nationalId: user.nationalId, role: user.role },
+      { id: user.id, nationalId: user.nationalId, role: user.role, schoolId: user.schoolId },
       process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: '30d' }
     );
@@ -120,8 +132,16 @@ export const login = async (req: Request, res: Response) => {
     return res.json({
       message: "تم تسجيل الدخول بنجاح",
       token,
-      user: { name: user.fullName, role: user.role },
+      user: { 
+        id: user.id,
+        name: user.fullName, 
+        role: user.role,
+        school: user.school,
+        schoolId: user.schoolId,
+        needsPasswordChange
+      },
     });
+
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({ message: "خطأ في السيرفر" });

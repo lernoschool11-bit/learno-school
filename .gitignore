@@ -1,5 +1,66 @@
+# Dependency directories
 node_modules/
-.env
+jspm_packages/
+.npm/
+.pnpm-store/
+
+# Build artifacts
+dist/
 build/
-.dart_tool
-package-lock.json
+bin/
+obj/
+out/
+.next/
+.server/
+.svelte-kit/
+.turbo/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+.env*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+frontend/build/
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.pub-cache/
+frontend/.pub/
+
+# Prisma
+backend/prisma/migrations/
+backend/prisma/*.sqlite
+backend/prisma/*.sqlite-journal
+
+# Compiled code
+lib-cov/
+coverage/
+*.lcov
+.nyc_output/
