@@ -15,7 +15,7 @@ class SocketService {
     final token = await _apiService.getToken();
     if (token == null) return;
 
-    _socket = IO.io('https://learno-school-production-2b55.up.railway.app', <String, dynamic>{
+    _socket = IO.io('https://learno-school.onrender.com', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
       'auth': {'token': token},
