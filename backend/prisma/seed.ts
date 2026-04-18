@@ -59,8 +59,72 @@ async function main() {
                 schoolId: dbSchool.id,
             }
         });
-        console.log(`✅ Principal for ${school.name} synced`);
     }
+
+    console.log("✅ Basic schools and principals synced.");
+
+    // ==================== TEST DATA ====================
+    console.log("🧪 Adding Test Data...");
+
+    const testPassword = await bcrypt.hash("12345678", 10);
+    const marjSchool = await prisma.school.findUnique({ where: { name: "Marj Al-Hamam" } });
+
+    if (!marjSchool) {
+        throw new Error("School 'Marj Al-Hamam' not found. Seed failed.");
+    }
+
+    // Create Test Student
+    const testUser = await prisma.user.upsert({
+        where: { username: "test1" },
+        update: {
+            password: testPassword,
+            role: 'STUDENT',
+            school: "Marj Al-Hamam",
+            schoolId: marjSchool.id,
+            grade: "10",
+            section: "A"
+        },
+        create: {
+            nationalId: "TEST001",
+            fullName: "Test User",
+            username: "test1",
+            email: "test1@gmail.com",
+            password: testPassword,
+            role: 'STUDENT',
+            school: "Marj Al-Hamam",
+            schoolId: marjSchool.id,
+            grade: "10",
+            section: "A"
+        }
+    });
+    console.log("✅ Test Student 'test1' created.");
+
+    // Create 5 Test Posts
+    for (let i = 1; i <= 5; i++) {
+        await prisma.post.create({
+            data: {
+                content: `Test post number ${i} for demonstration purposes. #Test`,
+                authorId: testUser.id,
+                schoolId: marjSchool.id,
+                type: 'TEXT'
+            }
+        });
+    }
+    console.log("✅ 5 Test Posts created.");
+
+    // Create 5 Community Messages
+    const roomId = "Marj Al-Hamam_10_A";
+    for (let i = 1; i <= 5; i++) {
+        await prisma.message.create({
+            data: {
+                roomId: roomId,
+                content: `Test message ${i} in the community chat.`,
+                userId: testUser.id,
+                type: 'text'
+            }
+        });
+    }
+    console.log("✅ 5 Community Messages created.");
 
     console.log("🏁 Seed finished successfully!");
 }
