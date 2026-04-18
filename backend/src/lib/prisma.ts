@@ -6,7 +6,15 @@ import ws from "ws";
 
 neonConfig.webSocketConstructor = ws;
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const connectionString = `${process.env.DATABASE_URL}`;
+
+if (!process.env.DATABASE_URL) {
+  console.error("❌ DATABASE_URL is MISSING from environment variables!");
+} else {
+  console.log("✅ DATABASE_URL is present, attempting to connect...");
+}
+
+const pool = new Pool({ connectionString });
 const adapter = new PrismaNeon(pool as any);
 
 const prisma = new PrismaClient({ adapter });
