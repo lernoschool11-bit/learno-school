@@ -5,11 +5,14 @@ import pkg from "pg";
 
 const { Pool } = pkg;
 
+const connectionString = process.env.DATABASE_URL!;
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  connectionString,
+  ssl: { rejectUnauthorized: false },
+  max: 1
 });
 
-const adapter = new PrismaPg(pool);
+const adapter = new PrismaPg(pool, { schema: "public" });
 export const prisma = new PrismaClient({ adapter });
 export default prisma;
