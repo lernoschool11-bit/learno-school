@@ -1,8 +1,18 @@
+import { PrismaClient } from '@prisma/client';
+import { PrismaNeon } from '@prisma/adapter-neon';
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
 import 'dotenv/config';
-import prisma from '../src/lib/prisma';
 import bcrypt from 'bcrypt';
 
+neonConfig.webSocketConstructor = ws;
+
+const prisma = new PrismaClient({
+    adapter: new PrismaNeon(new Pool({ connectionString: process.env.DATABASE_URL })) as any
+});
+
 async function main() {
+    console.log("🌱 Starting seed...");
 
     const schools = [
         { name: "Marj Al-Hamam", email: "admin@marj.edu.jo", password: "password123", code: "MARJ2024" },
@@ -26,10 +36,9 @@ async function main() {
                     isPasswordChanged: false,
                 }
             });
-            console.log(`School ${school.name} created`);
+            console.log(`✅ School ${school.name} created`);
         }
 
-        // Create/Update the Principal user for this school
         const hashedUserPassword = await bcrypt.hash(school.password, 10);
         await prisma.user.upsert({
             where: { email: school.email },
@@ -50,17 +59,15 @@ async function main() {
                 schoolId: dbSchool.id,
             }
         });
-        console.log(`Principal for ${school.name} synced`);
+        console.log(`✅ Principal for ${school.name} synced`);
     }
 
-
-
-
+    console.log("🏁 Seed finished successfully!");
 }
 
 main()
     .catch((e) => {
-        console.error(e);
+        console.error("❌ Seed failed:", e);
         process.exit(1);
     })
     .finally(async () => {
