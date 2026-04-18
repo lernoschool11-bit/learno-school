@@ -8,7 +8,7 @@ import bcrypt from 'bcrypt';
 neonConfig.webSocketConstructor = ws;
 
 const prisma = new PrismaClient({
-    adapter: new PrismaNeon(new Pool({ connectionString: process.env.DATABASE_URL })) as any
+    adapter: new PrismaNeon(new Pool({ connectionString: process.env.DATABASE_URL }) as any) as any
 });
 
 async function main() {
