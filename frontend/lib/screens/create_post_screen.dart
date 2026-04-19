@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 import '../main.dart';
 
 class CreatePostScreen extends StatefulWidget {
@@ -204,7 +205,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.category_outlined, size: 20, color: AppTheme.primaryColor),
+                Icon(Icons.category_outlined, size: 20, color: AppTheme.primaryColor),
                 const SizedBox(width: 8),
                 const Text('نوع المنشور:', style: TextStyle(color: Colors.grey, fontSize: 13)),
                 const SizedBox(width: 12),
@@ -212,7 +213,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   value: _selectedType,
                   dropdownColor: AppTheme.surfaceDark,
                   underline: const SizedBox(),
-                  style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
                   items: [
                     const DropdownMenuItem(value: 'TEXT', child: Text('نص')),
                     const DropdownMenuItem(value: 'IMAGE', child: Text('صورة')),
@@ -288,7 +289,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 
