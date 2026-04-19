@@ -8,7 +8,8 @@ import '../services/api_service.dart';
 import '../main.dart';
 
 class CreatePostScreen extends StatefulWidget {
-  const CreatePostScreen({super.key});
+  final String userRole;
+  const CreatePostScreen({super.key, required this.userRole});
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -109,7 +110,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       final token = await _apiService.getToken();
 
       final response = await http.post(
-        Uri.parse('https://learno-school-production-2b55.up.railway.app/api/posts'),
+        Uri.parse('${ApiService.baseUrl}/posts'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -193,40 +194,54 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceDark.withOpacity(0.5),
+              border: Border(bottom: BorderSide(color: AppTheme.dividerColor, width: 0.5)),
+            ),
+            child: Row(
               children: [
-                const Text('النوع: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Icon(Icons.category_outlined, size: 20, color: AppTheme.primaryColor),
                 const SizedBox(width: 8),
+                const Text('نوع المنشور:', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                const SizedBox(width: 12),
                 DropdownButton<String>(
                   value: _selectedType,
-                  items: const [
-                    DropdownMenuItem(value: 'TEXT', child: Text('نص')),
-                    DropdownMenuItem(value: 'IMAGE', child: Text('صورة')),
-                    DropdownMenuItem(value: 'STORY', child: Text('قصة')),
-                    DropdownMenuItem(value: 'VIDEO', child: Text('فيديو')),
+                  dropdownColor: AppTheme.surfaceDark,
+                  underline: const SizedBox(),
+                  style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                  items: [
+                    const DropdownMenuItem(value: 'TEXT', child: Text('نص')),
+                    const DropdownMenuItem(value: 'IMAGE', child: Text('صورة')),
+                    if (widget.userRole == 'TEACHER') ...[
+                      const DropdownMenuItem(value: 'STORY', child: Text('قصة')),
+                      const DropdownMenuItem(value: 'VIDEO', child: Text('فيديو')),
+                    ],
                   ],
                   onChanged: (val) => setState(() => _selectedType = val!),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Expanded(
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
               child: TextField(
                 controller: _contentController,
                 maxLines: null,
                 expands: true,
                 decoration: const InputDecoration(
-                  hintText: 'ماذا تريد أن تشارك؟',
-                  hintStyle: TextStyle(color: Colors.grey),
+                  hintText: 'ماذا يدور في ذهنك؟',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 18),
                   border: InputBorder.none,
                 ),
-                style: const TextStyle(fontSize: 16, color: Colors.white),
+                style: const TextStyle(fontSize: 18, color: Colors.white, height: 1.5),
               ),
             ),
+          ),
             if (_selectedFileBytes != null) ...[
               const Divider(),
               Container(
@@ -267,7 +282,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildAttachmentOption(Icons.image, 'صورة', Colors.green, _pickImage),
-                _buildAttachmentOption(Icons.video_library, 'فيديو', Colors.red, _pickVideo),
+                if (widget.userRole == 'TEACHER')
+                  _buildAttachmentOption(Icons.video_library, 'فيديو', Colors.red, _pickVideo),
               ],
             ),
           ],

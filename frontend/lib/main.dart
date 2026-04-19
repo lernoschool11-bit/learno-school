@@ -155,9 +155,12 @@ class _MainNavigationState extends State<MainNavigation> {
         bottom: false,
         child: Stack(
           children: [
-            IndexedStack(
-              index: _currentIndex,
-              children: screens,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 80), // Reserve space for floating Dock
+              child: IndexedStack(
+                index: _currentIndex,
+                children: screens,
+              ),
             ),
             Align(
               alignment: Alignment.bottomCenter,

@@ -324,7 +324,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   itemCount: _messages.length + 1,
                   itemBuilder: (context, index) {
                     if (index == _messages.length) {
-                      return const SizedBox(height: 110);
+                      return const SizedBox(height: 20); // Reduced since shell has 80
                     }
                     return _buildMessageBubble(_messages[index]);
                   },
