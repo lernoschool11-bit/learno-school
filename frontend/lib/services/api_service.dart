@@ -33,7 +33,6 @@ class ApiService {
 
   // ---------------- LOGIN ----------------
   Future<Map<String, dynamic>> login(String email, String password) async {
-
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
@@ -78,7 +77,6 @@ class ApiService {
 
   // ---------------- GET ME ----------------
   Future<Map<String, dynamic>> getUserProfile() async {
-
     try {
       final token = await getToken();
       final response = await http.get(Uri.parse('$baseUrl/auth/me'), headers: _headers(token));
@@ -112,7 +110,6 @@ class ApiService {
 
   // ---------------- POSTS ----------------
   Future<List<PostModel>> getPosts() async {
-
     try {
       final token = await getToken();
       final response = await http.get(Uri.parse('$baseUrl/posts/feed'), headers: _headers(token));
@@ -279,7 +276,6 @@ class ApiService {
 
   // ---------------- COMMUNITY ----------------
   Future<Map<String, dynamic>> getCommunity() async {
-
     try {
       final token = await getToken();
       final response = await http.get(Uri.parse('$baseUrl/community'), headers: _headers(token));
