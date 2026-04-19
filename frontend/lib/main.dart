@@ -13,6 +13,7 @@ import 'services/api_service.dart';
 import 'services/socket_service.dart';
 import 'theme/app_theme.dart';
 import 'widgets/mac_dock.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
       title: 'Learno',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: isLoggedIn ? const MainNavigation() : const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }
