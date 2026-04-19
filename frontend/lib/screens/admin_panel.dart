@@ -96,6 +96,23 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
     }
   }
 
+  Future<void> _toggleUserStatus(String userId) async {
+    final success = await _apiService.toggleSchoolUserStatus(userId);
+    if (success) {
+      setState(() {
+        final index = _users.indexWhere((u) => u['id'] == userId);
+        if (index != -1) {
+          _users[index]['isActive'] = !(_users[index]['isActive'] ?? true);
+        }
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم تحديث حالة الحساب')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -261,9 +278,23 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
                   subtitle: Text(user['role'], style: TextStyle(color: user['role'] == 'TEACHER' ? Colors.blue : Colors.green, fontSize: 11)),
                   trailing: isPrincipal
                       ? null
-                      : IconButton(
-                          icon: const Icon(Icons.person_remove_outlined, color: AppTheme.errorRed),
-                          onPressed: () => _deleteUser(user['id']),
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                (user['isActive'] ?? true) ? Icons.block : Icons.check_circle_outline,
+                                color: (user['isActive'] ?? true) ? Colors.orange : Colors.green,
+                              ),
+                              onPressed: () => _toggleUserStatus(user['id']),
+                              tooltip: (user['isActive'] ?? true) ? 'تجميد' : 'تفعيل',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.person_remove_outlined, color: AppTheme.errorRed),
+                              onPressed: () => _deleteUser(user['id']),
+                              tooltip: 'حذف نهائي',
+                            ),
+                          ],
                         ),
                 ),
               );

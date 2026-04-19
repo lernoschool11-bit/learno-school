@@ -55,7 +55,9 @@ class _ForcePasswordChangeScreenState extends State<ForcePasswordChangeScreen> {
 
     if (success) {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/'); // Go to main/home
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainNavigation()),
+        );
       }
     } else {
       if (mounted) {

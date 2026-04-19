@@ -447,6 +447,17 @@ class ApiService {
     } catch (e) { return false; }
   }
 
+  Future<bool> toggleSchoolUserStatus(String userId) async {
+    try {
+      final token = await getToken();
+      final response = await http.put(
+        Uri.parse('$baseUrl/admin/school-users/$userId/toggle-status'),
+        headers: _headers(token),
+      );
+      return response.statusCode == 200;
+    } catch (e) { return false; }
+  }
+
   Future<List<dynamic>> getSchoolPosts() async {
     try {
       final token = await getToken();

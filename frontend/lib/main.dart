@@ -96,7 +96,7 @@ class _MainNavigationState extends State<MainNavigation> {
       const HomeScreen(),
       const SearchScreen(),
       const AIChatScreen(),
-      if (_userRole == 'TEACHER') const CreatePostScreen(),
+      if (_userRole == 'TEACHER' || _userRole == 'STUDENT') CreatePostScreen(userRole: _userRole),
       if (_userRole == 'PRINCIPAL') AdminPanel(),
       const CommunityScreen(),
       const ProfileScreen(),
@@ -108,7 +108,7 @@ class _MainNavigationState extends State<MainNavigation> {
       const MacDockItem(icon: Icons.home, label: 'الرئيسية'),
       const MacDockItem(icon: Icons.search, label: 'البحث'),
       const MacDockItem(icon: Icons.auto_awesome, label: 'الذكاء'),
-      if (_userRole == 'TEACHER')
+      if (_userRole == 'TEACHER' || _userRole == 'STUDENT')
         const MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'),
       if (_userRole == 'PRINCIPAL')
         MacDockItem(icon: Icons.admin_panel_settings, label: 'الإدارة'),
