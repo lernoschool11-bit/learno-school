@@ -1,16 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { Pool } from "@neondatabase/serverless";
+import { neon } from "@neondatabase/serverless";
 
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not set");
-}
-
-const pool = new Pool({ connectionString });
-const adapter = new PrismaNeon(pool);
-
+const sql = neon(process.env.DATABASE_URL!);
+const adapter = new PrismaNeon(sql as any);
 const prisma = new PrismaClient({ adapter });
 
 export { prisma };
