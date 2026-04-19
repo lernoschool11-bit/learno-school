@@ -1,17 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
 
 /**
- * Input sanitization middleware.
- * SOP: Security framework - protect against injection attacks.
- * Strips common XSS patterns from request body strings.
+ * Input sanitization middleware to protect against XSS and injection.
  */
 export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) => {
     const sanitizeValue = (val: unknown): unknown => {
         if (typeof val === 'string') {
             return val
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                .replace(/javascript:/gi, '')
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove <script>
+                .replace(/on\w+="[^"]*"/gi, '') // Remove onmouseover, onclick, etc.
+                .replace(/javascript:\S+/gi, '') // Remove javascript:
+                .replace(/<[^>]*>?/gm, (match) => {
+                    // Allow only safe tags if needed, otherwise strip all
+                    const allowedTags = ['b', 'i', 'em', 'strong'];
+                    const tag = match.replace(/[<>\/]/g, '').toLowerCase();
+                    return allowedTags.includes(tag) ? match : '';
+                })
                 .trim();
+        }
+        if (Array.isArray(val)) {
+            return val.map(v => sanitizeValue(v));
         }
         if (typeof val === 'object' && val !== null) {
             return sanitizeObject(val as Record<string, unknown>);
@@ -27,9 +35,9 @@ export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) 
         return result;
     };
 
-    if (req.body && typeof req.body === 'object') {
-        req.body = sanitizeObject(req.body as Record<string, unknown>);
-    }
+    if (req.body) req.body = sanitizeValue(req.body);
+    if (req.query) req.query = sanitizeObject(req.query as Record<string, unknown>);
+    if (req.params) req.params = sanitizeObject(req.params as Record<string, unknown>);
 
     next();
 };
