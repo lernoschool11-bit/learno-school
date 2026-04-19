@@ -1,8 +1,20 @@
+import 'dotenv/config';
 import { PrismaClient } from "@prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { neon } from "@neondatabase/serverless";
 
-// On Render (Standard Web Service), we don't need the serverless adapter.
-// Standard PrismaClient will use DATABASE_URL from environment automatically.
-const prisma = new PrismaClient();
+let prisma: PrismaClient;
 
-export { prisma };
-export default prisma;
+function getPrisma() {
+  if (!prisma) {
+    const url = process.env.DATABASE_URL;
+    if (!url) throw new Error("DATABASE_URL not set");
+    const sql = neon(url);
+    const adapter = new PrismaNeon(sql as any);
+    prisma = new PrismaClient({ adapter });
+  }
+  return prisma;
+}
+
+export { getPrisma as prisma };
+export default getPrisma();
