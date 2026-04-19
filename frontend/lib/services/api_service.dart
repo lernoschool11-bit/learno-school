@@ -275,10 +275,14 @@ class ApiService {
   }
 
   // ---------------- COMMUNITY ----------------
-  Future<Map<String, dynamic>> getCommunity() async {
+  Future<Map<String, dynamic>> getCommunity({String? grade, String? section}) async {
     try {
       final token = await getToken();
-      final response = await http.get(Uri.parse('$baseUrl/community'), headers: _headers(token));
+      String url = '$baseUrl/community';
+      if (grade != null && section != null) {
+        url += '?grade=${Uri.encodeComponent(grade)}&section=${Uri.encodeComponent(section)}';
+      }
+      final response = await http.get(Uri.parse(url), headers: _headers(token));
       if (response.statusCode == 200) return jsonDecode(response.body);
       throw Exception("Failed to load community");
     } catch (e) { throw Exception('Network error'); }

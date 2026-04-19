@@ -25,6 +25,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
   bool _showMembers = false;
   String? _currentUsername;
   String? _currentUserId;
+  
+  List<dynamic> _availableClasses = [];
+  String? _selectedGrade;
+  String? _selectedSection;
 
   final List<String> _quickEmojis = ['😊', '👍', '❤️', '😂', '🎉', '📚', '✅', '❓', '👏', '🔥'];
 
@@ -35,9 +39,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
   }
 
   Future<void> _init() async {
-    await _loadCommunity();
-    await _connectSocket();
     await _loadCurrentUser();
+    await _loadCommunity();
+    // Socket connection is handled inside _loadCommunity now for better room management
   }
 
   Future<void> _loadCurrentUser() async {
@@ -50,15 +54,27 @@ class _CommunityScreenState extends State<CommunityScreen> {
     } catch (_) {}
   }
 
-  Future<void> _loadCommunity() async {
+  Future<void> _loadCommunity({String? grade, String? section}) async {
     try {
       setState(() { _isLoading = true; _error = null; });
-      final data = await _apiService.getCommunity();
+      final data = await _apiService.getCommunity(
+        grade: grade ?? _selectedGrade,
+        section: section ?? _selectedSection,
+      );
+      
+      final newRoomId = '${data['school']}_${data['grade']}_${data['section']}';
+      
       setState(() {
         _communityData = data;
-        _roomId = '${data['school']}_${data['grade']}_${data['section']}';
+        _selectedGrade = data['grade'];
+        _selectedSection = data['section'];
+        _availableClasses = data['availableClasses'] ?? [];
+        _roomId = newRoomId;
         _isLoading = false;
       });
+
+      // Connect or update socket room
+      _connectSocket();
     } catch (e) {
       setState(() { _error = 'فشل تحميل المجتمع'; _isLoading = false; });
     }
@@ -154,11 +170,47 @@ class _CommunityScreenState extends State<CommunityScreen> {
             Text('مجتمعي', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
             if (_communityData != null)
               Text(
-                'الصف ${_communityData!['grade']} - شعبة ${_communityData!['section']}',
+                'الصف ${_selectedGrade ?? _communityData!['grade']} - شعبة ${_selectedSection ?? _communityData!['section']}',
                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
               ),
           ],
         ),
+        bottom: (_availableClasses.length > 1) 
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(50),
+              child: Container(
+                height: 50,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: _availableClasses.length,
+                  itemBuilder: (context, index) {
+                    final cls = _availableClasses[index];
+                    final isSelected = cls['grade'] == _selectedGrade && cls['section'] == _selectedSection;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text('${cls['grade']}-${cls['section']}'),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            _loadCommunity(grade: cls['grade'], section: cls['section']);
+                          }
+                        },
+                        selectedColor: AppTheme.primaryColor,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.black : Colors.white,
+                          fontSize: 12,
+                        ),
+                        backgroundColor: AppTheme.surfaceDark,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            )
+          : null,
         actions: [
           IconButton(
             icon: Icon(_showMembers ? Icons.chat : Icons.people, color: AppTheme.primaryColor),
