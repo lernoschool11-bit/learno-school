@@ -98,7 +98,7 @@ class _MainNavigationState extends State<MainNavigation> {
       const AIChatScreen(),
       if (_userRole == 'TEACHER' || _userRole == 'STUDENT') CreatePostScreen(userRole: _userRole),
       if (_userRole == 'PRINCIPAL') AdminPanel(),
-      const CommunityScreen(),
+      if (_userRole != 'PRINCIPAL') const CommunityScreen(),
       const ProfileScreen(),
     ];
   }
@@ -112,7 +112,8 @@ class _MainNavigationState extends State<MainNavigation> {
         const MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'),
       if (_userRole == 'PRINCIPAL')
         MacDockItem(icon: Icons.admin_panel_settings, label: 'الإدارة'),
-      const MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
+      if (_userRole != 'PRINCIPAL')
+        const MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
       const MacDockItem(icon: Icons.person, label: 'حسابي'),
     ];
   }
