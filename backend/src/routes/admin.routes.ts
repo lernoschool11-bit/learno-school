@@ -18,6 +18,7 @@ router.put('/teacher-code', requireAuth, requireRole([Role.PRINCIPAL]), schoolCo
 // User Management
 router.get('/school-users', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolUsers);
 router.delete('/school-users/:userId', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.deleteSchoolUser);
+router.put('/school-users/:userId/toggle-status', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.toggleUserStatus);
 
 // Post Moderation
 router.get('/school-posts', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolPosts);

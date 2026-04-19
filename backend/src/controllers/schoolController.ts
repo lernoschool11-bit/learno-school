@@ -99,6 +99,7 @@ export const getSchoolUsers = async (req: AuthRequest, res: Response) => {
                 role: true,
                 email: true,
                 avatarUrl: true,
+                isActive: true,
                 createdAt: true,
             },
             orderBy: { createdAt: 'desc' }
@@ -138,6 +139,41 @@ export const deleteSchoolUser = async (req: AuthRequest, res: Response) => {
         return res.json({ message: "تم حذف المستخدم بنجاح" });
     } catch (error) {
         console.error("deleteSchoolUser error:", error);
+        return res.status(500).json({ message: "خطأ في السيرفر" });
+    }
+};
+
+// ==================== FREEZE/UNFREEZE USER ====================
+export const toggleUserStatus = async (req: AuthRequest, res: Response) => {
+    try {
+        const { schoolId } = req.user!;
+        const targetUserId = String(req.params.userId);
+
+        if (!schoolId) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
+
+        const targetUser = await prisma.user.findUnique({
+            where: { id: targetUserId }
+        });
+
+        if (!targetUser || targetUser.schoolId !== schoolId) {
+            return res.status(403).json({ message: "لا يمكنك تعديل هذا المستخدم" });
+        }
+
+        if (targetUser.role === 'PRINCIPAL') {
+            return res.status(403).json({ message: "لا يمكنك تجميد مدير المدرسة" });
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: targetUserId },
+            data: { isActive: !targetUser.isActive }
+        });
+
+        return res.json({ 
+            message: updatedUser.isActive ? "تم تفعيل الحساب" : "تم تجميد الحساب",
+            isActive: updatedUser.isActive 
+        });
+    } catch (error) {
+        console.error("toggleUserStatus error:", error);
         return res.status(500).json({ message: "خطأ في السيرفر" });
     }
 };
