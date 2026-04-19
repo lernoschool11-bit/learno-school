@@ -1,67 +1,62 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaNeon } from '@prisma/adapter-neon';
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
 
-neonConfig.webSocketConstructor = ws;
-
-const prisma = new PrismaClient({
-    adapter: new PrismaNeon(new Pool({ connectionString: process.env.DATABASE_URL }) as any) as any
-});
+const prisma = new PrismaClient();
 
 async function main() {
     console.log("🌱 Starting seed...");
 
-    const schools = [
-        { name: "Marj Al-Hamam", email: "admin@marj.edu.jo", password: "password123", code: "MARJ2024" },
-        { name: "Irbid Secondary", email: "admin@irbid.edu.jo", password: "password123", code: "IRBID2024" },
-        { name: "Amman Academy", email: "admin@amman.edu.jo", password: "password123", code: "AMMAN2024" },
+    // إنشاء مدارس تجريبية
+    const schoolsData = [
+        { name: "Marj Al-Hamam", adminEmail: "admin@marj.edu.jo", code: "MARJ2024" },
+        { name: "Irbid Secondary", adminEmail: "admin@irbid.edu.jo", code: "IRBID2024" },
+        { name: "Amman Academy", adminEmail: "admin@amman.edu.jo", code: "AMMAN2024" },
     ];
 
-    for (const school of schools) {
-        let dbSchool = await prisma.school.findUnique({
-            where: { name: school.name }
+    for (const data of schoolsData) {
+        // 1. إنشاء المدرسة أو تحديثها
+        const school = await prisma.school.upsert({
+            where: { name: data.name },
+            update: {
+                adminEmail: data.adminEmail,
+                teacherSecretCode: data.code,
+            },
+            create: {
+                name: data.name,
+                adminEmail: data.adminEmail,
+                adminPassword: await bcrypt.hash("password123", 10),
+                teacherSecretCode: data.code,
+                isPasswordChanged: false,
+            }
         });
 
-        if (!dbSchool) {
-            const hashedAdminPassword = await bcrypt.hash(school.password, 10);
-            dbSchool = await prisma.school.create({
-                data: {
-                    name: school.name,
-                    adminEmail: school.email,
-                    adminPassword: hashedAdminPassword,
-                    teacherSecretCode: school.code,
-                    isPasswordChanged: false,
-                }
-            });
-            console.log(`✅ School ${school.name} created`);
-        }
+        console.log(`✅ School ${school.name} is ready.`);
 
-        const hashedUserPassword = await bcrypt.hash(school.password, 10);
+        // 2. إنشاء حساب المدير (User with role PRINCIPAL)
+        const hashedPassword = await bcrypt.hash("password123", 10);
         await prisma.user.upsert({
-            where: { email: school.email },
+            where: { email: data.adminEmail },
             update: {
-                password: hashedUserPassword,
+                password: hashedPassword,
                 role: 'PRINCIPAL',
                 school: school.name,
-                schoolId: dbSchool.id,
+                schoolId: school.id,
             },
             create: {
                 nationalId: `ADMIN_${school.name.toUpperCase().replace(/\s/g, '_')}`,
                 fullName: `${school.name} Principal`,
                 username: `admin_${school.name.toLowerCase().replace(/\s/g, '_')}`,
-                email: school.email,
-                password: hashedUserPassword,
+                email: data.adminEmail,
+                password: hashedPassword,
                 role: 'PRINCIPAL',
                 school: school.name,
-                schoolId: dbSchool.id,
+                schoolId: school.id,
             }
         });
-    }
 
-    console.log("✅ Basic schools and principals synced.");
+        console.log(`👤 Principal for ${school.name} created.`);
+    }
 
     console.log("🏁 Seed finished successfully!");
 }
