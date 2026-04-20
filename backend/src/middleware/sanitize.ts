@@ -35,9 +35,26 @@ export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) 
         return result;
     };
 
-    if (req.body) req.body = sanitizeValue(req.body);
-    if (req.query) req.query = sanitizeObject(req.query as Record<string, unknown>) as any;
-    if (req.params) req.params = sanitizeObject(req.params as Record<string, unknown>) as any;
+    if (req.body && typeof req.body === 'object') {
+        const sanitizedBody = sanitizeObject(req.body as Record<string, unknown>);
+        Object.keys(req.body).forEach(key => {
+            (req.body as any)[key] = sanitizedBody[key];
+        });
+    }
+
+    if (req.query && typeof req.query === 'object') {
+        const sanitizedQuery = sanitizeObject(req.query as Record<string, unknown>);
+        Object.keys(req.query).forEach(key => {
+            (req.query as any)[key] = sanitizedQuery[key];
+        });
+    }
+
+    if (req.params && typeof req.params === 'object') {
+        const sanitizedParams = sanitizeObject(req.params as Record<string, unknown>);
+        Object.keys(req.params).forEach(key => {
+            (req.params as any)[key] = sanitizedParams[key];
+        });
+    }
 
     next();
 };
