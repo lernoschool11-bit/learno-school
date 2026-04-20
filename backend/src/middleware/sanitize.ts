@@ -36,8 +36,8 @@ export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) 
     };
 
     if (req.body) req.body = sanitizeValue(req.body);
-    if (req.query) req.query = sanitizeObject(req.query as Record<string, unknown>);
-    if (req.params) req.params = sanitizeObject(req.params as Record<string, unknown>);
+    if (req.query) req.query = sanitizeObject(req.query as Record<string, unknown>) as any;
+    if (req.params) req.params = sanitizeObject(req.params as Record<string, unknown>) as any;
 
     next();
 };
