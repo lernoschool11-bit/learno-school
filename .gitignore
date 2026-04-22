@@ -55,7 +55,7 @@ frontend/.pub-cache/
 frontend/.pub/
 
 # Prisma
-backend/prisma/migrations/
+# backend/prisma/migrations/
 backend/prisma/*.sqlite
 backend/prisma/*.sqlite-journal
 
