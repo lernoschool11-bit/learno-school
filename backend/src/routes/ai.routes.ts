@@ -72,7 +72,12 @@ router.post('/chat', requireAuth, async (req: AuthRequest, res) => {
     res.json({ response: aiText });
 
   } catch (error: any) {
-    console.error('AI Proxy Error:', error.response?.data || error.message);
+    if (error.response) {
+      console.error('OpenRouter Error Data:', error.response.data);
+      console.error('OpenRouter Status:', error.response.status);
+    } else {
+      console.error('AI Proxy Error:', error.message);
+    }
     res.status(500).json({ error: 'حدث خطأ في الاتصال بخدمة الذكاء الاصطناعي' });
   }
 });
