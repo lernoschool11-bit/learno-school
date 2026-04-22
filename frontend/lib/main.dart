@@ -13,6 +13,7 @@ import 'services/api_service.dart';
 import 'services/socket_service.dart';
 import 'theme/app_theme.dart';
 import 'widgets/mac_dock.dart';
+import 'widgets/mesh_background.dart';
 import 'screens/splash_screen.dart';
 
 void main() async {
@@ -96,11 +97,11 @@ class _MainNavigationState extends State<MainNavigation> {
     return [
       const HomeScreen(),
       const SearchScreen(),
-      const AIChatScreen(),
       if (_userRole == 'TEACHER' || _userRole == 'STUDENT') CreatePostScreen(userRole: _userRole),
       if (_userRole == 'PRINCIPAL') AdminPanel(),
       if (_userRole != 'PRINCIPAL') const CommunityScreen(),
       const ProfileScreen(),
+      const AIChatScreen(),
     ];
   }
 
@@ -108,7 +109,6 @@ class _MainNavigationState extends State<MainNavigation> {
     return [
       const MacDockItem(icon: Icons.home, label: 'الرئيسية'),
       const MacDockItem(icon: Icons.search, label: 'البحث'),
-      const MacDockItem(icon: Icons.auto_awesome, label: 'الذكاء'),
       if (_userRole == 'TEACHER' || _userRole == 'STUDENT')
         const MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'),
       if (_userRole == 'PRINCIPAL')
@@ -116,6 +116,7 @@ class _MainNavigationState extends State<MainNavigation> {
       if (_userRole != 'PRINCIPAL')
         const MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
       const MacDockItem(icon: Icons.person, label: 'حسابي'),
+      const MacDockItem(icon: Icons.auto_awesome, label: 'الذكاء'),
     ];
   }
 
@@ -149,31 +150,33 @@ class _MainNavigationState extends State<MainNavigation> {
       _currentIndex = 0;
     }
 
-    return Scaffold(
-      backgroundColor: AppTheme.oledBlack,
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 80), // Reserve space for floating Dock
-              child: IndexedStack(
-                index: _currentIndex,
-                children: screens,
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: MacDock(
-                  currentIndex: _currentIndex,
-                  onTap: (index) => setState(() => _currentIndex = index),
-                  items: dockItems,
+    return MeshBackground(
+      child: Scaffold(
+        backgroundColor: AppTheme.oledBlack.withAlpha(200),
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 80), // Reserve space for floating Dock
+                child: IndexedStack(
+                  index: _currentIndex,
+                  children: screens,
                 ),
               ),
-            ),
-          ],
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: MacDock(
+                    currentIndex: _currentIndex,
+                    onTap: (index) => setState(() => _currentIndex = index),
+                    items: dockItems,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

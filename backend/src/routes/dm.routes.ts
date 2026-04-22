@@ -11,8 +11,11 @@ router.post('/request/:receiverId', requireAuth, async (req: Request, res: Respo
     const senderId = (req as any).user.id as string;
     const receiverId = req.params.receiverId as string;
 
-    if (senderId === receiverId) {
-      return res.status(400).json({ message: 'لا يمكنك مراسلة نفسك' });
+    const sender = await prisma.user.findUnique({ where: { id: senderId } });
+    const receiver = await prisma.user.findUnique({ where: { id: receiverId } });
+
+    if (!sender || !receiver || sender.schoolId !== receiver.schoolId) {
+      return res.status(403).json({ message: 'لا يمكنك مراسلة مستخدمين خارج مدرستك' });
     }
 
     const existing = await prisma.conversation.findFirst({

@@ -9,10 +9,8 @@ import '../theme/app_theme.dart';
 /// signature glassmorphism look:
 ///   • BackdropFilter blur
 ///   • Semi-transparent fill
-///   • Subtle white border
+///   • Subtle primary-colored neon border
 ///   • Optional neon glow
-///
-/// IMPORTANT: This widget does NOT contain any business logic.
 /// ──────────────────────────────────────────────────────────────
 
 class GlassCard extends StatelessWidget {
@@ -56,8 +54,16 @@ class GlassCard extends StatelessWidget {
               color: AppTheme.surfaceDark.withAlpha((opacity * 255).round()),
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
-                color: Colors.white.withAlpha(30),
+                color: AppTheme.primaryColor.withAlpha(100),
                 width: 1,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withAlpha(40),
+                  Colors.white.withAlpha(10),
+                ],
               ),
               boxShadow: glow != null
                   ? [

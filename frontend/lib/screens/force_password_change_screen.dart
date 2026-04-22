@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/luxury_button.dart';
 import '../widgets/glass_card.dart';
+import '../main.dart';
 
 class ForcePasswordChangeScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -56,7 +57,7 @@ class _ForcePasswordChangeScreenState extends State<ForcePasswordChangeScreen> {
     if (success) {
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainNavigation()),
+          MaterialPageRoute(builder: (_) => MainNavigation()),
         );
       }
     } else {

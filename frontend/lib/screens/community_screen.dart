@@ -177,10 +177,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
         ),
         bottom: (_availableClasses.length > 1) 
           ? PreferredSize(
-              preferredSize: const Size.fromHeight(50),
+              preferredSize: const Size.fromHeight(60),
               child: Container(
-                height: 50,
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                height: 60,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: AppTheme.dividerColor, width: 0.5)),
+                ),
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -189,21 +192,24 @@ class _CommunityScreenState extends State<CommunityScreen> {
                     final cls = _availableClasses[index];
                     final isSelected = cls['grade'] == _selectedGrade && cls['section'] == _selectedSection;
                     return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text('${cls['grade']}-${cls['section']}'),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            _loadCommunity(grade: cls['grade'], section: cls['section']);
-                          }
+                      padding: const EdgeInsets.only(right: 10),
+                      child: ActionChip(
+                        avatar: Icon(
+                          Icons.groups_3_outlined, 
+                          size: 16, 
+                          color: isSelected ? Colors.black : AppTheme.primaryColor
+                        ),
+                        label: Text('مجموعة ${cls['grade']}-${cls['section']}'),
+                        onPressed: () {
+                          _loadCommunity(grade: cls['grade'], section: cls['section']);
                         },
-                        selectedColor: AppTheme.primaryColor,
+                        backgroundColor: isSelected ? AppTheme.primaryColor : AppTheme.surfaceDark,
                         labelStyle: TextStyle(
                           color: isSelected ? Colors.black : Colors.white,
-                          fontSize: 12,
+                          fontSize: 13,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
-                        backgroundColor: AppTheme.surfaceDark,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       ),
                     );
                   },

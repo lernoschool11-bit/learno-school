@@ -198,6 +198,7 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
           { username: { contains: query, mode: 'insensitive' } },
           { fullName: { contains: query, mode: 'insensitive' } },
         ],
+        school: req.user?.school, // Only search within the same school
         id: { not: req.user?.id },
       },
       select: {
@@ -350,6 +351,11 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
     });
 
     if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
+
+    // تقييد: لا يمكنك رؤية ملفات شخصية خارج مدرستك
+    if (user.school !== req.user?.school && req.user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "لا يمكنك رؤية ملفات شخصية خارج مدرستك" });
+    }
 
     // التحقق هل المستخدم العالمي يتابع هذا المستخدم
     const isFollowing = await prisma.follow.findFirst({

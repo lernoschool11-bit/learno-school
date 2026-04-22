@@ -4,7 +4,7 @@ import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'admin_panel.dart';
 import '../main.dart';
-import '../widgets/login_character_widget.dart';
+import '../widgets/parallax_logo.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/luxury_button.dart';
 import '../theme/app_theme.dart';
@@ -121,10 +121,8 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              Center(
-                child: LoginCharacterWidget(
-                  isPasswordVisible: !_obscurePassword,
-                ),
+              const Center(
+                child: ParallaxLogo(),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -143,37 +141,50 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 48),
 
               GlassCard(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 margin: EdgeInsets.zero,
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'البريد الإلكتروني',
-                        prefixIcon: Icon(Icons.email),
+                opacity: 0.08,
+                child: TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'البريد الإلكتروني',
+                    labelStyle: TextStyle(color: Colors.grey),
+                    prefixIcon: Icon(Icons.email, color: AppTheme.primaryColor),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              GlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                margin: EdgeInsets.zero,
+                opacity: 0.08,
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'كلمة المرور',
+                    labelStyle: const TextStyle(color: Colors.grey),
+                    prefixIcon: const Icon(Icons.lock, color: AppTheme.primaryColor),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: AppTheme.primaryColor,
                       ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'كلمة المرور',
-                        prefixIcon: const Icon(Icons.lock),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () =>
-                              setState(() => _obscurePassword = !_obscurePassword),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(height: 8),

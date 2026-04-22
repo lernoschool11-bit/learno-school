@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
@@ -6,6 +7,11 @@ import '../models/post_model.dart';
 import '../widgets/post_card.dart';
 import 'notifications_screen.dart';
 import 'direct_messages_screen.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/tilt_card.dart';
+import '../widgets/staggered_slide_animation.dart';
+import '../widgets/dynamic_effects.dart';
+import '../widgets/ai_orb_button.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -159,10 +165,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadData,
-          ),
+          ).wrapWithBounce(),
         ],
       ),
-      body: _buildBody(),
+      body: GlowScrollFollower(child: _buildBody()),
     );
   }
 
@@ -201,15 +207,192 @@ class _HomeScreenState extends State<HomeScreen> {
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView.builder(
-        itemCount: _posts.length,
+        itemCount: _posts.length + 2, // +1 for activity bar, +1 for horizontal list
         itemBuilder: (context, index) {
-          return PostCard(
-            post: _posts[index],
-            currentUserId: _currentUserId,
-            onDeleted: () => _removePost(_posts[index].id),
+          if (index == 0) {
+            // Task 2: Interactive Analytics Bar
+            return const SchoolActivityBar();
+          }
+
+          if (index == 1) {
+            // Task 2: Horizontal ListView for "Featured Content"
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Text(
+                    'أبرز الأنشطة',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 140,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: 5,
+                    itemBuilder: (context, i) {
+                      return StaggeredSlideAnimation(
+                        index: i,
+                        child: TiltCard(
+                          child: AnimatedBounce(
+                            onTap: () {},
+                            child: Container(
+                              width: 140,
+                              height: 140,
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    [Icons.star, Icons.trending_up, Icons.school, Icons.lightbulb, Icons.event][i % 5],
+                                    color: AppTheme.primaryColor,
+                                    size: 32,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    ['نشاط جديد', 'ترند', 'مميز', 'فكرة ذكية', 'فعالية'][i % 5],
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            );
+          }
+
+          final postIndex = index - 2;
+          // Task 4: Staggered Entry Animations
+          return StaggeredSlideAnimation(
+            index: index,
+            child: PostCard(
+              post: _posts[postIndex],
+              currentUserId: _currentUserId,
+              onDeleted: () => _removePost(_posts[postIndex].id),
+            ),
           );
         },
       ),
     );
+  }
+}
+
+class SchoolActivityBar extends StatefulWidget {
+  const SchoolActivityBar({super.key});
+
+  @override
+  State<SchoolActivityBar> createState() => _SchoolActivityBarState();
+}
+
+class _SchoolActivityBarState extends State<SchoolActivityBar> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _progressAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _progressAnimation = Tween<double>(begin: 0, end: 0.75).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const SpringCurve(),
+      ),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 80, 16, 8), // Padding for transparent app bar
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'نشاط المدرسة المتوقع',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.primaryColor.withAlpha(200),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Text(
+                '75%',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: AnimatedBuilder(
+              animation: _progressAnimation,
+              builder: (context, child) {
+                return Stack(
+                  children: [
+                    Container(
+                      height: 4,
+                      width: double.infinity,
+                      color: Colors.white.withAlpha(20),
+                    ),
+                    Container(
+                      height: 4,
+                      width: MediaQuery.of(context).size.width * _progressAnimation.value,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryColor.withAlpha(150),
+                            blurRadius: 10,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SpringCurve extends Curve {
+  const SpringCurve();
+
+  @override
+  double transformInternal(double t) {
+    const double s = 0.15;
+    return pow(2, -10 * t) * sin((t - s / 4) * (2 * pi) / s) + 1;
   }
 }

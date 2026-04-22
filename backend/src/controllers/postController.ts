@@ -11,6 +11,7 @@ export const getFeed = async (req: AuthRequest, res: Response) => {
 
     const posts = await prisma.post.findMany({
       where: {
+        schoolId: req.user?.schoolId, // Only show posts from the same school
         OR: [
           { expiresAt: null },
           { expiresAt: { gt: new Date() } }

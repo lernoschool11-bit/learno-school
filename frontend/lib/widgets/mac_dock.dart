@@ -81,23 +81,29 @@ class _MacDockState extends State<MacDock> with SingleTickerProviderStateMixin {
                 height: _dockHeight,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: AppTheme.surfaceDark.withAlpha(180),
-                  borderRadius: BorderRadius.circular(28),
+                  color: AppTheme.surfaceDark.withAlpha(200),
+                  borderRadius: BorderRadius.circular(34),
                   border: Border.all(
-                    color: Colors.white.withAlpha(25),
-                    width: 1.2,
+                    color: AppTheme.primaryColor.withAlpha(80),
+                    width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primaryColor.withAlpha(20),
+                      color: AppTheme.primaryColor.withAlpha(40),
                       blurRadius: 30,
-                      spreadRadius: 2,
+                      spreadRadius: 4,
+                    ),
+                    BoxShadow(
+                      color: AppTheme.neonMagenta.withAlpha(20),
+                      blurRadius: 60,
+                      spreadRadius: -10,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center, // Centered for premium feel
                   children: List.generate(count, (i) {
                     final scale = _scaleFor(i, count);
                     final isActive = widget.currentIndex == i;
@@ -166,7 +172,8 @@ class _DockIconState extends State<_DockIcon> {
   @override
   Widget build(BuildContext context) {
     final size = _MacDockState._baseIconSize * widget.scale;
-    final pressScale = _isPressed ? 0.85 : 1.0;
+    // Spring effect scale
+    final effectiveScale = _isPressed ? 0.85 : (widget.isActive ? 1.15 : 1.0);
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
@@ -175,8 +182,9 @@ class _DockIconState extends State<_DockIcon> {
       onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedScale(
-        scale: pressScale,
-        duration: const Duration(milliseconds: 100),
+        scale: effectiveScale,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.elasticOut,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: widget.spacing),
           child: Column(
