@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import { Server as HttpServer } from 'http';
 import jwt from 'jsonwebtoken';
 import prisma from './lib/prisma';
+import { createNotification } from './controllers/notificationController';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-dev';
 
@@ -130,7 +131,7 @@ export const initSocket = (httpServer: HttpServer) => {
       }
     });
 
-    /* ════════ الرسائل الخاصة (جديد) ════════
+    // ════════ الرسائل الخاصة (جديد) ════════
     // المستخدم ينضم لغرفته الخاصة
     socket.on('join_direct', () => {
       socket.join(`dm_${user.id}`);
@@ -173,6 +174,14 @@ export const initSocket = (httpServer: HttpServer) => {
             ? conversation.receiverId
             : conversation.senderId;
 
+        // إرسال الإشعار
+        await createNotification({
+          userId: receiverId,
+          actorId: user.id,
+          type: 'MESSAGE',
+          message: `أرسل لك ${user.fullName} رسالة جديدة`,
+        });
+
         io.to(`dm_${user.id}`).emit('new_direct_message', message);
         io.to(`dm_${receiverId}`).emit('new_direct_message', message);
       } catch (err) {
@@ -183,7 +192,7 @@ export const initSocket = (httpServer: HttpServer) => {
     // إشعار بطلب محادثة جديد
     socket.on('notify_dm_request', ({ receiverId }) => {
       io.to(`dm_${receiverId}`).emit('new_dm_request');
-    }); */
+    });
 
     socket.on('disconnect', () => {
       console.log(`❌ ${user.fullName} disconnected`);

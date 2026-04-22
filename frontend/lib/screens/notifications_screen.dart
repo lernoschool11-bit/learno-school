@@ -35,6 +35,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       case 'LIKE': return Icons.favorite;
       case 'COMMENT': return Icons.comment;
       case 'FOLLOW': return Icons.person_add;
+      case 'MESSAGE': return Icons.mail;
       default: return Icons.notifications;
     }
   }
@@ -44,6 +45,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       case 'LIKE': return Colors.red;
       case 'COMMENT': return Colors.blue;
       case 'FOLLOW': return Colors.green;
+      case 'MESSAGE': return Colors.orange;
       default: return Colors.grey;
     }
   }
