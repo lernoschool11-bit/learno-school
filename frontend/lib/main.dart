@@ -100,8 +100,8 @@ class _MainNavigationState extends State<MainNavigation> {
       if (_userRole == 'TEACHER' || _userRole == 'STUDENT') CreatePostScreen(userRole: _userRole),
       if (_userRole == 'PRINCIPAL') AdminPanel(),
       if (_userRole != 'PRINCIPAL') const CommunityScreen(),
-      const ProfileScreen(),
       const AIChatScreen(),
+      const ProfileScreen(),
     ];
   }
 
@@ -115,8 +115,8 @@ class _MainNavigationState extends State<MainNavigation> {
         MacDockItem(icon: Icons.admin_panel_settings, label: 'الإدارة'),
       if (_userRole != 'PRINCIPAL')
         const MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
-      const MacDockItem(icon: Icons.person, label: 'حسابي'),
       const MacDockItem(icon: Icons.auto_awesome, label: 'الذكاء'),
+      const MacDockItem(icon: Icons.person, label: 'حسابي'),
     ];
   }
 
