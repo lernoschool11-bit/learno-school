@@ -12,6 +12,7 @@ export interface AuthRequest extends Request {
         role: Role;
         nationalId: string;
         schoolId?: string | null;
+        school?: string | null;
     };
 }
 
@@ -28,7 +29,7 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
         // Quick validation via DB to ensure user hasn't been revoked
         const user = await prisma.user.findUnique({
             where: { id: decoded.id },
-            select: { id: true, role: true, nationalId: true, schoolId: true, isActive: true }
+            select: { id: true, role: true, nationalId: true, schoolId: true, school: true, isActive: true }
         });
 
         if (!user) return res.status(401).json({ error: 'User not found or access revoked' });
