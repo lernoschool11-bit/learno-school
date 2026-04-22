@@ -39,6 +39,8 @@ model User {
   classes     String?
 
   isActive    Boolean  @default(true)
+  aiRequestsCount Int     @default(0)
+  lastAiRequest   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
