@@ -31,6 +31,16 @@ class ApiService {
     };
   }
 
+  // Generic POST method
+  Future<http.Response> post(String endpoint, dynamic body) async {
+    final token = await getToken();
+    return await http.post(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: _headers(token),
+      body: jsonEncode(body),
+    );
+  }
+
   // ---------------- LOGIN ----------------
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
