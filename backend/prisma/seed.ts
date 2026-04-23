@@ -7,11 +7,15 @@ const prisma = new PrismaClient();
 async function main() {
     console.log("🌱 Starting seed...");
 
-    // إنشاء مدارس تجريبية
+    // إنشاء مدارس لواء وادي السير
     const schoolsData = [
-        { name: "Marj Al-Hamam", adminEmail: "admin@marj.edu.jo", code: "MARJ2024" },
-        { name: "Irbid Secondary", adminEmail: "admin@irbid.edu.jo", code: "IRBID2024" },
-        { name: "Amman Academy", adminEmail: "admin@amman.edu.jo", code: "AMMAN2024" },
+        { name: "وادي السير الثانوية للبنين", adminEmail: "admin@wadiseer-boy.edu.jo", code: "WADI2024" },
+        { name: "مرج الحمام الثانوية للبنات", adminEmail: "admin@marj-girl.edu.jo", code: "MARJ2024" },
+        { name: "أم عبهرة الثانوية", adminEmail: "admin@obhara.edu.jo", code: "OBHARA2024" },
+        { name: "وادي الشتاء الأساسية", adminEmail: "admin@shita.edu.jo", code: "SHITA2024" },
+        { name: "البصة الثانوية", adminEmail: "admin@bassa.edu.jo", code: "BASSA2024" },
+        { name: "العراق الأساسية", adminEmail: "admin@iraq.edu.jo", code: "IRAQ2024" },
+        { name: "بيادر وادي السير الأساسية", adminEmail: "admin@bayader.edu.jo", code: "BAYADER2024" },
     ];
 
     for (const data of schoolsData) {
