@@ -206,6 +206,8 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
     if (!query) return res.json([]);
 
     const users = await prisma.user.findMany({
+      where: {
+        id: { not: req.user?.id },
         AND: [
           {
             OR: [
@@ -217,7 +219,7 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
             ? { schoolId: req.user.schoolId } 
             : { school: req.user?.school, schoolId: null },
         ],
-        id: { not: req.user?.id },
+      },
       select: {
         id: true,
         fullName: true,

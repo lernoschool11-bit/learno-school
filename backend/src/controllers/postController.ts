@@ -14,7 +14,7 @@ export const getFeed = async (req: AuthRequest, res: Response) => {
         AND: [
           req.user?.schoolId 
             ? { schoolId: req.user.schoolId } 
-            : { school: req.user?.school, schoolId: null },
+            : { author: { school: req.user?.school }, schoolId: null },
           {
             OR: [
               { expiresAt: null },
