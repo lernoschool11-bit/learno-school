@@ -73,8 +73,21 @@ export const register = async (req: Request, res: Response) => {
       const schoolRecord = await prisma.school.findFirst({
         where: { name: { contains: finalSchoolName, mode: 'insensitive' } }
       });
+      
       if (schoolRecord) {
         schoolId = schoolRecord.id;
+      } else if (role === 'PRINCIPAL') {
+        // ✅ إذا كان المسجل مدير والمدرسة مش موجودة، ننشئها له فوراً
+        const newSchool = await prisma.school.create({
+          data: {
+            name: finalSchoolName,
+            adminEmail: emailLower,
+            adminPassword: hashedPassword, // سيتم تحديثها لاحقاً عند تغيير الباسورد
+            teacherSecretCode: "teacher123", // كود افتراضي
+            isPasswordChanged: false
+          }
+        });
+        schoolId = newSchool.id;
       }
     }
 
@@ -88,7 +101,7 @@ export const register = async (req: Request, res: Response) => {
         password: hashedPassword,
         role: role || 'STUDENT',
         school: finalSchoolName,
-        schoolId: schoolId, // Link to school ID if found
+        schoolId: schoolId, // Link to school ID
         directorate: district,
         grade: role === 'STUDENT' ? grade : null,
         section: role === 'STUDENT' ? section : null,

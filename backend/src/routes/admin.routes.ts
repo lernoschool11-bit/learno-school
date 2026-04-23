@@ -16,7 +16,7 @@ router.get('/teacher-code', requireAuth, requireRole([Role.PRINCIPAL]), schoolCo
 router.put('/teacher-code', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.updateTeacherSecretCode);
 
 // User Management
-router.get('/school-users', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolUsers);
+router.get('/school-users', requireAuth, requireRole([Role.PRINCIPAL, Role.TEACHER]), schoolController.getSchoolUsers);
 router.delete('/school-users/:userId', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.deleteSchoolUser);
 router.put('/school-users/:userId/toggle-status', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.toggleUserStatus);
 
@@ -24,7 +24,7 @@ router.put('/school-users/:userId/toggle-status', requireAuth, requireRole([Role
 router.get('/school-posts', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolPosts);
 
 // Classes Management
-router.get('/school-classes', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolClasses);
+router.get('/school-classes', requireAuth, requireRole([Role.PRINCIPAL, Role.TEACHER]), schoolController.getSchoolClasses);
 
 
 // Verify Teacher Code (Public - used during registration)
