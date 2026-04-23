@@ -60,7 +60,7 @@ export const getFeed = async (req: AuthRequest, res: Response) => {
       orderBy: { createdAt: 'desc' }
     });
 
-    const postsWithLiked = posts.map(post => ({
+    const postsWithLiked = (posts as any[]).map(post => ({
       ...post,
       isLiked: post.likes.some((like: { userId: string }) => like.userId === userId),
       likesCount: post.likes.length,
