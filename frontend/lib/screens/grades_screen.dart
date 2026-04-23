@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../widgets/interaction_wrapper.dart';
 import 'package:intl/intl.dart';
+import '../theme/app_theme.dart';
 
 class GradesScreen extends StatefulWidget {
   @override
@@ -90,7 +91,7 @@ class _GradesScreenState extends State<GradesScreen> {
         if (percentage < 50) statusColor = Colors.redAccent;
         else if (percentage < 80) statusColor = Colors.orangeAccent;
 
-        return InteractionWrapper(
+        return InteractiveScale(
           child: Container(
             margin: EdgeInsets.only(bottom: 16),
             padding: EdgeInsets.all(16),

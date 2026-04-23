@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import 'package:intl/intl.dart';
 import '../widgets/interaction_wrapper.dart';
 
 class ClassGradesScreen extends StatefulWidget {
@@ -115,7 +116,7 @@ class _ClassGradesScreenState extends State<ClassGradesScreen> {
         final student = g['student'];
         final double percentage = (g['score'] / g['maxScore']) * 100;
 
-        return InteractionWrapper(
+        return InteractiveScale(
           child: Container(
             margin: EdgeInsets.only(bottom: 12),
             padding: EdgeInsets.all(16),

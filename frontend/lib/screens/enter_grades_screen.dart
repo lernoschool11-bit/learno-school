@@ -111,7 +111,7 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
                     _isLoading
                       ? CircularProgressIndicator(color: Colors.blueAccent)
                       : LuxuryButton(
-                          text: 'حفظ العلامة',
+                          label: 'حفظ العلامة',
                           onPressed: _submit,
                           icon: Icons.save_rounded,
                         ),
