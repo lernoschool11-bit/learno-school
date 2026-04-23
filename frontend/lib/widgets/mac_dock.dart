@@ -101,20 +101,24 @@ class _MacDockState extends State<MacDock> with SingleTickerProviderStateMixin {
                     ),
                   ],
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center, // Centered for premium feel
-                  children: List.generate(count, (i) {
-                    final scale = _scaleFor(i, count);
-                    final isActive = widget.currentIndex == i;
-                    return _DockIcon(
-                      item: items[i],
-                      scale: scale,
-                      isActive: isActive,
-                      spacing: _iconSpacing,
-                      onTap: () => widget.onTap(i),
-                    );
-                  }),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: List.generate(count, (i) {
+                      final scale = _scaleFor(i, count);
+                      final isActive = widget.currentIndex == i;
+                      return _DockIcon(
+                        item: items[i],
+                        scale: scale,
+                        isActive: isActive,
+                        spacing: _iconSpacing,
+                        onTap: () => widget.onTap(i),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),
