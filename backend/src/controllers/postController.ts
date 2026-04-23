@@ -9,6 +9,7 @@ export const getFeed = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 
+    const posts = await prisma.post.findMany({
       where: {
         AND: [
           req.user?.schoolId 
