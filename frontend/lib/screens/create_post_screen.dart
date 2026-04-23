@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:file_picker/file_picker.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../main.dart';
@@ -57,13 +58,29 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
   }
 
+  Future<void> _pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'],
+    );
+    if (result != null && result.files.single.bytes != null) {
+      setState(() {
+        _selectedFileBytes = result.files.single.bytes;
+        _selectedFileName = result.files.single.name;
+        _selectedFileMime = 'application/octet-stream';
+        _selectedType = 'DOCUMENT';
+      });
+    }
+  }
+
   Future<String?> _uploadToCloudinary() async {
     if (_selectedFileBytes == null) return null;
 
     final isVideo = _selectedFileMime?.startsWith('video') == true;
-    final resourceType = isVideo ? 'video' : 'image';
+    final isImage = _selectedFileMime?.startsWith('image') == true;
+    final resourceType = isVideo ? 'video' : (isImage ? 'image' : 'raw');
 
-    setState(() => _loadingText = isVideo ? 'جاري رفع الفيديو...' : 'جاري رفع الصورة...');
+    setState(() => _loadingText = isVideo ? 'جاري رفع الفيديو...' : (isImage ? 'جاري رفع الصورة...' : 'جاري رفع الملف...'));
 
     final uri = Uri.parse(
       'https://api.cloudinary.com/v1_1/$_cloudName/$resourceType/upload',
@@ -217,9 +234,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   items: [
                     const DropdownMenuItem(value: 'TEXT', child: Text('نص')),
                     const DropdownMenuItem(value: 'IMAGE', child: Text('صورة')),
-                    if (widget.userRole == 'TEACHER') ...[
+                    if (widget.userRole == 'TEACHER' || widget.userRole == 'PRINCIPAL') ...[
                       const DropdownMenuItem(value: 'STORY', child: Text('قصة')),
                       const DropdownMenuItem(value: 'VIDEO', child: Text('فيديو')),
+                      const DropdownMenuItem(value: 'DOCUMENT', child: Text('ملف')),
                     ],
                   ],
                   onChanged: (val) => setState(() => _selectedType = val!),
@@ -257,12 +275,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                         borderRadius: BorderRadius.circular(8),
                         child: Image.memory(_selectedFileBytes!, fit: BoxFit.cover),
                       )
-                    : const Center(
+                    : Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.video_file, size: 50, color: Colors.grey),
-                            Text('فيديو جاهز للرفع', style: TextStyle(color: Colors.grey)),
+                            Icon(_selectedType == 'VIDEO' ? Icons.video_file : Icons.insert_drive_file, size: 50, color: Colors.grey),
+                            Text(_selectedType == 'VIDEO' ? 'فيديو جاهز للرفع' : 'ملف جاهز للرفع', style: TextStyle(color: Colors.grey)),
+                            if (_selectedFileName != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: Text(_selectedFileName!, style: const TextStyle(color: Colors.blue, fontSize: 12), overflow: TextOverflow.ellipsis),
+                              ),
                           ],
                         ),
                       ),
@@ -283,8 +306,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildAttachmentOption(Icons.image, 'صورة', Colors.green, _pickImage),
-                if (widget.userRole == 'TEACHER')
+                if (widget.userRole == 'TEACHER' || widget.userRole == 'PRINCIPAL') ...[
                   _buildAttachmentOption(Icons.video_library, 'فيديو', Colors.red, _pickVideo),
+                  _buildAttachmentOption(Icons.attach_file, 'ملف', Colors.blue, _pickFile),
+                ],
               ],
             ),
           ],

@@ -166,6 +166,7 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     final isTeacher = widget.post.authorRole == 'TEACHER';
+    final isPrincipal = widget.post.authorRole == 'PRINCIPAL';
     final isMyPost = widget.post.authorId == widget.currentUserId;
 
     return ThreeDTransformer(
@@ -183,7 +184,7 @@ class _PostCardState extends State<PostCard> {
               child: _buildAvatar(
                 name: widget.post.authorName,
                 avatarUrl: widget.post.authorAvatar,
-                backgroundColor: isTeacher ? Colors.teal : const Color(0xFF0A2342),
+                backgroundColor: isPrincipal ? Colors.amber.shade800 : (isTeacher ? Colors.teal : const Color(0xFF0A2342)),
               ),
             ),
             title: GestureDetector(
@@ -197,7 +198,7 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
             subtitle: Text(
-              '${isTeacher ? 'معلم' : 'طالب'} • ${widget.post.school}\n${widget.post.timeAgo}',
+              '${isPrincipal ? 'مدير المدرسة' : (isTeacher ? 'معلم' : 'طالب')} • ${widget.post.school}\n${widget.post.timeAgo}',
               style: TextStyle(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
@@ -274,6 +275,41 @@ class _PostCardState extends State<PostCard> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: VideoPlayerWidget(videoUrl: widget.post.mediaUrl!),
+              ),
+            ),
+
+          // ملف (Document)
+          if (widget.post.mediaUrl != null && widget.post.type == 'DOCUMENT')
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: InkWell(
+                onTap: () {
+                   // فتح الملف في المتصفح أو تطبيق خارجي
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.insert_drive_file, color: Colors.blue, size: 32),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('ملف مرفق', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                            Text(widget.post.mediaUrl!.split('/').last, style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.download, color: Colors.blue),
+                    ],
+                  ),
+                ),
               ),
             ),
 
@@ -402,6 +438,7 @@ class _PostCardState extends State<PostCard> {
       case 'IMAGE': return Colors.green;
       case 'VIDEO': return Colors.red;
       case 'STORY': return Colors.purple;
+      case 'DOCUMENT': return Colors.blue;
       default: return const Color(0xFF0A2342);
     }
   }
@@ -411,6 +448,7 @@ class _PostCardState extends State<PostCard> {
       case 'IMAGE': return 'صورة';
       case 'VIDEO': return 'فيديو';
       case 'STORY': return 'قصة';
+      case 'DOCUMENT': return 'ملف';
       default: return 'نص';
     }
   }
@@ -433,6 +471,7 @@ class _CommentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isTeacher = comment.authorRole == 'TEACHER';
+    final isPrincipal = comment.authorRole == 'PRINCIPAL';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -443,7 +482,7 @@ class _CommentTile extends StatelessWidget {
             onTap: onTapUser,
             child: CircleAvatar(
               radius: 16,
-              backgroundColor: isTeacher ? Colors.teal : const Color(0xFF0A2342),
+              backgroundColor: isPrincipal ? Colors.amber.shade800 : (isTeacher ? Colors.teal : const Color(0xFF0A2342)),
               backgroundImage: comment.authorAvatar != null
                   ? NetworkImage(comment.authorAvatar!)
                   : null,
@@ -480,10 +519,10 @@ class _CommentTile extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        isTeacher ? 'معلم' : 'طالب',
+                        isPrincipal ? 'مدير المدرسة' : (isTeacher ? 'معلم' : 'طالب'),
                         style: TextStyle(
                           fontSize: 11,
-                          color: isTeacher ? Colors.teal : Colors.grey,
+                          color: isPrincipal ? Colors.amber.shade900 : (isTeacher ? Colors.teal : Colors.grey),
                         ),
                       ),
                       const Spacer(),

@@ -96,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // التحقق من رمز المعلم عن طريق الـ API
     if (_selectedRole == 'TEACHER') {
       try {
-        final isValid = await _apiService.verifyTeacherCode(_teacherCodeController.text.trim());
+        final isValid = await _apiService.verifyTeacherCode(_teacherCodeController.text.trim(), schoolName: _selectedSchool);
         if (!isValid) {
           setState(() => _isLoading = false);
           if (mounted) {

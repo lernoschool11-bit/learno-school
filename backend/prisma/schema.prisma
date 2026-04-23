@@ -86,6 +86,7 @@ enum PostType {
   IMAGE
   STORY
   VIDEO
+  DOCUMENT
 }
 
 model Post {

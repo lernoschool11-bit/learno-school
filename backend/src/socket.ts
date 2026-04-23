@@ -59,6 +59,9 @@ export const initSocket = (httpServer: HttpServer) => {
         const classes = JSON.parse(currentUser.classes || '[]');
         const canJoin = classes.some((c: any) => c.grade === roomGrade && c.section === roomSection);
         if (!canJoin) return socket.emit('error', 'لا تدرس هذا الصف');
+      } else if (currentUser.role === 'PRINCIPAL') {
+        // Principals can join any room in their school
+        console.log(`👁️ Principal monitoring enabled for room: ${roomId}`);
       }
 
       socket.join(roomId);

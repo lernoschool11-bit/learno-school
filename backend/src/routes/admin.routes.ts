@@ -26,31 +26,30 @@ router.get('/school-posts', requireAuth, requireRole([Role.PRINCIPAL]), schoolCo
 // Classes Management
 router.get('/school-classes', requireAuth, requireRole([Role.PRINCIPAL, Role.TEACHER]), schoolController.getSchoolClasses);
 
+// School Stats
+router.get('/school-stats', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolStats);
+
 
 // Verify Teacher Code (Public - used during registration)
 router.post('/verify-teacher-code', async (req, res) => {
     try {
         const { code, name } = req.body;
-        // In a multi-school system, we should verify it against the specific school
-        // But for now, if name is provided, find that school
+        if (!code || !name) return res.json({ valid: false, message: 'الكود واسم المدرسة مطلوبان' });
+
         const school = await prisma.school.findFirst({
-            where: {
-                OR: [
-                    { name: name },
-                    { teacherSecretCode: code }
-                ]
-            }
+            where: { name: name }
         });
         
-        if (!school) return res.json({ valid: false });
+        if (!school) return res.json({ valid: false, message: 'المدرسة غير موجودة' });
         
+        const isValid = school.teacherSecretCode === code;
         res.json({ 
-            valid: school.teacherSecretCode === code,
+            valid: isValid,
             schoolId: school.id,
             schoolName: school.name
         });
     } catch (e) {
-        res.status(500).json({ message: 'خطأ' });
+        res.status(500).json({ message: 'خطأ في الخادم' });
     }
 });
 

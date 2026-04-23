@@ -14,6 +14,11 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
 
   List<dynamic> _students = [];
   String? _selectedStudentId;
+  String _selectedGrade = '4';
+  String _selectedSection = 'أ';
+  final List<String> _grades = ['4', '5', '6', '7', '8', '9', '10'];
+  final List<String> _sections = ['أ', 'ب', 'ج', 'د'];
+
   String _subject = '';
   String _title = '';
   double _score = 0;
@@ -28,6 +33,7 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
   }
 
   Future<void> _loadStudents() async {
+    setState(() => _isFetchingStudents = true);
     try {
       final students = await _apiService.getSchoolUsers();
       setState(() {
@@ -37,6 +43,12 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
     } catch (e) {
       setState(() => _isFetchingStudents = false);
     }
+  }
+
+  List<dynamic> _getFilteredStudents() {
+    return _students.where((s) {
+      return s['grade'].toString() == _selectedGrade && s['section'].toString() == _selectedSection;
+    }).toList();
   }
 
   Future<void> _submit() async {
@@ -94,6 +106,8 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    _buildFilters(),
+                    SizedBox(height: 20),
                     _buildDropdown(),
                     SizedBox(height: 20),
                     _buildTextField('المادة (مثلاً: رياضيات)', (val) => _subject = val),
@@ -123,7 +137,51 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
     );
   }
 
+  Widget _buildFilters() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('تصفية الطلاب:', style: TextStyle(color: Colors.white70, fontSize: 14)),
+        SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: _selectedGrade,
+                dropdownColor: Color(0xFF1E293B),
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'الصف',
+                  labelStyle: TextStyle(color: Colors.blueAccent),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                items: _grades.map((g) => DropdownMenuItem(value: g, child: Text('صف $g'))).toList(),
+                onChanged: (val) => setState(() { _selectedGrade = val!; _selectedStudentId = null; }),
+              ),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: _selectedSection,
+                dropdownColor: Color(0xFF1E293B),
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'الشعبة',
+                  labelStyle: TextStyle(color: Colors.blueAccent),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                items: _sections.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                onChanged: (val) => setState(() { _selectedSection = val!; _selectedStudentId = null; }),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildDropdown() {
+    final filtered = _getFilteredStudents();
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -134,11 +192,11 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedStudentId,
-          hint: Text('اختر الطالب', style: TextStyle(color: Colors.white54)),
+          hint: Text(filtered.isEmpty ? 'لا يوجد طلاب في هذا الصف' : 'اختر الطالب', style: TextStyle(color: Colors.white54)),
           dropdownColor: Color(0xFF1E293B),
           isExpanded: true,
           icon: Icon(Icons.keyboard_arrow_down, color: Colors.blueAccent),
-          items: _students.map((s) {
+          items: filtered.map((s) {
             return DropdownMenuItem<String>(
               value: s['id'],
               child: Text(s['fullName'], style: TextStyle(color: Colors.white)),

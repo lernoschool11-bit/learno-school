@@ -209,11 +209,11 @@ export const getSchoolPosts = async (req: AuthRequest, res: Response) => {
 // ==================== GET SCHOOL CLASSES ====================
 export const getSchoolClasses = async (req: AuthRequest, res: Response) => {
     try {
-        const { schoolId } = req.user!;
+        const { schoolId, role } = req.user!;
         if (!schoolId) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
 
-        // Get unique combinations of grade and section for students in this school
-        const classes = await prisma.user.groupBy({
+        // Get student counts for existing classes
+        const studentCounts = await prisma.user.groupBy({
             by: ['grade', 'section'],
             where: {
                 schoolId,
@@ -221,13 +221,35 @@ export const getSchoolClasses = async (req: AuthRequest, res: Response) => {
                 grade: { not: null },
                 section: { not: null }
             },
-            _count: {
-                id: true
-            }
+            _count: { id: true }
         });
 
-        // Format: { grade: "10", section: "A", studentCount: 25 }
-        const formattedClasses = classes.map(c => ({
+        const countsMap: Record<string, number> = {};
+        studentCounts.forEach(c => {
+            countsMap[`${c.grade}-${c.section}`] = c._count.id;
+        });
+
+        // If Principal, return all possible classes from 4-A to 10-D
+        if (role === 'PRINCIPAL') {
+            const allPossibleClasses = [];
+            const grades = ['4', '5', '6', '7', '8', '9', '10'];
+            const sections = ['أ', 'ب', 'ج', 'د'];
+
+            for (const g of grades) {
+                for (const s of sections) {
+                    allPossibleClasses.push({
+                        grade: g,
+                        section: s,
+                        studentCount: countsMap[`${g}-${s}`] || 0
+                    });
+                }
+            }
+            return res.json(allPossibleClasses);
+        }
+
+        // For others (Teachers), return only classes that have students or are assigned to them
+        // (For simplicity, returning all with students)
+        const formattedClasses = studentCounts.map(c => ({
             grade: c.grade,
             section: c.section,
             studentCount: c._count.id
@@ -240,3 +262,33 @@ export const getSchoolClasses = async (req: AuthRequest, res: Response) => {
     }
 };
 
+
+// ==================== GET SCHOOL STATS ====================
+export const getSchoolStats = async (req: AuthRequest, res: Response) => {
+    try {
+        const { schoolId } = req.user!;
+        if (!schoolId) return res.status(403).json({ message: "????? ???? ???????" });
+
+        const [userCount, teacherCount, postCount, commentCount] = await Promise.all([
+            prisma.user.count({ where: { schoolId, role: 'STUDENT' } }),
+            prisma.user.count({ where: { schoolId, role: 'TEACHER' } }),
+            prisma.post.count({ where: { schoolId } }),
+            prisma.comment.count({ where: { post: { schoolId } } })
+        ]);
+
+        const totalUsers = userCount + teacherCount;
+        const engagementRate = totalUsers > 0 ? ((postCount + commentCount) / totalUsers).toFixed(1) : 0;
+
+        return res.json({
+            students: userCount,
+            teachers: teacherCount,
+            posts: postCount,
+            comments: commentCount,
+            engagementRate: engagementRate,
+            status: Number(engagementRate) > 5 ? '???? ???? ??' : (Number(engagementRate) > 2 ? '??? ??' : '???? ??')
+        });
+    } catch (error) {
+        console.error("getSchoolStats error:", error);
+        return res.status(500).json({ message: "??? ?? ???????" });
+    }
+};
