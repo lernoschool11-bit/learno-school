@@ -62,7 +62,7 @@ class ApiService {
 
   // ---------------- REGISTER ----------------
   Future<bool> register({
-    required String fullName, required String? nationalId, required String dob,
+    required String fullName, String? nationalId, required String dob,
     required String username, required String email, required String password,
     required String role, required String school, String? district,
     String? grade, String? section, List<String>? subjects, List<Map<String, String>>? classes,
