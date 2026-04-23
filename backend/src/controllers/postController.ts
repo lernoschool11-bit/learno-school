@@ -9,14 +9,20 @@ export const getFeed = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 
-    const posts = await prisma.post.findMany({
       where: {
-        schoolId: req.user?.schoolId, // Only show posts from the same school
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: new Date() } }
+        AND: [
+          req.user?.schoolId 
+            ? { schoolId: req.user.schoolId } 
+            : { school: req.user?.school, schoolId: null },
+          {
+            OR: [
+              { expiresAt: null },
+              { expiresAt: { gt: new Date() } }
+            ]
+          }
         ]
       },
+
       include: {
         author: {
           select: {

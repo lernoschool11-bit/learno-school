@@ -60,6 +60,9 @@ model User {
   sentConversations     Conversation[]  @relation("SentConversations")
   receivedConversations Conversation[]  @relation("ReceivedConversations")
   directMessages        DirectMessage[]
+
+  studentGrades Grade[] @relation("StudentGrades")
+  teacherGrades Grade[] @relation("TeacherGrades")
 }
 
 model School {
@@ -263,4 +266,18 @@ model DirectMessage {
   sender         User         @relation(fields: [senderId], references: [id])
 
   createdAt      DateTime     @default(now())
+}
+
+model Grade {
+  id        Int      @id @default(autoincrement())
+  studentId String
+  teacherId String
+  subject   String
+  title     String   // مثلاً: "اختبار الفصل الأول" أو "واجب الرياضيات"
+  score     Float    // العلامة اللي حصل عليها
+  maxScore  Float    // العلامة الكاملة (مثلاً 100)
+  createdAt DateTime @default(now())
+
+  student   User @relation("StudentGrades", fields: [studentId], references: [id])
+  teacher   User @relation("TeacherGrades", fields: [teacherId], references: [id])
 }

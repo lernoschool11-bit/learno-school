@@ -481,4 +481,87 @@ class ApiService {
     } catch (e) { return []; }
   }
 
+  Future<List<dynamic>> getSchoolClasses() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(Uri.parse('$baseUrl/admin/school-classes'), headers: _headers(token));
+      if (response.statusCode == 200) return jsonDecode(response.body);
+      return [];
+    } catch (e) { return []; }
+  }
+
+
+  // ---------------- GRADES ----------------
+  Future<List<dynamic>> getMyGrades() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(Uri.parse('$baseUrl/grades/my'), headers: _headers(token));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['grades'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getMyGrades error: $e');
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>> addGrade({
+    required String studentId,
+    required String subject,
+    required String title,
+    required double score,
+    required double maxScore,
+  }) async {
+    try {
+      final token = await getToken();
+      final response = await http.post(
+        Uri.parse('$baseUrl/grades'),
+        headers: _headers(token),
+        body: jsonEncode({
+          'studentId': studentId,
+          'subject': subject,
+          'title': title,
+          'score': score,
+          'maxScore': maxScore,
+        }),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return {};
+    } catch (e) {
+      debugPrint('addGrade error: $e');
+      return {};
+    }
+  }
+
+  Future<List<dynamic>> getClassGrades({
+    String? grade,
+    String? section,
+    String? subject,
+  }) async {
+    try {
+      final token = await getToken();
+      String url = '$baseUrl/grades/class';
+      List<String> queryParams = [];
+      if (grade != null) queryParams.add('grade=${Uri.encodeComponent(grade)}');
+      if (section != null) queryParams.add('section=${Uri.encodeComponent(section)}');
+      if (subject != null) queryParams.add('subject=${Uri.encodeComponent(subject)}');
+      
+      if (queryParams.isNotEmpty) {
+        url += '?' + queryParams.join('&');
+      }
+
+      final response = await http.get(Uri.parse(url), headers: _headers(token));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getClassGrades error: $e');
+      return [];
+    }
+  }
+
 }

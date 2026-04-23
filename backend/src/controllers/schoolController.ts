@@ -205,3 +205,38 @@ export const getSchoolPosts = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({ message: "خطأ في السيرفر" });
     }
 };
+
+// ==================== GET SCHOOL CLASSES ====================
+export const getSchoolClasses = async (req: AuthRequest, res: Response) => {
+    try {
+        const { schoolId } = req.user!;
+        if (!schoolId) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
+
+        // Get unique combinations of grade and section for students in this school
+        const classes = await prisma.user.groupBy({
+            by: ['grade', 'section'],
+            where: {
+                schoolId,
+                role: 'STUDENT',
+                grade: { not: null },
+                section: { not: null }
+            },
+            _count: {
+                id: true
+            }
+        });
+
+        // Format: { grade: "10", section: "A", studentCount: 25 }
+        const formattedClasses = classes.map(c => ({
+            grade: c.grade,
+            section: c.section,
+            studentCount: c._count.id
+        }));
+
+        return res.json(formattedClasses);
+    } catch (error) {
+        console.error("getSchoolClasses error:", error);
+        return res.status(500).json({ message: "خطأ في السيرفر" });
+    }
+};
+

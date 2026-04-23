@@ -23,6 +23,10 @@ router.put('/school-users/:userId/toggle-status', requireAuth, requireRole([Role
 // Post Moderation
 router.get('/school-posts', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolPosts);
 
+// Classes Management
+router.get('/school-classes', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolClasses);
+
+
 // Verify Teacher Code (Public - used during registration)
 router.post('/verify-teacher-code', async (req, res) => {
     try {

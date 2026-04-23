@@ -18,13 +18,14 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
   Map<String, dynamic>? _profile;
   List<dynamic> _users = [];
   List<dynamic> _posts = [];
+  List<dynamic> _classes = [];
   String? _teacherCode;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _loadData();
   }
 
@@ -36,6 +37,7 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
         _apiService.getSchoolUsers(),
         _apiService.getSchoolPosts(),
         _apiService.getTeacherCode(),
+        _apiService.getSchoolClasses(),
       ]);
 
       if (mounted) {
@@ -44,6 +46,7 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
           _users = results[1] as List<dynamic>;
           _posts = results[2] as List<dynamic>;
           _teacherCode = results[3] as String?;
+          _classes = results[4] as List<dynamic>;
           _isLoading = false;
         });
       }
@@ -52,6 +55,7 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
     }
   }
 
+  // ... (previous helper methods like _updateTeacherCode, _deletePost, etc. remain the same)
   Future<void> _updateTeacherCode() async {
     final controller = TextEditingController(text: _teacherCode);
     final newCode = await showDialog<String>(
@@ -123,22 +127,26 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
     }
 
     final schoolName = _profile?['school'] ?? 'المدرسة';
+    final teachers = _users.where((u) => u['role'] == 'TEACHER').toList();
+    final students = _users.where((u) => u['role'] == 'STUDENT').toList();
 
     return Scaffold(
       backgroundColor: AppTheme.oledBlack,
       body: Column(
         children: [
           _buildHeader(schoolName),
-          const SizedBox(height: 10),
           TabBar(
             controller: _tabController,
+            isScrollable: true,
             indicatorColor: AppTheme.primaryColor,
             labelColor: AppTheme.primaryColor,
             unselectedLabelColor: Colors.grey,
             tabs: const [
-              Tab(icon: Icon(Icons.vpn_key), text: 'الوصول'),
-              Tab(icon: Icon(Icons.article), text: 'المحتوى'),
-              Tab(icon: Icon(Icons.people), text: 'الأعضاء'),
+              Tab(text: 'الوصول'),
+              Tab(text: 'المنشورات'),
+              Tab(text: 'الصفوف'),
+              Tab(text: 'المعلمون'),
+              Tab(text: 'الطلاب'),
             ],
           ),
           Expanded(
@@ -147,7 +155,9 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
               children: [
                 _buildAccessTab(),
                 _buildContentTab(),
-                _buildUsersTab(),
+                _buildClassesTab(),
+                _buildUserListTab(teachers, 'لا يوجد معلمون حالياً'),
+                _buildUserListTab(students, 'لا يوجد طلاب حالياً'),
               ],
             ),
           ),
@@ -159,33 +169,33 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
 
   Widget _buildHeader(String schoolName) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
+      padding: const EdgeInsets.fromLTRB(24, 60, 24, 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppTheme.primaryColor.withOpacity(0.2), Colors.transparent],
+          colors: [AppTheme.primaryColor.withOpacity(0.15), Colors.transparent],
         ),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 30,
+            radius: 25,
             backgroundColor: AppTheme.primaryColor,
-            child: Text(schoolName[0], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black)),
+            child: Text(schoolName[0], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(schoolName, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                const Text('إدارة النظام - لوحة المدير', style: TextStyle(color: AppTheme.primaryColor, fontSize: 14)),
+                Text(schoolName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                const Text('لوحة تحكم المدير', style: TextStyle(color: AppTheme.primaryColor, fontSize: 12)),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.grey),
+            icon: const Icon(Icons.refresh, color: Colors.grey, size: 20),
             onPressed: _loadData,
           ),
         ],
@@ -194,37 +204,30 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
   }
 
   Widget _buildAccessTab() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('إدارة وصول المعلمين', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-          const SizedBox(height: 16),
+          const Text('إدارة رمز المعلمين', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 12),
           GlassCard(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('رمز التسجيل الحالي', style: TextStyle(color: Colors.grey)),
-                      SizedBox(height: 4),
-                      Text('يستخدمه المعلمون الجدد للانضمام', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                    ],
-                  ),
+                  child: Text('رمز التسجيل الحالي:', style: TextStyle(color: Colors.grey)),
                 ),
                 Text(
                   _teacherCode ?? '----',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.primaryColor, letterSpacing: 2),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryColor, letterSpacing: 2),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           LuxuryButton(
-            label: 'تغيير رمز المعلمين',
+            label: 'تغيير الرمز',
             onPressed: _updateTeacherCode,
             icon: Icons.edit,
           ),
@@ -235,20 +238,20 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
 
   Widget _buildContentTab() {
     return _posts.isEmpty
-        ? const Center(child: Text('لا توجد منشورات حالياً', style: TextStyle(color: Colors.grey)))
+        ? const Center(child: Text('لا توجد منشورات', style: TextStyle(color: Colors.grey)))
         : ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             itemCount: _posts.length,
             itemBuilder: (context, index) {
               final post = _posts[index];
               return GlassCard(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(8),
                 child: ListTile(
-                  title: Text(post['content'] ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white)),
-                  subtitle: Text('بواسطة: ${post['author']?['fullName'] ?? 'مجهول'}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  title: Text(post['content'] ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                  subtitle: Text('بواسطة: ${post['author']?['fullName'] ?? 'مجهول'}', style: const TextStyle(color: Colors.grey, fontSize: 11)),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: AppTheme.errorRed),
+                    icon: const Icon(Icons.delete_outline, color: AppTheme.errorRed, size: 20),
                     onPressed: () => _deletePost(post['id']),
                   ),
                 ),
@@ -257,45 +260,77 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
           );
   }
 
-  Widget _buildUsersTab() {
-    return _users.isEmpty
-        ? const Center(child: Text('لا يوجد أعضاء', style: TextStyle(color: Colors.grey)))
-        : ListView.builder(
+  Widget _buildClassesTab() {
+    return _classes.isEmpty
+        ? const Center(child: Text('لا توجد صفوف مسجلة', style: TextStyle(color: Colors.grey)))
+        : GridView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: _users.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.5,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: _classes.length,
             itemBuilder: (context, index) {
-              final user = _users[index];
-              final isPrincipal = user['role'] == 'PRINCIPAL';
+              final c = _classes[index];
               return GlassCard(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('صف ${c['grade']} - ${c['section']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.people, size: 14, color: AppTheme.primaryColor),
+                        const SizedBox(width: 4),
+                        Text('${c['studentCount']} طالب', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+  }
+
+  Widget _buildUserListTab(List<dynamic> users, String emptyMsg) {
+    return users.isEmpty
+        ? Center(child: Text(emptyMsg, style: const TextStyle(color: Colors.grey)))
+        : ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              final user = users[index];
+              return GlassCard(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(4),
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundImage: user['avatarUrl'] != null ? NetworkImage(user['avatarUrl']) : null,
-                    child: user['avatarUrl'] == null ? const Icon(Icons.person) : null,
+                    child: user['avatarUrl'] == null ? const Icon(Icons.person, size: 20) : null,
                   ),
-                  title: Text(user['fullName'] ?? '', style: const TextStyle(color: Colors.white)),
-                  subtitle: Text(user['role'], style: TextStyle(color: user['role'] == 'TEACHER' ? Colors.blue : Colors.green, fontSize: 11)),
-                  trailing: isPrincipal
-                      ? null
-                      : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(
-                                (user['isActive'] ?? true) ? Icons.block : Icons.check_circle_outline,
-                                color: (user['isActive'] ?? true) ? Colors.orange : Colors.green,
-                              ),
-                              onPressed: () => _toggleUserStatus(user['id']),
-                              tooltip: (user['isActive'] ?? true) ? 'تجميد' : 'تفعيل',
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.person_remove_outlined, color: AppTheme.errorRed),
-                              onPressed: () => _deleteUser(user['id']),
-                              tooltip: 'حذف نهائي',
-                            ),
-                          ],
+                  title: Text(user['fullName'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 14)),
+                  subtitle: Text(user['username'] ?? '', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          (user['isActive'] ?? true) ? Icons.block : Icons.check_circle_outline,
+                          color: (user['isActive'] ?? true) ? Colors.orange : Colors.green,
+                          size: 20,
                         ),
+                        onPressed: () => _toggleUserStatus(user['id']),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.person_remove_outlined, color: AppTheme.errorRed, size: 20),
+                        onPressed: () => _deleteUser(user['id']),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

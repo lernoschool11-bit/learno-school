@@ -9,6 +9,9 @@ import 'screens/community_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/ai_chat_screen.dart';
 import 'screens/admin_panel.dart';
+import 'screens/grades_screen.dart';
+import 'screens/enter_grades_screen.dart';
+import 'screens/class_grades_screen.dart';
 import 'services/api_service.dart';
 import 'services/socket_service.dart';
 import 'theme/app_theme.dart';
@@ -101,6 +104,9 @@ class _MainNavigationState extends State<MainNavigation> {
       if (_userRole == 'PRINCIPAL') AdminPanel(),
       if (_userRole != 'PRINCIPAL') const CommunityScreen(),
       const AIChatScreen(),
+      if (_userRole == 'STUDENT') GradesScreen(),
+      if (_userRole == 'TEACHER') EnterGradesScreen(),
+      if (_userRole == 'PRINCIPAL' || _userRole == 'TEACHER') ClassGradesScreen(),
       const ProfileScreen(),
     ];
   }
@@ -116,6 +122,9 @@ class _MainNavigationState extends State<MainNavigation> {
       if (_userRole != 'PRINCIPAL')
         const MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
       const MacDockItem(icon: Icons.auto_awesome, label: 'الذكاء'),
+      if (_userRole == 'STUDENT') const MacDockItem(icon: Icons.grade, label: 'علاماتي'),
+      if (_userRole == 'TEACHER') const MacDockItem(icon: Icons.edit_note, label: 'رصد'),
+      if (_userRole == 'PRINCIPAL' || _userRole == 'TEACHER') const MacDockItem(icon: Icons.assessment, label: 'السجل'),
       const MacDockItem(icon: Icons.person, label: 'حسابي'),
     ];
   }

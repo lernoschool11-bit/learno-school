@@ -65,6 +65,18 @@ export const register = async (req: Request, res: Response) => {
     const finalNationalId = nationalId || `AUTO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const normalizedSchool = school ? normalizeSchoolName(school) : null;
+    const finalSchoolName = normalizedSchool || school_name || school;
+
+    // ✅ البحث عن المدرسة في قاعدة البيانات لربطها باليوزر
+    let schoolId: string | null = null;
+    if (finalSchoolName) {
+      const schoolRecord = await prisma.school.findFirst({
+        where: { name: { contains: finalSchoolName, mode: 'insensitive' } }
+      });
+      if (schoolRecord) {
+        schoolId = schoolRecord.id;
+      }
+    }
 
     const user = await prisma.user.create({
       data: {
@@ -75,7 +87,8 @@ export const register = async (req: Request, res: Response) => {
         email: emailLower,
         password: hashedPassword,
         role: role || 'STUDENT',
-        school: normalizedSchool || school_name || school,
+        school: finalSchoolName,
+        schoolId: schoolId, // Link to school ID if found
         directorate: district,
         grade: role === 'STUDENT' ? grade : null,
         section: role === 'STUDENT' ? section : null,
@@ -193,14 +206,18 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
     if (!query) return res.json([]);
 
     const users = await prisma.user.findMany({
-      where: {
-        OR: [
-          { username: { contains: query, mode: 'insensitive' } },
-          { fullName: { contains: query, mode: 'insensitive' } },
+        AND: [
+          {
+            OR: [
+              { username: { contains: query, mode: 'insensitive' } },
+              { fullName: { contains: query, mode: 'insensitive' } },
+            ],
+          },
+          req.user?.schoolId 
+            ? { schoolId: req.user.schoolId } 
+            : { school: req.user?.school, schoolId: null },
         ],
-        school: req.user?.school, // Only search within the same school
         id: { not: req.user?.id },
-      },
       select: {
         id: true,
         fullName: true,
@@ -318,6 +335,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         username: true,
         role: true,
         school: true,
+        schoolId: true,
         grade: true,
         section: true,
         subjects: true,
@@ -353,7 +371,11 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
     if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
 
     // تقييد: لا يمكنك رؤية ملفات شخصية خارج مدرستك
-    if (user.school !== req.user?.school && req.user?.role !== 'ADMIN') {
+    const isSameSchool = req.user?.schoolId 
+        ? user.schoolId === req.user.schoolId 
+        : user.school === req.user?.school && user.schoolId === null;
+
+    if (!isSameSchool && req.user?.role !== 'ADMIN') {
         return res.status(403).json({ message: "لا يمكنك رؤية ملفات شخصية خارج مدرستك" });
     }
 

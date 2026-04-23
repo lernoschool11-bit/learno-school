@@ -10,6 +10,7 @@ import chatRoutes from './chat.routes';
 import dmRoutes from './dm.routes';
 import adminRoutes from './admin.routes';
 import aiRoutes from './ai.routes';
+import gradeRoutes from './grade.routes';
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/notifications', notificationRoutes);
 router.use('/dm', dmRoutes);
 router.use('/admin', adminRoutes);
 router.use('/ai', aiRoutes);
+router.use('/grades', gradeRoutes);
 
 export default router;
