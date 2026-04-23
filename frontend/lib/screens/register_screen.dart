@@ -15,7 +15,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   int _currentPage = 0;
 
   final _fullNameController = TextEditingController();
-  final _nationalIdController = TextEditingController();
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _dobController = TextEditingController();
@@ -48,10 +47,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   String? _validatePage1() {
     if (_fullNameController.text.trim().isEmpty) return 'الرجاء إدخال الاسم الكامل';
-    final nationalId = _nationalIdController.text.trim();
-    if (nationalId.isNotEmpty && (nationalId.length != 10 || int.tryParse(nationalId) == null)) {
-      return 'الرقم الوطني يجب أن يتكون من 10 أرقام';
-    }
     if (_usernameController.text.trim().isEmpty) return 'الرجاء إدخال اسم المستخدم';
     if (_emailController.text.trim().isEmpty || !_emailController.text.contains('@')) {
       return 'الرجاء إدخال بريد إلكتروني صالح';
@@ -122,7 +117,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final success = await _apiService.register(
       fullName: _fullNameController.text.trim(),
-      nationalId: _nationalIdController.text.trim().isNotEmpty ? _nationalIdController.text.trim() : null,
       dob: _dobController.text.trim(),
       username: _usernameController.text.trim(),
       email: _emailController.text.trim(),
@@ -202,12 +196,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ],
           const SizedBox(height: 20),
           _buildField(_fullNameController, 'الاسم الكامل *', Icons.person),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _nationalIdController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'الرقم الوطني (اختياري)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.badge), hintText: '10 أرقام'),
-          ),
           const SizedBox(height: 16),
           _buildField(_usernameController, 'اسم المستخدم *', Icons.alternate_email),
           const SizedBox(height: 16),
