@@ -101,6 +101,8 @@ export const getSchoolUsers = async (req: AuthRequest, res: Response) => {
                 avatarUrl: true,
                 isActive: true,
                 createdAt: true,
+                grade: true,
+                section: true,
             },
             orderBy: { createdAt: 'desc' }
         });
@@ -277,15 +279,17 @@ export const getSchoolStats = async (req: AuthRequest, res: Response) => {
         ]);
 
         const totalUsers = userCount + teacherCount;
-        const engagementRate = totalUsers > 0 ? ((postCount + commentCount) / totalUsers).toFixed(1) : 0;
+        const engagementRate = totalUsers > 0 ? ((postCount + commentCount) / totalUsers) : 0;
+        const activityScore = Math.min(100, (engagementRate / 5) * 100);
 
         return res.json({
             students: userCount,
             teachers: teacherCount,
             posts: postCount,
             comments: commentCount,
-            engagementRate: engagementRate,
-            status: Number(engagementRate) > 5 ? '???? ???? ??' : (Number(engagementRate) > 2 ? '??? ??' : '???? ??')
+            engagementRate: engagementRate.toFixed(1),
+            activityScore: Math.round(activityScore),
+            status: engagementRate > 5 ? 'ممتاز' : (engagementRate > 2 ? 'جيد جدا' : 'جيد')
         });
     } catch (error) {
         console.error("getSchoolStats error:", error);

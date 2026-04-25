@@ -27,7 +27,7 @@ router.get('/school-posts', requireAuth, requireRole([Role.PRINCIPAL]), schoolCo
 router.get('/school-classes', requireAuth, requireRole([Role.PRINCIPAL, Role.TEACHER]), schoolController.getSchoolClasses);
 
 // School Stats
-router.get('/school-stats', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolStats);
+router.get('/school-stats', requireAuth, schoolController.getSchoolStats);
 
 
 // Verify Teacher Code (Public - used during registration)

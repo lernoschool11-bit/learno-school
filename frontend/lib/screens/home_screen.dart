@@ -27,6 +27,13 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _error;
   String _currentUserId = '';
   int _unreadCount = 0;
+  int _activityScore = 0;
+
+  List<PostModel> get _topPosts {
+    final sorted = List<PostModel>.from(_posts);
+    sorted.sort((a, b) => (b.likes + b.comments).compareTo(a.likes + a.comments));
+    return sorted.take(5).toList();
+  }
 
   @override
   void initState() {
@@ -44,16 +51,19 @@ class _HomeScreenState extends State<HomeScreen> {
         _apiService.getUserProfile(),
         _apiService.getPosts(),
         _apiService.getUnreadCount(),
+        _apiService.getSchoolStats(),
       ]);
 
       final profile = results[0] as Map<String, dynamic>;
       final posts = results[1] as List<PostModel>;
       final unreadCount = results[2] as int;
+      final stats = results[3] as Map<String, dynamic>;
 
       setState(() {
         _currentUserId = profile['id'] ?? '';
         _posts = posts;
         _unreadCount = unreadCount;
+        _activityScore = stats['activityScore'] ?? 0;
         _isLoading = false;
       });
     } catch (e) {
@@ -211,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (context, index) {
           if (index == 0) {
             // Task 2: Interactive Analytics Bar
-            return const SchoolActivityBar();
+            return SchoolActivityBar(activityScore: _activityScore);
           }
 
           if (index == 1) {
@@ -230,45 +240,60 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 140,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: 5,
-                    itemBuilder: (context, i) {
-                      return StaggeredSlideAnimation(
-                        index: i,
-                        child: TiltCard(
-                          child: AnimatedBounce(
-                            onTap: () {},
-                            child: Container(
-                              width: 140,
-                              height: 140,
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    [Icons.star, Icons.trending_up, Icons.school, Icons.lightbulb, Icons.event][i % 5],
-                                    color: AppTheme.primaryColor,
-                                    size: 32,
+                if (_topPosts.isNotEmpty)
+                  SizedBox(
+                    height: 140,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _topPosts.length,
+                      itemBuilder: (context, i) {
+                        final post = _topPosts[i];
+                        return StaggeredSlideAnimation(
+                          index: i,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 12),
+                            child: TiltCard(
+                              child: AnimatedBounce(
+                                onTap: () {},
+                                child: Container(
+                                  width: 140,
+                                  height: 140,
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        post.type == 'IMAGE' ? Icons.image : 
+                                        post.type == 'VIDEO' ? Icons.play_circle :
+                                        post.type == 'DOCUMENT' ? Icons.description :
+                                        Icons.text_snippet,
+                                        color: AppTheme.primaryColor,
+                                        size: 32,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        post.authorName,
+                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${post.likes} إعجاب',
+                                        style: TextStyle(fontSize: 10, color: AppTheme.primaryColor.withAlpha(200)),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    ['نشاط جديد', 'ترند', 'مميز', 'فكرة ذكية', 'فعالية'][i % 5],
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
                 const SizedBox(height: 16),
               ],
             );
@@ -291,7 +316,8 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class SchoolActivityBar extends StatefulWidget {
-  const SchoolActivityBar({super.key});
+  final int activityScore;
+  const SchoolActivityBar({super.key, required this.activityScore});
 
   @override
   State<SchoolActivityBar> createState() => _SchoolActivityBarState();
@@ -309,7 +335,8 @@ class _SchoolActivityBarState extends State<SchoolActivityBar> with SingleTicker
       duration: const Duration(milliseconds: 1500),
     );
 
-    _progressAnimation = Tween<double>(begin: 0, end: 0.75).animate(
+    final double endValue = widget.activityScore / 100.0;
+    _progressAnimation = Tween<double>(begin: 0, end: endValue).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const SpringCurve(),
@@ -317,6 +344,21 @@ class _SchoolActivityBarState extends State<SchoolActivityBar> with SingleTicker
     );
 
     _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(SchoolActivityBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.activityScore != widget.activityScore) {
+      final double endValue = widget.activityScore / 100.0;
+      _progressAnimation = Tween<double>(begin: _progressAnimation.value, end: endValue).animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: const SpringCurve(),
+        ),
+      );
+      _controller.forward(from: 0);
+    }
   }
 
   @override
@@ -343,9 +385,14 @@ class _SchoolActivityBarState extends State<SchoolActivityBar> with SingleTicker
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const Text(
-                '75%',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+              AnimatedBuilder(
+                animation: _progressAnimation,
+                builder: (context, child) {
+                  return Text(
+                    '${(_progressAnimation.value * 100).toInt()}%',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  );
+                },
               ),
             ],
           ),

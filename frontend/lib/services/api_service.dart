@@ -378,6 +378,15 @@ class ApiService {
     } catch (e) { debugPrint('getAdminStats error: $e'); throw Exception('Network error'); }
   }
 
+  Future<Map<String, dynamic>> getSchoolStats() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(Uri.parse('$baseUrl/admin/school-stats'), headers: _headers(token));
+      if (response.statusCode == 200) return jsonDecode(response.body);
+      return {};
+    } catch (e) { debugPrint('getSchoolStats error: $e'); return {}; }
+  }
+
   Future<List<dynamic>> getAdminUsers(String role) async {
     try {
       final token = await getToken();

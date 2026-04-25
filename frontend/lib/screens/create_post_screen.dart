@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../main.dart';
@@ -62,14 +63,22 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'],
+      withData: true,
     );
-    if (result != null && result.files.single.bytes != null) {
-      setState(() {
-        _selectedFileBytes = result.files.single.bytes;
-        _selectedFileName = result.files.single.name;
-        _selectedFileMime = 'application/octet-stream';
-        _selectedType = 'DOCUMENT';
-      });
+    if (result != null) {
+      final file = result.files.single;
+      Uint8List? bytes = file.bytes;
+      if (bytes == null && file.path != null) {
+        bytes = await File(file.path!).readAsBytes();
+      }
+      if (bytes != null) {
+        setState(() {
+          _selectedFileBytes = bytes;
+          _selectedFileName = file.name;
+          _selectedFileMime = 'application/octet-stream';
+          _selectedType = 'DOCUMENT';
+        });
+      }
     }
   }
 
@@ -312,6 +321,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 ],
               ],
             ),
+            const SizedBox(height: 100),
           ],
         ),
     );
