@@ -173,84 +173,88 @@ class _MainNavigationState extends State<MainNavigation> {
                   children: screens,
                 ),
               ),
+              // AI Floating Circle (Glassmorphism)
+              Positioned(
+                right: 20,
+                bottom: 100, // Positioned above the Dock
+                child: GestureDetector(
+                  onTap: () {
+                    final aiIndex = screens.indexWhere((s) => s is AIChatScreen);
+                    if (aiIndex != -1) {
+                      setState(() => _currentIndex = aiIndex);
+                    }
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppTheme.surfaceDark.withAlpha(180),
+                          border: Border.all(
+                            color: AppTheme.primaryColor.withAlpha(100),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primaryColor.withAlpha(40),
+                              blurRadius: 15,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.auto_awesome, 
+                          color: (_currentIndex == screens.indexWhere((s) => s is AIChatScreen)) 
+                              ? AppTheme.primaryColor 
+                              : Colors.white70, 
+                          size: 30
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 20),
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      MacDock(
-                        currentIndex: dockItems.indexWhere((item) {
-                          final currentScreen = screens[_currentIndex];
-                          if (currentScreen is HomeScreen && item.label == 'الرئيسية') return true;
-                          if (currentScreen is SearchScreen && item.label == 'البحث') return true;
-                          if (currentScreen is CreatePostScreen && item.label == 'نشر') return true;
-                          if (currentScreen is AdminPanel && item.label == 'الإدارة') return true;
-                          if (currentScreen is CommunityScreen && item.label == 'مجتمعي') return true;
-                          if (currentScreen is GradesScreen && item.label == 'علاماتي') return true;
-                          if (currentScreen is EnterGradesScreen && item.label == 'رصد') return true;
-                          if (currentScreen is ClassGradesScreen && item.label == 'السجل') return true;
-                          if (currentScreen is ProfileScreen && item.label == 'حسابي') return true;
-                          return false;
-                        }),
-                        onTap: (dockIndex) {
-                          final label = dockItems[dockIndex].label;
-                          int targetIndex = -1;
-                          
-                          if (label == 'الرئيسية') targetIndex = screens.indexWhere((s) => s is HomeScreen);
-                          else if (label == 'البحث') targetIndex = screens.indexWhere((s) => s is SearchScreen);
-                          else if (label == 'نشر') targetIndex = screens.indexWhere((s) => s is CreatePostScreen);
-                          else if (label == 'الإدارة') targetIndex = screens.indexWhere((s) => s is AdminPanel);
-                          else if (label == 'مجتمعي') targetIndex = screens.indexWhere((s) => s is CommunityScreen);
-                          else if (label == 'علاماتي') targetIndex = screens.indexWhere((s) => s is GradesScreen);
-                          else if (label == 'رصد') targetIndex = screens.indexWhere((s) => s is EnterGradesScreen);
-                          else if (label == 'السجل') targetIndex = screens.indexWhere((s) => s is ClassGradesScreen);
-                          else if (label == 'حسابي') targetIndex = screens.indexWhere((s) => s is ProfileScreen);
+                  child: MacDock(
+                    currentIndex: dockItems.indexWhere((item) {
+                      final currentScreen = screens[_currentIndex];
+                      if (currentScreen is HomeScreen && item.label == 'الرئيسية') return true;
+                      if (currentScreen is SearchScreen && item.label == 'البحث') return true;
+                      if (currentScreen is CreatePostScreen && item.label == 'نشر') return true;
+                      if (currentScreen is AdminPanel && item.label == 'الإدارة') return true;
+                      if (currentScreen is CommunityScreen && item.label == 'مجتمعي') return true;
+                      if (currentScreen is GradesScreen && item.label == 'علاماتي') return true;
+                      if (currentScreen is EnterGradesScreen && item.label == 'رصد') return true;
+                      if (currentScreen is ClassGradesScreen && item.label == 'السجل') return true;
+                      if (currentScreen is ProfileScreen && item.label == 'حسابي') return true;
+                      return false;
+                    }),
+                    onTap: (dockIndex) {
+                      final label = dockItems[dockIndex].label;
+                      int targetIndex = -1;
+                      
+                      if (label == 'الرئيسية') targetIndex = screens.indexWhere((s) => s is HomeScreen);
+                      else if (label == 'البحث') targetIndex = screens.indexWhere((s) => s is SearchScreen);
+                      else if (label == 'نشر') targetIndex = screens.indexWhere((s) => s is CreatePostScreen);
+                      else if (label == 'الإدارة') targetIndex = screens.indexWhere((s) => s is AdminPanel);
+                      else if (label == 'مجتمعي') targetIndex = screens.indexWhere((s) => s is CommunityScreen);
+                      else if (label == 'علاماتي') targetIndex = screens.indexWhere((s) => s is GradesScreen);
+                      else if (label == 'رصد') targetIndex = screens.indexWhere((s) => s is EnterGradesScreen);
+                      else if (label == 'السجل') targetIndex = screens.indexWhere((s) => s is ClassGradesScreen);
+                      else if (label == 'حسابي') targetIndex = screens.indexWhere((s) => s is ProfileScreen);
 
-                          if (targetIndex != -1) {
-                            setState(() => _currentIndex = targetIndex);
-                          }
-                        },
-                        items: dockItems,
-                      ),
-                      // AI Floating Circle
-                      Positioned(
-                        right: 10,
-                        bottom: 80, // Above the dock
-                        child: GestureDetector(
-                          onTap: () {
-                            // Find AI screen index
-                            final aiIndex = screens.indexWhere((s) => s is AIChatScreen);
-                            if (aiIndex != -1) {
-                              setState(() => _currentIndex = aiIndex);
-                            }
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: [Colors.blueAccent, Colors.purpleAccent],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blueAccent.withAlpha(100),
-                                  blurRadius: 15,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                              border: Border.all(color: Colors.white24, width: 2),
-                            ),
-                            child: Icon(Icons.auto_awesome, color: Colors.white, size: 30),
-                          ),
-                        ),
-                      ),
-                    ],
+                      if (targetIndex != -1) {
+                        setState(() => _currentIndex = targetIndex);
+                      }
+                    },
+                    items: dockItems,
                   ),
                 ),
               ),
