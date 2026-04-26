@@ -176,7 +176,7 @@ class _MainNavigationState extends State<MainNavigation> {
               // AI Floating Circle (Glassmorphism)
               Positioned(
                 right: 20,
-                bottom: 100, // Positioned above the Dock
+                bottom: 110, // Positioned well above the Dock
                 child: GestureDetector(
                   onTap: () {
                     final aiIndex = screens.indexWhere((s) => s is AIChatScreen);

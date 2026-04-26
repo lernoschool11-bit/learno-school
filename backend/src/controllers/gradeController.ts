@@ -7,6 +7,7 @@ import { AuthRequest } from '../middleware/auth';
 export const addGrade = async (req: AuthRequest, res: Response) => {
   try {
     const teacherId = req.user!.id;
+    const { schoolId, school } = req.user!;
     const { studentId, subject, title, score, maxScore } = req.body;
 
     // 1. تأكد إن المستخدم معلم
@@ -19,7 +20,11 @@ export const addGrade = async (req: AuthRequest, res: Response) => {
       where: { id: studentId }
     });
 
-    if (!student || student.schoolId !== req.user!.schoolId) {
+    const isSameSchool = schoolId 
+        ? (student?.schoolId === schoolId || student?.school === school)
+        : (student?.school === school);
+
+    if (!student || !isSameSchool) {
       return res.status(404).json({ error: 'Student not found in your school' });
     }
 
@@ -90,23 +95,37 @@ export const getMyGrades = async (req: AuthRequest, res: Response) => {
 export const getClassGrades = async (req: AuthRequest, res: Response) => {
   try {
     const { grade, section, subject } = req.query;
+    const { schoolId, school } = req.user!;
 
     if (req.user!.role === Role.STUDENT) {
       return res.status(403).json({ error: 'Students cannot view class grades' });
     }
 
     const whereClause: any = {
-      student: {
-        schoolId: req.user!.schoolId,
-      }
+      student: schoolId 
+          ? { OR: [{ schoolId: schoolId }, { school: school || undefined }] }
+          : { school: school! }
     };
 
-    if (grade) whereClause.student.grade = String(grade);
-    if (section) whereClause.student.section = String(section);
-    if (subject) whereClause.subject = String(subject);
+    // Since Prisma nested relations inside `where` with `OR` can be tricky, 
+    // it's better to structure it carefully.
+    
+    // Instead of putting OR inside student, we put student inside OR
+    const studentWhereCondition = schoolId 
+        ? { OR: [{ schoolId: schoolId }, { school: school || undefined }] }
+        : { school: school! };
+
+    const finalWhere: any = {
+        student: {
+            ...studentWhereCondition,
+            ...(grade ? { grade: String(grade) } : {}),
+            ...(section ? { section: String(section) } : {})
+        },
+        ...(subject ? { subject: String(subject) } : {})
+    };
 
     const grades = await prisma.grade.findMany({
-      where: whereClause,
+      where: finalWhere,
       include: {
         student: {
           select: { 
