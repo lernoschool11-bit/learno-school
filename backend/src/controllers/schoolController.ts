@@ -269,7 +269,7 @@ export const getSchoolClasses = async (req: AuthRequest, res: Response) => {
 export const getSchoolStats = async (req: AuthRequest, res: Response) => {
     try {
         const { schoolId } = req.user!;
-        if (!schoolId) return res.status(403).json({ message: "????? ???? ???????" });
+        if (!schoolId) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
 
         const [userCount, teacherCount, postCount, commentCount] = await Promise.all([
             prisma.user.count({ where: { schoolId, role: 'STUDENT' } }),
@@ -287,12 +287,12 @@ export const getSchoolStats = async (req: AuthRequest, res: Response) => {
             teachers: teacherCount,
             posts: postCount,
             comments: commentCount,
-            engagementRate: engagementRate.toFixed(1),
+            engagementRate: parseFloat(engagementRate.toFixed(1)),
             activityScore: Math.round(activityScore),
             status: engagementRate > 5 ? 'ممتاز' : (engagementRate > 2 ? 'جيد جدا' : 'جيد')
         });
     } catch (error) {
         console.error("getSchoolStats error:", error);
-        return res.status(500).json({ message: "??? ?? ???????" });
+        return res.status(500).json({ message: "خطأ في جلب الإحصائيات" });
     }
 };

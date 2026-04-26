@@ -36,18 +36,26 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
     setState(() => _isFetchingStudents = true);
     try {
       final students = await _apiService.getSchoolUsers();
+      debugPrint('Loaded ${students.length} school users');
       setState(() {
         _students = students.where((u) => u['role'] == 'STUDENT').toList();
+        debugPrint('Found ${_students.length} students');
         _isFetchingStudents = false;
       });
     } catch (e) {
+      debugPrint('Error loading students: $e');
       setState(() => _isFetchingStudents = false);
     }
   }
 
   List<dynamic> _getFilteredStudents() {
     return _students.where((s) {
-      return s['grade'].toString() == _selectedGrade && s['section'].toString() == _selectedSection;
+      final sGrade = s['grade']?.toString().trim();
+      final sSection = s['section']?.toString().trim();
+      final selectedGrade = _selectedGrade.trim();
+      final selectedSection = _selectedSection.trim();
+      
+      return sGrade == selectedGrade && sSection == selectedSection;
     }).toList();
   }
 
