@@ -35,5 +35,10 @@ Unlike standard social platforms, Learno implements a strict **Multi-Tenant Arch
 2. `flutter pub get`
 3. `flutter run`
 
+## ⚖️ Ownership & Intellectual Property
+This software is the exclusive property of **Ayham Moayed Meraish**. 
+For full licensing and copyright details, please refer to the [COPYRIGHT_OWNERSHIP.md](COPYRIGHT_OWNERSHIP.md) file.
+
 ---
 *Developed with excellence for the next generation of Jordanian education.*
+© 2026 Ayham Moayed Meraish. All rights reserved.
