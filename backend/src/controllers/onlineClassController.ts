@@ -91,7 +91,7 @@ export const getActiveOnlineClasses = async (req: AuthRequest, res: Response) =>
 export const endOnlineClass = async (req: AuthRequest, res: Response) => {
     try {
         const user = req.user!;
-        const { id } = req.params;
+        const id = req.params.id as string;
 
         const onlineClass = await prisma.onlineClass.findUnique({
             where: { id }
