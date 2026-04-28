@@ -12,6 +12,7 @@ import '../widgets/tilt_card.dart';
 import '../widgets/staggered_slide_animation.dart';
 import '../widgets/dynamic_effects.dart';
 import '../widgets/ai_orb_button.dart';
+import 'online_classes_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String _currentUserId = '';
   int _unreadCount = 0;
   int _activityScore = 0;
+  int _activeClassesCount = 0;
+  Map<String, dynamic> _userProfile = {};
 
   List<PostModel> get _topPosts {
     final sorted = List<PostModel>.from(_posts);
@@ -58,12 +61,16 @@ class _HomeScreenState extends State<HomeScreen> {
       final posts = results[1] as List<PostModel>;
       final unreadCount = results[2] as int;
       final stats = results[3] as Map<String, dynamic>;
+      
+      final activeClasses = await _apiService.getActiveOnlineClasses();
 
       setState(() {
+        _userProfile = profile;
         _currentUserId = profile['id'] ?? '';
         _posts = posts;
         _unreadCount = unreadCount;
         _activityScore = stats['activityScore'] ?? 0;
+        _activeClassesCount = activeClasses.length;
         _isLoading = false;
       });
     } catch (e) {
@@ -129,6 +136,36 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
 
         actions: [
+          // Online Classes Button
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.video_camera_front_outlined),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => OnlineClassesScreen(userProfile: _userProfile)),
+                  ).then((_) => _loadData());
+                },
+              ),
+              if (_activeClassesCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 12,
+                      minHeight: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
           // زر الإشعارات مع العداد
           Stack(
             children: [

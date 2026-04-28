@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/post_model.dart';
+import '../models/online_class_model.dart';
 
 class ApiService {
   static const String baseUrl = 'https://learno-school.onrender.com/api';
@@ -573,4 +574,51 @@ class ApiService {
     }
   }
 
+  // ---------------- ONLINE CLASSES ----------------
+  Future<List<OnlineClassModel>> getActiveOnlineClasses() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(Uri.parse('$baseUrl/online-classes/active'), headers: _headers(token));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((c) => OnlineClassModel.fromJson(c)).toList();
+      }
+      return [];
+    } catch (e) { debugPrint('getActiveOnlineClasses error: $e'); return []; }
+  }
+
+  Future<bool> createOnlineClass({
+    required String title,
+    required String meetingUrl,
+    String? grade,
+    String? section,
+    String? subject,
+  }) async {
+    try {
+      final token = await getToken();
+      final response = await http.post(
+        Uri.parse('$baseUrl/online-classes'),
+        headers: _headers(token),
+        body: jsonEncode({
+          'title': title,
+          'meetingUrl': meetingUrl,
+          if (grade != null) 'grade': grade,
+          if (section != null) 'section': section,
+          if (subject != null) 'subject': subject,
+        }),
+      );
+      return response.statusCode == 201;
+    } catch (e) { debugPrint('createOnlineClass error: $e'); return false; }
+  }
+
+  Future<bool> endOnlineClass(String classId) async {
+    try {
+      final token = await getToken();
+      final response = await http.patch(
+        Uri.parse('$baseUrl/online-classes/$classId/end'),
+        headers: _headers(token),
+      );
+      return response.statusCode == 200;
+    } catch (e) { debugPrint('endOnlineClass error: $e'); return false; }
+  }
 }

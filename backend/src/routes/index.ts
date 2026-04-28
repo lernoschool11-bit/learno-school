@@ -11,6 +11,7 @@ import dmRoutes from './dm.routes';
 import adminRoutes from './admin.routes';
 import aiRoutes from './ai.routes';
 import gradeRoutes from './grade.routes';
+import onlineClassRoutes from './onlineClass.routes';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/dm', dmRoutes);
 router.use('/admin', adminRoutes);
 router.use('/ai', aiRoutes);
 router.use('/grades', gradeRoutes);
+router.use('/online-classes', onlineClassRoutes);
 
 export default router;

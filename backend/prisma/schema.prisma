@@ -63,6 +63,8 @@ model User {
 
   studentGrades Grade[] @relation("StudentGrades")
   teacherGrades Grade[] @relation("TeacherGrades")
+  
+  onlineClasses OnlineClass[] @relation("TeacherOnlineClasses")
 }
 
 model School {
@@ -281,4 +283,22 @@ model Grade {
 
   student   User @relation("StudentGrades", fields: [studentId], references: [id])
   teacher   User @relation("TeacherGrades", fields: [teacherId], references: [id])
+}
+
+model OnlineClass {
+  id          String   @id @default(uuid())
+  title       String
+  meetingUrl  String
+  startTime   DateTime @default(now())
+  isActive    Boolean  @default(true)
+  
+  teacherId   String
+  teacher     User     @relation("TeacherOnlineClasses", fields: [teacherId], references: [id])
+  
+  schoolId    String?
+  grade       String?
+  section     String?
+  subject     String?
+
+  createdAt   DateTime @default(now())
 }

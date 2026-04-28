@@ -7,7 +7,7 @@ const router = Router();
 
 // OPENROUTER CONFIG
 const OPENROUTER_API_KEY = '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';
-const AI_MODEL = 'google/gemini-2.0-flash-lite-preview-02-05:free';
+const AI_MODEL = 'google/gemini-flash-1.5-exp:free';
 const DAILY_LIMIT = 20;
 
 router.post('/chat', requireAuth, async (req: AuthRequest, res) => {
@@ -48,12 +48,11 @@ router.post('/chat', requireAuth, async (req: AuthRequest, res) => {
       model: AI_MODEL,
       messages: messages,
       temperature: 0.7,
-      max_tokens: 1024,
     }, {
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': 'https://learno.app',
-        'X-Title': 'Learno School',
+        'HTTP-Referer': 'https://learno-ai.com',
+        'X-Title': 'Learno AI Assistant',
         'Content-Type': 'application/json',
       }
     });

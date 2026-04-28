@@ -14,6 +14,8 @@ export interface AuthRequest extends Request {
         schoolId?: string | null;
         school?: string | null;
         subjects: string[];
+        grade?: string | null;
+        section?: string | null;
     };
 }
 
@@ -30,7 +32,17 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
         // Quick validation via DB to ensure user hasn't been revoked
         const user = await prisma.user.findUnique({
             where: { id: decoded.id },
-            select: { id: true, role: true, nationalId: true, schoolId: true, school: true, subjects: true, isActive: true }
+            select: { 
+                id: true, 
+                role: true, 
+                nationalId: true, 
+                schoolId: true, 
+                school: true, 
+                subjects: true, 
+                isActive: true,
+                grade: true,
+                section: true
+            }
         });
 
 
