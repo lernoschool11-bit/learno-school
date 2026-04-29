@@ -228,9 +228,7 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
               { fullName: { contains: query, mode: 'insensitive' } },
             ],
           },
-          req.user?.schoolId 
-            ? { schoolId: req.user.schoolId } 
-            : { school: req.user?.school, schoolId: null },
+          { school: req.user?.school },
         ],
       },
       select: {
@@ -386,9 +384,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
     if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
 
     // تقييد: لا يمكنك رؤية ملفات شخصية خارج مدرستك
-    const isSameSchool = req.user?.schoolId 
-        ? user.schoolId === req.user.schoolId 
-        : user.school === req.user?.school && user.schoolId === null;
+    const isSameSchool = user.school === req.user?.school;
 
     if (!isSameSchool && req.user?.role !== 'ADMIN') {
         return res.status(403).json({ message: "لا يمكنك رؤية ملفات شخصية خارج مدرستك" });

@@ -20,8 +20,12 @@ import 'widgets/mac_dock.dart';
 import 'widgets/mesh_background.dart';
 import 'screens/splash_screen.dart';
 
+import 'services/notification_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await NotificationService().init();
 
   final prefs = await SharedPreferences.getInstance();
   final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
@@ -175,50 +179,49 @@ class _MainNavigationState extends State<MainNavigation> {
                 ),
               ),
               // AI Floating Circle (Glassmorphism)
-              Positioned(
-                right: 20,
-                bottom: 110, // Positioned well above the Dock
-                child: GestureDetector(
-                  onTap: () {
-                    final aiIndex = screens.indexWhere((s) => s is AIChatScreen);
-                    if (aiIndex != -1) {
-                      setState(() => _currentIndex = aiIndex);
-                    }
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(30),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppTheme.surfaceDark.withAlpha(180),
-                          border: Border.all(
-                            color: AppTheme.primaryColor.withAlpha(100),
-                            width: 1.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.primaryColor.withAlpha(40),
-                              blurRadius: 15,
-                              spreadRadius: 2,
+              if (_currentIndex != screens.indexWhere((s) => s is AIChatScreen))
+                Positioned(
+                  right: 20,
+                  bottom: 110, // Positioned well above the Dock
+                  child: GestureDetector(
+                    onTap: () {
+                      final aiIndex = screens.indexWhere((s) => s is AIChatScreen);
+                      if (aiIndex != -1) {
+                        setState(() => _currentIndex = aiIndex);
+                      }
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppTheme.surfaceDark.withAlpha(180),
+                            border: Border.all(
+                              color: AppTheme.primaryColor.withAlpha(100),
+                              width: 1.5,
                             ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.auto_awesome, 
-                          color: (_currentIndex == screens.indexWhere((s) => s is AIChatScreen)) 
-                              ? AppTheme.primaryColor 
-                              : Colors.white70, 
-                          size: 30
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primaryColor.withAlpha(40),
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.auto_awesome, 
+                            color: Colors.white70, 
+                            size: 30
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(

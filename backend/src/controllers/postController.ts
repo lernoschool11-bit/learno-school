@@ -12,9 +12,7 @@ export const getFeed = async (req: AuthRequest, res: Response) => {
     const posts = await prisma.post.findMany({
       where: {
         AND: [
-          req.user?.schoolId 
-            ? { schoolId: req.user.schoolId } 
-            : { author: { school: req.user?.school }, schoolId: null },
+          { author: { school: req.user?.school } },
           {
             OR: [
               { expiresAt: null },

@@ -220,6 +220,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 child: const Text('ليس لديك حساب؟ سجل الآن'),
               ),
+              TextButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: AppTheme.surfaceDark,
+                      title: const Text('سياسة الخصوصية', style: TextStyle(color: Colors.white)),
+                      content: const SingleChildScrollView(
+                        child: Text(
+                          'نحن في Learno نلتزم بحماية خصوصية بياناتك. يتم تشفير كافة البيانات والمعلومات الشخصية...'
+                          '\n\nلا يتم مشاركة بياناتك مع أي طرف ثالث وتُستخدم فقط لتحسين تجربتك التعليمية.',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('حسناً', style: TextStyle(color: AppTheme.primaryColor)),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: const Text('سياسة الخصوصية (Privacy Policy)', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              ),
             ],
           ),
         ),

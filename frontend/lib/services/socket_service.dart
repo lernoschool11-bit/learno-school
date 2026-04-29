@@ -1,5 +1,6 @@
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'api_service.dart';
+import 'notification_service.dart';
 
 class SocketService {
   static final SocketService _instance = SocketService._internal();
@@ -64,7 +65,16 @@ class SocketService {
 
   void onDirectMessage(Function(Map<String, dynamic>) callback) {
     _socket?.off('new_direct_message'); // إزالة المستمعين القديمين
-    _socket?.on('new_direct_message', (data) => callback(Map<String, dynamic>.from(data)));
+    _socket?.on('new_direct_message', (data) {
+      final msg = Map<String, dynamic>.from(data);
+      // Show Push Notification
+      NotificationService().showNotification(
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title: 'رسالة جديدة',
+          body: msg['content'] ?? 'لديك رسالة جديدة',
+      );
+      callback(msg);
+    });
   }
 
   void notifyDmRequest(String receiverId) {
