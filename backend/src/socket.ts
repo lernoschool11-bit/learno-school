@@ -134,6 +134,28 @@ export const initSocket = (httpServer: HttpServer) => {
       }
     });
 
+    socket.on('delete_message', async ({ roomId, messageId }) => {
+      try {
+        const msg = await prisma.message.findUnique({
+          where: { id: messageId },
+          select: { userId: true }
+        });
+
+        if (!msg) return;
+
+        // Author or Principal can delete
+        const canDelete = msg.userId === user.id || user.role === 'PRINCIPAL';
+        
+        if (canDelete) {
+          await prisma.message.delete({ where: { id: messageId } });
+          io.to(roomId).emit('message_deleted', { messageId });
+          console.log(`🗑️ Message ${messageId} deleted by ${user.fullName}`);
+        }
+      } catch (err) {
+        console.error('Error deleting message:', err);
+      }
+    });
+
     // ════════ الرسائل الخاصة (جديد) ════════
     // المستخدم ينضم لغرفته الخاصة
     socket.on('join_direct', () => {

@@ -46,6 +46,14 @@ class SocketService {
     _socket?.on('new_message', (data) => callback(Map<String, dynamic>.from(data)));
   }
 
+  void deleteMessage(String roomId, String messageId) {
+    _socket?.emit('delete_message', {'roomId': roomId, 'messageId': messageId});
+  }
+
+  void onMessageDeleted(Function(String) callback) {
+    _socket?.on('message_deleted', (data) => callback(data['messageId']));
+  }
+
   void onRoomHistory(Function(List<dynamic>) callback) {
     _socket?.on('room_history', (data) => callback(List<dynamic>.from(data)));
   }

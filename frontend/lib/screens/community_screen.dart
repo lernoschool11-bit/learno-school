@@ -25,6 +25,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
   bool _showMembers = false;
   String? _currentUsername;
   String? _currentUserId;
+  String? _currentUserRole;
   
   List<dynamic> _availableClasses = [];
   String? _selectedGrade;
@@ -50,6 +51,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
       setState(() {
         _currentUsername = profile['username'];
         _currentUserId = profile['id'];
+        _currentUserRole = profile['role'];
       });
     } catch (_) {}
   }
@@ -94,6 +96,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
     _socketService.onMessage((message) {
       setState(() => _messages.add(message));
       _scrollToBottom();
+    });
+    _socketService.onMessageDeleted((messageId) {
+      setState(() {
+        _messages.removeWhere((m) => m['id'] == messageId);
+      });
     });
   }
 
@@ -485,6 +492,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
               ),
             ),
           ),
+          if (isMe || _currentUserRole == 'PRINCIPAL') 
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: AppTheme.errorRed, size: 18),
+              onPressed: () {
+                if (_roomId != null && message['id'] != null) {
+                  _socketService.deleteMessage(_roomId!, message['id']);
+                }
+              },
+            ),
         ],
       ),
     );

@@ -107,7 +107,7 @@ class _MainNavigationState extends State<MainNavigation> {
       const SearchScreen(),
       if (_userRole == 'TEACHER' || _userRole == 'STUDENT') CreatePostScreen(userRole: _userRole),
       if (_userRole == 'PRINCIPAL') AdminPanel(),
-      if (_userRole != 'PRINCIPAL') const CommunityScreen(),
+      const CommunityScreen(),
       const AIChatScreen(),
       if (_userRole == 'STUDENT') GradesScreen(),
       if (_userRole == 'TEACHER') EnterGradesScreen(),
@@ -124,8 +124,7 @@ class _MainNavigationState extends State<MainNavigation> {
         const MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'),
       if (_userRole == 'PRINCIPAL')
         MacDockItem(icon: Icons.admin_panel_settings, label: 'الإدارة'),
-      if (_userRole != 'PRINCIPAL')
-        const MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
+      const MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
       // AI moved to separate FAB
       if (_userRole == 'STUDENT') const MacDockItem(icon: Icons.grade, label: 'علاماتي'),
       if (_userRole == 'TEACHER') const MacDockItem(icon: Icons.edit_note, label: 'رصد'),

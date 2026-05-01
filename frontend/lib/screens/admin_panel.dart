@@ -20,12 +20,13 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
   List<dynamic> _posts = [];
   List<dynamic> _classes = [];
   String? _teacherCode;
+  Map<String, dynamic>? _stats;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _loadData();
   }
 
@@ -38,6 +39,7 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
         _apiService.getSchoolPosts(),
         _apiService.getTeacherCode(),
         _apiService.getSchoolClasses(),
+        _apiService.getSchoolStats(),
       ]);
 
       if (mounted) {
@@ -47,6 +49,7 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
           _posts = results[2] as List<dynamic>;
           _teacherCode = results[3] as String?;
           _classes = results[4] as List<dynamic>;
+          _stats = results[5] as Map<String, dynamic>?;
           _isLoading = false;
         });
       }
@@ -143,6 +146,7 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
             unselectedLabelColor: Colors.grey,
             tabs: const [
               Tab(text: 'الوصول'),
+              Tab(text: 'الإحصائيات'),
               Tab(text: 'المنشورات'),
               Tab(text: 'الصفوف'),
               Tab(text: 'المعلمون'),
@@ -154,6 +158,7 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
               controller: _tabController,
               children: [
                 _buildAccessTab(),
+                _buildStatsTab(),
                 _buildContentTab(),
                 _buildClassesTab(),
                 _buildUserListTab(teachers, 'لا يوجد معلمون حالياً'),
@@ -182,7 +187,10 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
           CircleAvatar(
             radius: 25,
             backgroundColor: AppTheme.primaryColor,
-            child: Text(schoolName[0], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
+            child: Text(
+              schoolName.isNotEmpty ? schoolName[0] : 'S', 
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -231,6 +239,75 @@ class _AdminPanelState extends State<AdminPanel> with SingleTickerProviderStateM
             onPressed: _updateTeacherCode,
             icon: Icons.edit,
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsTab() {
+    if (_stats == null) return const Center(child: Text('لا توجد إحصائيات', style: TextStyle(color: Colors.grey)));
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: _buildStatCard('الطلاب', _stats!['students']?.toString() ?? '0', Icons.people, Colors.blue)),
+              const SizedBox(width: 12),
+              Expanded(child: _buildStatCard('المعلمون', _stats!['teachers']?.toString() ?? '0', Icons.person_pin, Colors.orange)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _buildStatCard('المنشورات', _stats!['posts']?.toString() ?? '0', Icons.article, Colors.green)),
+              const SizedBox(width: 12),
+              Expanded(child: _buildStatCard('التفاعل', _stats!['comments']?.toString() ?? '0', Icons.comment, Colors.purple)),
+            ],
+          ),
+          const SizedBox(height: 20),
+          GlassCard(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                const Text('درجة النشاط العامة', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      height: 120,
+                      child: CircularProgressIndicator(
+                        value: (_stats!['activityScore'] ?? 0) / 100,
+                        strokeWidth: 10,
+                        backgroundColor: Colors.white10,
+                        color: AppTheme.primaryColor,
+                      ),
+                    ),
+                    Text('${_stats!['activityScore'] ?? 0}%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Text('الحالة: ${_stats!['status'] ?? '---'}', style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+    return GlassCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         ],
       ),
     );
