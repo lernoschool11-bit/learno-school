@@ -258,7 +258,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 label: Text('الصف $grade'),
                 selected: _selectedGrade == grade,
                 selectedColor: AppTheme.primaryColor,
-                labelStyle: TextStyle(color: _selectedGrade == grade ? Colors.white : Colors.black),
+                labelStyle: TextStyle(color: _selectedGrade == grade ? Colors.white : Colors.white70),
                 onSelected: (_) => setState(() => _selectedGrade = grade),
               )).toList(),
             ),
@@ -272,7 +272,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label: Text(section),
                   selected: _selectedSection == section,
                   selectedColor: AppTheme.primaryColor,
-                  labelStyle: TextStyle(color: _selectedSection == section ? Colors.white : Colors.black),
+                  labelStyle: TextStyle(color: _selectedSection == section ? Colors.white : Colors.white70),
                   onSelected: (_) => setState(() => _selectedSection = section),
                 ),
               )).toList(),
@@ -288,7 +288,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 label: Text(subject),
                 selected: _selectedSubjects.contains(subject),
                 selectedColor: AppTheme.primaryColor,
-                labelStyle: TextStyle(color: _selectedSubjects.contains(subject) ? Colors.white : Colors.black),
+                labelStyle: TextStyle(color: _selectedSubjects.contains(subject) ? Colors.white : Colors.white70),
                 onSelected: (selected) {
                   setState(() { if (selected) _selectedSubjects.add(subject); else _selectedSubjects.remove(subject); });
                 },
@@ -368,9 +368,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(color: selected ? const Color(0xFF0A2342) : Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
         child: Column(children: [
-          Icon(icon, color: selected ? Colors.white : Colors.grey),
+          Icon(icon, color: selected ? Colors.white : Colors.grey.shade400),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(color: selected ? Colors.white : Colors.grey, fontWeight: FontWeight.bold)),
+          Text(label, style: TextStyle(color: selected ? Colors.white : Colors.grey.shade400, fontWeight: FontWeight.bold)),
         ]),
       ),
     );

@@ -43,10 +43,30 @@ export const initSocket = (httpServer: HttpServer) => {
 
     socket.on('join_room', async ({ roomId }) => {
       // Authorization Check
-      const [roomSchool, roomGrade, roomSection] = roomId.split('_');
-      const currentUser = await prisma.user.findUnique({ where: { id: user.id } });
+      const parts = roomId.split('_');
+      const roomSchool = parts[0];
+      const roomGrade = parts[1];
+      const roomSection = parts[2];
 
-      if (!currentUser || currentUser.school !== roomSchool) {
+      const currentUser = await prisma.user.findUnique({ 
+        where: { id: user.id },
+        include: { linkedSchool: true }
+      });
+
+      if (!currentUser) return socket.emit('error', 'المستخدم غير موجود');
+
+      // Use normalization for school name matching or compare by linkedSchool.name
+      const userSchoolName = currentUser.school || '';
+      const linkedSchoolName = currentUser.linkedSchool?.name || '';
+      
+      const isSameSchool = 
+        userSchoolName === roomSchool || 
+        linkedSchoolName === roomSchool ||
+        userSchoolName.includes(roomSchool) || 
+        roomSchool.includes(userSchoolName) ||
+        (currentUser.schoolId && currentUser.linkedSchool?.name === roomSchool);
+
+      if (!isSameSchool && currentUser.role !== 'ADMIN') {
         console.warn(`❌ Unauthorized access attempt by ${user.fullName} to room: ${roomId}`);
         return socket.emit('error', 'غير مصرح لك بدخول هذه الغرفة');
       }

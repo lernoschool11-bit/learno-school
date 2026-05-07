@@ -213,10 +213,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 : ElevatedButton(
                     onPressed: _submitPost,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF678D88),
+                      backgroundColor: AppTheme.primaryColor,
                       foregroundColor: Colors.white,
+                      elevation: 8,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     ),
-                    child: const Text('نشر'),
+                    child: const Text('نشر', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
           ),
         ],
@@ -237,9 +240,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 const SizedBox(width: 12),
                 DropdownButton<String>(
                   value: _selectedType,
-                  dropdownColor: AppTheme.surfaceDark,
+                  dropdownColor: AppTheme.surfaceLight,
                   underline: const SizedBox(),
-                  style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                  icon: const Icon(Icons.arrow_drop_down, color: AppTheme.primaryColor),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
                   items: [
                     const DropdownMenuItem(value: 'TEXT', child: Text('نص')),
                     const DropdownMenuItem(value: 'IMAGE', child: Text('صورة')),

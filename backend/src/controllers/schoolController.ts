@@ -90,9 +90,17 @@ export const getSchoolUsers = async (req: AuthRequest, res: Response) => {
         const { schoolId, school } = req.user!;
         if (!schoolId && !school) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
 
-        const whereCondition = schoolId 
-            ? { OR: [{ schoolId }, { school: school || undefined }] }
-            : { school: school! };
+        const whereCondition: any = {};
+        if (schoolId) {
+            whereCondition.OR = [
+                { schoolId },
+                { school: { contains: school || '', mode: 'insensitive' } }
+            ];
+        } else if (school) {
+            whereCondition.school = { contains: school, mode: 'insensitive' };
+        } else {
+            return res.status(403).json({ message: "مطلوب معرف المدرسة" });
+        }
 
         const users = await prisma.user.findMany({
             where: whereCondition,
@@ -131,8 +139,8 @@ export const deleteSchoolUser = async (req: AuthRequest, res: Response) => {
         });
 
         const isSameSchool = schoolId 
-            ? (targetUser?.schoolId === schoolId || targetUser?.school === school)
-            : (targetUser?.school === school);
+            ? (targetUser?.schoolId === schoolId || (targetUser?.school && school && targetUser.school.toLowerCase().includes(school.toLowerCase())))
+            : (targetUser?.school && school && targetUser.school.toLowerCase().includes(school.toLowerCase()));
 
         if (!targetUser || !isSameSchool) {
             return res.status(403).json({ message: "لا يمكنك حذف هذا المستخدم" });
@@ -166,8 +174,8 @@ export const toggleUserStatus = async (req: AuthRequest, res: Response) => {
         });
 
         const isSameSchool = schoolId 
-            ? (targetUser?.schoolId === schoolId || targetUser?.school === school)
-            : (targetUser?.school === school);
+            ? (targetUser?.schoolId === schoolId || (targetUser?.school && school && targetUser.school.toLowerCase().includes(school.toLowerCase())))
+            : (targetUser?.school && school && targetUser.school.toLowerCase().includes(school.toLowerCase()));
 
         if (!targetUser || !isSameSchool) {
             return res.status(403).json({ message: "لا يمكنك تعديل هذا المستخدم" });
@@ -200,9 +208,17 @@ export const getSchoolPosts = async (req: AuthRequest, res: Response) => {
 
         // Posts might not have a generic 'school' string fallback in schema, only schoolId
         // But authors do.
-        const whereCondition = schoolId 
-            ? { OR: [{ schoolId }, { author: { school: school || undefined } }] }
-            : { author: { school: school! } };
+        const whereCondition: any = {};
+        if (schoolId) {
+            whereCondition.OR = [
+                { schoolId },
+                { author: { school: { contains: school || '', mode: 'insensitive' } } }
+            ];
+        } else if (school) {
+            whereCondition.author = { school: { contains: school, mode: 'insensitive' } };
+        } else {
+            return res.status(403).json({ message: "مطلوب معرف المدرسة" });
+        }
 
         const posts = await prisma.post.findMany({
             where: whereCondition,
@@ -232,9 +248,9 @@ export const getSchoolClasses = async (req: AuthRequest, res: Response) => {
         const { schoolId, school, role } = req.user!;
         if (!schoolId && !school) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
 
-        const whereCondition = schoolId 
-            ? { OR: [{ schoolId }, { school: school || undefined }] }
-            : { school: school! };
+        const whereCondition: any = schoolId 
+            ? { OR: [{ schoolId }, { school: { contains: school || '', mode: 'insensitive' } }] }
+            : { school: { contains: school || '', mode: 'insensitive' } };
 
         // Get student counts for existing classes
         const studentCounts = await prisma.user.groupBy({
@@ -294,16 +310,22 @@ export const getSchoolStats = async (req: AuthRequest, res: Response) => {
         if (!schoolId && !school) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
 
         const whereUserCondition = schoolId 
-            ? { OR: [{ schoolId }, { school: school || undefined }] }
-            : { school: school! };
+            ? { OR: [{ schoolId }, { school: { contains: school || '', mode: 'insensitive' } }] }
+            : { school: { contains: school || '', mode: 'insensitive' } };
 
-        const wherePostCondition = schoolId 
-            ? { OR: [{ schoolId }, { author: { school: school || undefined } }] }
-            : { author: { school: school! } };
+        const wherePostCondition: any = schoolId 
+            ? { OR: [{ schoolId }, { author: { school: { contains: school || '', mode: 'insensitive' } } }] }
+            : { author: { school: { contains: school || '', mode: 'insensitive' } } };
 
-        const whereCommentCondition = schoolId 
-            ? { OR: [{ post: { schoolId } }, { post: { author: { school: school || undefined } } }] }
-            : { post: { author: { school: school! } } };
+        const whereCommentCondition: any = {};
+        if (schoolId) {
+            whereCommentCondition.OR = [
+                { post: { schoolId } },
+                { post: { author: { school: { contains: school || '', mode: 'insensitive' } } } }
+            ];
+        } else if (school) {
+            whereCommentCondition.post = { author: { school: { contains: school, mode: 'insensitive' } } };
+        }
 
         const [userCount, teacherCount, postCount, commentCount] = await Promise.all([
             prisma.user.count({ where: { ...whereUserCondition, role: 'STUDENT' } }),

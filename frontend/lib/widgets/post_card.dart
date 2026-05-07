@@ -374,7 +374,7 @@ class _PostCardState extends State<PostCard> {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: Colors.grey.shade100,
+                        fillColor: AppTheme.surfaceLight,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
@@ -499,7 +499,7 @@ class _CommentTile extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: AppTheme.surfaceLight,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
