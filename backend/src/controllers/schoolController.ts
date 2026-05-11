@@ -87,8 +87,14 @@ export const getTeacherSecretCode = async (req: AuthRequest, res: Response) => {
 // ==================== GET SCHOOL USERS ====================
 export const getSchoolUsers = async (req: AuthRequest, res: Response) => {
     try {
-        const { schoolId, school } = req.user!;
-        if (!schoolId && !school) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
+        const { schoolId, school, role: userRole } = req.user!;
+        console.log(`[DEBUG] getSchoolUsers called by ${userRole} (ID: ${req.user!.id})`);
+        console.log(`[DEBUG] Context: schoolId=${schoolId}, schoolName=${school}`);
+
+        if (!schoolId && !school) {
+            console.warn(`[DEBUG] Access denied: User has no school context`);
+            return res.status(403).json({ message: "مطلوب معرف المدرسة" });
+        }
 
         const whereCondition: any = {};
         if (schoolId) {
@@ -98,9 +104,9 @@ export const getSchoolUsers = async (req: AuthRequest, res: Response) => {
             ];
         } else if (school) {
             whereCondition.school = { contains: school, mode: 'insensitive' };
-        } else {
-            return res.status(403).json({ message: "مطلوب معرف المدرسة" });
         }
+
+        console.log(`[DEBUG] Query Condition:`, JSON.stringify(whereCondition, null, 2));
 
         const users = await prisma.user.findMany({
             where: whereCondition,
@@ -119,6 +125,7 @@ export const getSchoolUsers = async (req: AuthRequest, res: Response) => {
             orderBy: { createdAt: 'desc' }
         });
 
+        console.log(`[DEBUG] Found ${users.length} users`);
         return res.json(users);
     } catch (error) {
         console.error("getSchoolUsers error:", error);
@@ -307,6 +314,7 @@ export const getSchoolClasses = async (req: AuthRequest, res: Response) => {
 export const getSchoolStats = async (req: AuthRequest, res: Response) => {
     try {
         const { schoolId, school } = req.user!;
+        console.log(`[DEBUG] getSchoolStats context: schoolId=${schoolId}, schoolName=${school}`);
         if (!schoolId && !school) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
 
         const whereUserCondition: any = schoolId 
