@@ -309,7 +309,7 @@ export const getSchoolStats = async (req: AuthRequest, res: Response) => {
         const { schoolId, school } = req.user!;
         if (!schoolId && !school) return res.status(403).json({ message: "مطلوب معرف المدرسة" });
 
-        const whereUserCondition = schoolId 
+        const whereUserCondition: any = schoolId 
             ? { OR: [{ schoolId }, { school: { contains: school || '', mode: 'insensitive' } }] }
             : { school: { contains: school || '', mode: 'insensitive' } };
 
