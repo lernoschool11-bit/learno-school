@@ -45,7 +45,7 @@ class _PremiumMeshBackgroundState extends State<PremiumMeshBackground>
             return Stack(
               children: [
                 _buildBlob(
-                  color: const Color(0xFF1A0B2E).withOpacity(0.6),
+                  color: AppTheme.nightPurple.withOpacity(0.4),
                   size: 500,
                   alignment: Alignment(
                     0.8 * cos(_controller.value * 2 * pi),
@@ -53,7 +53,7 @@ class _PremiumMeshBackgroundState extends State<PremiumMeshBackground>
                   ),
                 ),
                 _buildBlob(
-                  color: const Color(0xFF0A1A2E).withOpacity(0.5),
+                  color: AppTheme.iceBlue.withOpacity(0.3),
                   size: 600,
                   alignment: Alignment(
                     -0.8 * sin(_controller.value * 2 * pi),
@@ -61,7 +61,7 @@ class _PremiumMeshBackgroundState extends State<PremiumMeshBackground>
                   ),
                 ),
                 _buildBlob(
-                  color: const Color(0xFF2E0A1A).withOpacity(0.4),
+                  color: const Color(0xFF001A2E).withOpacity(0.8),
                   size: 400,
                   alignment: Alignment(
                     0.5 * sin(_controller.value * 4 * pi),
@@ -270,9 +270,9 @@ class SpecularBorderPainter extends CustomPainter {
       begin: Alignment(lightPos - 0.3, lightPos - 0.3),
       end: Alignment(lightPos + 0.3, lightPos + 0.3),
       colors: [
-        Colors.white.withOpacity(0.0),
-        Colors.white.withOpacity(0.8), // Icy White flash
-        Colors.white.withOpacity(0.0),
+        AppTheme.iceBlue.withOpacity(0.0),
+        AppTheme.iceBlue.withOpacity(0.6), // Icy Blue flash
+        AppTheme.iceBlue.withOpacity(0.0),
       ],
       stops: const [0.0, 0.5, 1.0],
     ).createShader(rect);

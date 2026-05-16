@@ -39,11 +39,13 @@ class _SplashScreenState extends State<SplashScreen>
     final prefs = await SharedPreferences.getInstance();
     final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(milliseconds: 1500), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => isLoggedIn ? const MainNavigation() : const LoginScreen(),
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => isLoggedIn ? const MainNavigation() : const LoginScreen(),
+            transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
+            transitionDuration: const Duration(milliseconds: 800),
           ),
         );
       }

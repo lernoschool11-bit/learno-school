@@ -9,6 +9,7 @@ import 'login_screen.dart';
 import 'user_profile_screen.dart';
 import 'edit_profile_screen.dart';
 import 'admin_panel.dart';
+import '../widgets/digital_id_card.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -205,90 +206,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           children: [
-            // الهيدر
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(bottom: 32, top: 20),
-              decoration: const BoxDecoration(
-                color: Color(0xFF0A2342),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(32),
-                  bottomRight: Radius.circular(32),
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // صورة البروفايل - Centered and Fixed Distortion
-                  GestureDetector(
-                    onTap: _openEditProfile,
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withOpacity(0.2), width: 3),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                        image: avatarUrl != null 
-                          ? DecorationImage(
-                              image: NetworkImage(avatarUrl),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                        color: Colors.white.withAlpha(50),
-                      ),
-                      child: avatarUrl == null
-                          ? Center(
-                              child: Text(
-                                (_userProfile!['fullName'] as String? ?? '؟')[0],
-                                style: const TextStyle(
-                                  fontSize: 40,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            )
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    _userProfile!['fullName'] ?? '',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '@${_userProfile!['username'] ?? ''}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: isTeacher ? Colors.teal : Colors.white.withAlpha(50),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      isTeacher ? 'معلم' : 'طالب',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            // Digital ID Card Section
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
+              child: DigitalIDCard(userData: _userProfile!),
             ),
 
             const SizedBox(height: 16),
@@ -393,15 +314,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withAlpha(15),
-            borderRadius: BorderRadius.circular(12),
+            color: AppTheme.iceBlue.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.iceBlue.withOpacity(0.1)),
           ),
           child: Column(
             children: [
-              Icon(icon, color: AppTheme.primaryColor, size: 22),
+              Icon(icon, color: AppTheme.iceBlue, size: 22),
               const SizedBox(height: 6),
-              Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0A2342))),
-              Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
             ],
           ),
         ),
@@ -411,9 +333,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildInfoTile(IconData icon, String label, String value) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF0A2342)),
-      title: Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-      subtitle: Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+      leading: Icon(icon, color: AppTheme.iceBlue),
+      title: Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+      subtitle: Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.white)),
     );
   }
 }

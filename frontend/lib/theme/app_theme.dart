@@ -15,34 +15,42 @@ class AppTheme {
 
   // ── Core palette ──────────────────────────────────────────────
   static const Color oledBlack      = Color(0xFF000000);
-  static const Color surfaceDark    = Color(0xFF121212);
-  static const Color surfaceLight   = Color(0xFF1A1A1A);
-  static const Color cardDark       = Color(0xFF1E1E1E);
-  static const Color primaryColor   = Color(0xFF678D88);
-  static const Color neonMagenta    = Color(0xFFFF00FF);
+  static const Color surfaceDark    = Color(0xFF0A0A0B);
+  static const Color surfaceLight   = Color(0xFF121214);
+  static const Color iceBlue        = Color(0xFF00D4FF);
+  static const Color nightPurple    = Color(0xFF8A2BE2);
+  static const Color primaryColor   = iceBlue;
+  static const Color accentColor    = nightPurple;
   static const Color textPrimary    = Color(0xFFFFFFFF);
-  static const Color textSecondary  = Color(0xFFB0B0B0);
-  static const Color textHint       = Color(0xFF707070);
-  static const Color dividerColor   = Color(0xFF2A2A2A);
-  static const Color errorRed       = Color(0xFFFF4C6A);
+  static const Color textSecondary  = Color(0xFFA0A0A5);
+  static const Color textHint       = Color(0xFF505055);
+  static const Color dividerColor   = Color(0xFF1E1E22);
+  static const Color errorRed       = Color(0xFFFF3B30);
+  static const Color goldChip       = Color(0xFFFFD700);
 
   // ── Gradient helpers ──────────────────────────────────────────
   static const LinearGradient neonGradient = LinearGradient(
-    colors: [primaryColor, neonMagenta],
+    colors: [iceBlue, nightPurple],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient subtleGradient = LinearGradient(
-    colors: [Color(0xFF0D2B3E), Color(0xFF1A0A2E)],
+    colors: [Color(0xFF000814), Color(0xFF02010A)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient buttonGradient = LinearGradient(
-    colors: [primaryColor, Color(0xFF4A6B67)],
+    colors: [iceBlue, Color(0xFF0088AA)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
+  );
+
+  static const LinearGradient xpGradient = LinearGradient(
+    colors: [Color(0xFF00D4FF), Color(0xFF0088FF)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
   );
 
   // ── Glassmorphism ─────────────────────────────────────────────
@@ -84,13 +92,13 @@ class AppTheme {
       // Color scheme
       colorScheme: const ColorScheme.dark(
         surface: oledBlack,
-        primary: primaryColor,
-        secondary: neonMagenta,
+        primary: iceBlue,
+        secondary: nightPurple,
         error: errorRed,
-        onPrimary: Colors.white,
-        onSecondary: oledBlack,
+        onPrimary: oledBlack,
+        onSecondary: Colors.white,
         onSurface: textPrimary,
-        onError: oledBlack,
+        onError: Colors.white,
         outline: dividerColor,
       ),
 

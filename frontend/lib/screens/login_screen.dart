@@ -132,14 +132,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Learno',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 36,
                   fontWeight: FontWeight.bold,
+                  color: AppTheme.iceBlue,
+                  letterSpacing: 2,
                 ),
               ),
               const Text(
-                'المنصة التعليمية',
+                'المنصة التعليمية المستقبلية',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: TextStyle(fontSize: 14, color: AppTheme.textSecondary, letterSpacing: 1),
               ),
               const SizedBox(height: 48),
 
@@ -221,7 +223,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     MaterialPageRoute(builder: (_) => const RegisterScreen()),
                   );
                 },
-                child: const Text('ليس لديك حساب؟ سجل الآن'),
+                child: const Text(
+                  'ليس لديك حساب؟ سجل الآن',
+                  style: TextStyle(color: AppTheme.iceBlue),
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -252,6 +257,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

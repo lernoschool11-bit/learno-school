@@ -77,37 +77,37 @@ class PremiumMeshPainter extends CustomPainter {
 
     final double phase = progress * 2 * pi;
 
-    // 1. Midnight Purple Nebula
+    // 1. Night Purple Nebula
     _drawBlob(
       canvas, size, paint,
-      const Color(0xFF1A0B2E).withOpacity(0.8),
+      const Color(0xFF1A0B2E).withOpacity(0.8), // Night Purple base
       0.2 + 0.1 * sin(phase),
       0.3 + 0.1 * cos(phase),
       0.8,
     );
 
-    // 2. Icy Blue Nebula
+    // 2. Ice Blue Nebula
     _drawBlob(
       canvas, size, paint,
-      const Color(0xFF0A1A2E).withOpacity(0.7),
+      const Color(0xFF00D4FF).withOpacity(0.5), // Ice Blue
       0.8 + 0.1 * cos(phase * 0.8),
       0.2 + 0.1 * sin(phase * 1.2),
       0.7,
     );
 
-    // 3. Deep Indigo Nebula
+    // 3. Deep Space Black/Indigo
     _drawBlob(
       canvas, size, paint,
-      const Color(0xFF0E0B1A).withOpacity(0.9),
+      const Color(0xFF02010A).withOpacity(0.9),
       0.5 + 0.2 * cos(phase * 0.5),
       0.8 + 0.2 * sin(phase * 0.5),
       1.0,
     );
 
-    // 4. Subtle Violet Flash
+    // 4. Electric Violet Flash
     _drawBlob(
       canvas, size, paint,
-      const Color(0xFF2E0A1A).withOpacity(0.4),
+      const Color(0xFF8A2BE2).withOpacity(0.3), // Night Purple
       0.1 + 0.3 * cos(phase * 1.5),
       0.9 + 0.1 * sin(phase * 0.7),
       0.5,
