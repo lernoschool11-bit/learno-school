@@ -41,6 +41,11 @@ model User {
   isActive    Boolean  @default(true)
   aiRequestsCount Int     @default(0)
   lastAiRequest   DateTime?
+  
+  // Gamification fields
+  points      Int      @default(0)
+  rank        String   @default("مبتدئ")
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -65,6 +70,12 @@ model User {
   teacherGrades Grade[] @relation("TeacherGrades")
   
   onlineClasses OnlineClass[] @relation("TeacherOnlineClasses")
+  
+  quests         Quest[]        @relation("TeacherQuests")
+  questAnswers   QuestAnswer[]
+
+  summaries         Summary[]     @relation("StudentSummaries")
+  approvedSummaries Summary[]     @relation("TeacherApprovedSummaries")
 }
 
 model School {
@@ -301,4 +312,126 @@ model OnlineClass {
   subject     String?
 
   createdAt   DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Audit Log — "الصندوق الأسود"
+// ═══════════════════════════════════════════════════════════════
+// Records every sensitive action with:
+//   - WHO did it (userId + role)
+//   - WHAT they did (action + entity)
+//   - WHEN they did it (timestamp)
+//   - WHERE they came from (IP + user agent)
+//   - The BEFORE and AFTER values
+// ═══════════════════════════════════════════════════════════════
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  
+  // ── Who ─────────────────────────────────────────────────
+  userId      String        // The user who performed the action
+  userRole    String        // Role at the time of action (for historical accuracy)
+  userName    String?       // Cached name for quick display
+
+  // ── What ────────────────────────────────────────────────
+  action      String        // e.g. UPDATE_GRADE, DELETE_USER, FREEZE_USER
+  entity      String        // e.g. "grade", "user", "post"
+  entityId    String        // ID of the affected record
+  
+  // ── Values ──────────────────────────────────────────────
+  oldValue    Json?         // Previous state (snapshot)
+  newValue    Json?         // New state (snapshot)
+  description String?       // Human-readable summary in Arabic
+
+  // ── Context ─────────────────────────────────────────────
+  schoolId    String        // Tenant isolation
+  ipAddress   String?       // Client IP
+  userAgent   String?       // Browser/device info
+  
+  // ── Timestamp ───────────────────────────────────────────
+  createdAt   DateTime @default(now())
+
+  @@index([schoolId, createdAt])
+  @@index([userId])
+  @@index([action])
+  @@index([entity, entityId])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Gamification System - Rewards & Leaderboard
+// ═══════════════════════════════════════════════════════════════
+
+model Quest {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   // نص السؤال التحدي
+  points      Int      @default(50)
+  isActive    Boolean  @default(true)
+  
+  authorId    String
+  author      User     @relation("TeacherQuests", fields: [authorId], references: [id])
+  
+  schoolId    String
+  
+  answers     QuestAnswer[]
+  winnerId    String?  // معرف الطالب الذي فاز بالتحدي
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId, isActive])
+}
+
+model QuestAnswer {
+  id        String   @id @default(uuid())
+  content   String   // نص الإجابة
+  
+  questId   String
+  quest     Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  isCorrect Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([questId, userId]) // إجابة واحدة لكل طالب لكل تحدي
+}
+
+// ═══════════════════════════════════════════════════════════════
+// The Live Vault - Summaries Bank
+// ═══════════════════════════════════════════════════════════════
+
+enum SummaryStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Summary {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  fileUrl     String
+  fileType    String   // PDF, IMAGE, etc.
+  
+  subject     String   // المادة (كيمياء، رياضيات...)
+  grade       String   // الصف
+  section     String?
+  
+  status      SummaryStatus @default(PENDING)
+  
+  studentId   String
+  student     User     @relation("StudentSummaries", fields: [studentId], references: [id])
+  
+  teacherId   String?  // الأستاذ الذي اعتمد الملف
+  approvedBy  User?    @relation("TeacherApprovedSummaries", fields: [teacherId], references: [id])
+  
+  schoolId    String
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId, status])
+  @@index([grade, subject])
 }

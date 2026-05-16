@@ -12,6 +12,8 @@ import adminRoutes from './admin.routes';
 import aiRoutes from './ai.routes';
 import gradeRoutes from './grade.routes';
 import onlineClassRoutes from './onlineClass.routes';
+import gamificationRoutes from './gamification.routes';
+import vaultRoutes from './vault.routes';
 
 const router = Router();
 
@@ -28,5 +30,7 @@ router.use('/admin', adminRoutes);
 router.use('/ai', aiRoutes);
 router.use('/grades', gradeRoutes);
 router.use('/online-classes', onlineClassRoutes);
+router.use('/gamification', gamificationRoutes);
+router.use('/vault', vaultRoutes);
 
 export default router;

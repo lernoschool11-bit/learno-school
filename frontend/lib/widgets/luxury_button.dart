@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
-import 'dynamic_effects.dart';
+import 'premium_visuals.dart';
 
 class LuxuryButton extends StatelessWidget {
   final String label;
@@ -18,8 +16,8 @@ class LuxuryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBounce(
-      onTap: onPressed,
+    return JellyButton(
+      onTap: onPressed ?? () {},
       child: Container(
         width: double.infinity,
         height: 56,

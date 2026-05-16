@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { LayoutDashboard, Users, FileText, Settings, LogOut } from 'lucide-react';
+import { DashboardSkeleton } from '@/components/Skeleton';
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);

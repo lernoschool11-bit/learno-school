@@ -10,6 +10,7 @@ import '../widgets/luxury_button.dart';
 import '../theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'force_password_change_screen.dart';
+import '../widgets/mesh_background.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -112,8 +113,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
+    return MeshBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(

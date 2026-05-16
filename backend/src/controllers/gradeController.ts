@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { Role } from '@prisma/client';
 import prisma from '../lib/prisma';
 import { AuthRequest } from '../middleware/auth';
+import { writeAudit } from '../services/auditService';
 
 // ==================== ADD GRADE (Teacher Only) ====================
 export const addGrade = async (req: AuthRequest, res: Response) => {
@@ -48,6 +49,15 @@ export const addGrade = async (req: AuthRequest, res: Response) => {
           select: { fullName: true }
         }
       }
+    });
+
+    // ✅ سجّل الحدث في الصندوق الأسود
+    await writeAudit(req, {
+      action: 'ADD_GRADE',
+      entity: 'grade',
+      entityId: String(grade.id),
+      newValue: { studentId, subject, title, score: parseFloat(score), maxScore: parseFloat(maxScore) },
+      description: `المعلم أضاف علامة "${title}" للطالب ${grade.student.fullName} — ${score}/${maxScore} في مادة ${subject}`,
     });
 
     return res.status(201).json(grade);

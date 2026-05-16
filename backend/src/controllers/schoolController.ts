@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 import bcrypt from "bcrypt";
 import { AuthRequest } from "../middleware/auth";
+import { writeAudit } from "../services/auditService";
 
 // ==================== FORCE PASSWORD CHANGE ====================
 export const changeInitialPassword = async (req: AuthRequest, res: Response) => {
@@ -37,6 +38,14 @@ export const changeInitialPassword = async (req: AuthRequest, res: Response) => 
                 isPasswordChanged: true,
                 adminPassword: hashedPassword // Syncing school admin password
             }
+        });
+
+        // ✅ سجّل الحدث في الصندوق الأسود
+        await writeAudit(req, {
+            action: 'CHANGE_INITIAL_PASSWORD',
+            entity: 'school',
+            entityId: user.schoolId!,
+            description: `المدير غيّر كلمة المرور الأولية للمدرسة`,
         });
 
         return res.json({ message: "تم تغيير كلمة المرور بنجاح" });
@@ -161,6 +170,15 @@ export const deleteSchoolUser = async (req: AuthRequest, res: Response) => {
             where: { id: targetUserId }
         });
 
+        // ✅ سجّل الحدث في الصندوق الأسود
+        await writeAudit(req, {
+            action: 'DELETE_USER',
+            entity: 'user',
+            entityId: targetUserId,
+            oldValue: { fullName: targetUser.fullName, role: targetUser.role, nationalId: targetUser.nationalId },
+            description: `المدير حذف المستخدم "${targetUser.fullName}" (${targetUser.role})`,
+        });
+
         return res.json({ message: "تم حذف المستخدم بنجاح" });
     } catch (error) {
         console.error("deleteSchoolUser error:", error);
@@ -195,6 +213,18 @@ export const toggleUserStatus = async (req: AuthRequest, res: Response) => {
         const updatedUser = await prisma.user.update({
             where: { id: targetUserId },
             data: { isActive: !targetUser.isActive }
+        });
+
+        // ✅ سجّل الحدث في الصندوق الأسود
+        await writeAudit(req, {
+            action: updatedUser.isActive ? 'UNFREEZE_USER' : 'FREEZE_USER',
+            entity: 'user',
+            entityId: targetUserId,
+            oldValue: { isActive: targetUser.isActive },
+            newValue: { isActive: updatedUser.isActive },
+            description: updatedUser.isActive 
+                ? `المدير فعّل حساب "${targetUser.fullName}"`
+                : `المدير جمّد حساب "${targetUser.fullName}"`,
         });
 
         return res.json({ 

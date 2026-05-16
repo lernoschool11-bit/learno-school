@@ -3,6 +3,9 @@ import { requireAuth, requireRole } from '../middleware/auth';
 import { Role } from '@prisma/client';
 import prisma from '../lib/prisma';
 import * as schoolController from '../controllers/schoolController';
+import * as auditController from '../controllers/auditController';
+import { tenantGuard } from '../middleware/tenantGuard';
+import { rbac } from '../middleware/rbac';
 
 const router = Router();
 
@@ -12,23 +15,26 @@ const router = Router();
 router.post('/force-password-change', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.changeInitialPassword);
 
 // Teacher Secret Code Management
-router.get('/teacher-code', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getTeacherSecretCode);
-router.put('/teacher-code', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.updateTeacherSecretCode);
+router.get('/teacher-code', requireAuth, requireRole([Role.PRINCIPAL]), tenantGuard, schoolController.getTeacherSecretCode);
+router.put('/teacher-code', requireAuth, requireRole([Role.PRINCIPAL]), tenantGuard, schoolController.updateTeacherSecretCode);
 
-// User Management
-router.get('/school-users', requireAuth, requireRole([Role.PRINCIPAL, Role.TEACHER]), schoolController.getSchoolUsers);
-router.delete('/school-users/:userId', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.deleteSchoolUser);
-router.put('/school-users/:userId/toggle-status', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.toggleUserStatus);
+// User Management (with Tenant Guard)
+router.get('/school-users', requireAuth, requireRole([Role.PRINCIPAL, Role.TEACHER]), tenantGuard, schoolController.getSchoolUsers);
+router.delete('/school-users/:userId', requireAuth, requireRole([Role.PRINCIPAL]), tenantGuard, schoolController.deleteSchoolUser);
+router.put('/school-users/:userId/toggle-status', requireAuth, requireRole([Role.PRINCIPAL]), tenantGuard, schoolController.toggleUserStatus);
 
 // Post Moderation
-router.get('/school-posts', requireAuth, requireRole([Role.PRINCIPAL]), schoolController.getSchoolPosts);
+router.get('/school-posts', requireAuth, requireRole([Role.PRINCIPAL]), tenantGuard, schoolController.getSchoolPosts);
 
 // Classes Management
-router.get('/school-classes', requireAuth, requireRole([Role.PRINCIPAL, Role.TEACHER]), schoolController.getSchoolClasses);
+router.get('/school-classes', requireAuth, requireRole([Role.PRINCIPAL, Role.TEACHER]), tenantGuard, schoolController.getSchoolClasses);
 
 // School Stats
-router.get('/school-stats', requireAuth, schoolController.getSchoolStats);
+router.get('/school-stats', requireAuth, tenantGuard, schoolController.getSchoolStats);
 
+// ==================== AUDIT LOG ROUTES ("الصندوق الأسود") ====================
+router.get('/audit-logs', requireAuth, rbac('VIEW_AUDIT_LOGS'), tenantGuard, auditController.getAuditLogs);
+router.get('/audit-logs/stats', requireAuth, rbac('VIEW_AUDIT_LOGS'), tenantGuard, auditController.getAuditStats);
 
 // Verify Teacher Code (Public - used during registration)
 router.post('/verify-teacher-code', async (req, res) => {

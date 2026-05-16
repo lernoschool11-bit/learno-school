@@ -6,8 +6,10 @@ import { createNotification } from './controllers/notificationController';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-dev';
 
+let io: Server;
+
 export const initSocket = (httpServer: HttpServer) => {
-  const io = new Server(httpServer, {
+  io = new Server(httpServer, {
     cors: {
       origin: true,
       methods: ['GET', 'POST'],
@@ -38,6 +40,12 @@ export const initSocket = (httpServer: HttpServer) => {
   io.on('connection', (socket) => {
     const user = (socket as any).user;
     console.log(`✅ ${user.fullName} connected`);
+
+    // انضمام لغرفة المدرسة (Tenant Isolation)
+    if (user.schoolId) {
+      socket.join(user.schoolId);
+      console.log(`🏫 Joined school room: ${user.schoolId}`);
+    }
 
     // ════════ الغرف العامة (موجود مسبقاً) ════════
 
@@ -244,5 +252,12 @@ export const initSocket = (httpServer: HttpServer) => {
     });
   });
 
+  return io;
+};
+
+export const getIO = () => {
+  if (!io) {
+    throw new Error('Socket.io not initialized!');
+  }
   return io;
 };

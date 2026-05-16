@@ -7,7 +7,12 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "prisma generate && npx prisma db push --accept-data-loss && tsc",
     "start": "npx prisma generate && node dist/server.js",
-    "test": "jest --config jest.config.ts"
+    "test": "jest --config jest.config.ts",
+    "service:start": "pm2 start ecosystem.config.js",
+    "service:stop": "pm2 delete learno-backend",
+    "service:restart": "pm2 restart learno-backend",
+    "service:logs": "pm2 logs learno-backend --lines 100",
+    "service:status": "pm2 status"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

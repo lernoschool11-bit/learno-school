@@ -1,44 +1,21 @@
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 /// ──────────────────────────────────────────────────────────────
-/// ThreeDTransformer – Adds a subtle 3D tilt to any child
+/// PremiumThreeDTransformer – Upgraded with Gyroscope & Specular Highlights
 /// ──────────────────────────────────────────────────────────────
-/// Modes:
-///   1. **Touch / pointer** – tilts toward the user's finger.
-///   2. **Scroll-aware**    – set [scrollFraction] (0→1) for
-///      a parallax tilt as the card enters/exits the viewport.
-///
-/// Usage:
-///   ThreeDTransformer(child: MyCard())  // touch mode (default)
-///
-///   ThreeDTransformer(                  // scroll mode
-///     scrollFraction: fraction,
-///     child: MyCard(),
-///   )
-///
-/// IMPORTANT: This widget does NOT contain any business logic.
-/// ──────────────────────────────────────────────────────────────
-
 class ThreeDTransformer extends StatefulWidget {
   final Widget child;
-
-  /// Max tilt angle in radians (default ≈ 4°).
   final double maxTilt;
-
-  /// If non-null, drives the tilt from scroll position instead of pointer.
-  /// Should be a value from 0.0 (top) to 1.0 (bottom).
-  final double? scrollFraction;
-
-  /// Duration for the spring-back animation.
-  final Duration resetDuration;
+  final bool useGyro;
 
   const ThreeDTransformer({
     super.key,
     required this.child,
-    this.maxTilt = 0.07,
-    this.scrollFraction,
-    this.resetDuration = const Duration(milliseconds: 400),
+    this.maxTilt = 0.05,
+    this.useGyro = true,
   });
 
   @override
@@ -48,68 +25,137 @@ class ThreeDTransformer extends StatefulWidget {
 class _ThreeDTransformerState extends State<ThreeDTransformer> {
   double _rotateX = 0;
   double _rotateY = 0;
+  double _scrollProgress = 0.5;
+  final GlobalKey _cardKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
-    // ── Scroll-driven mode ─────────────────────────────
-    if (widget.scrollFraction != null) {
-      final f = (widget.scrollFraction! - 0.5) * 2; // –1 → +1
-      return Transform(
-        alignment: FractionalOffset.center,
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // perspective
-          ..rotateX(f * widget.maxTilt),
-        child: widget.child,
-      );
-    }
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (_cardKey.currentContext != null) {
+          final RenderBox box = _cardKey.currentContext!.findRenderObject() as RenderBox;
+          final position = box.localToGlobal(Offset.zero).dy;
+          final screenHeight = MediaQuery.of(context).size.height;
+          
+          setState(() {
+            _scrollProgress = (position / screenHeight).clamp(0.0, 1.0);
+          });
+        }
+        return false;
+      },
+      child: StreamBuilder<GyroscopeEvent>(
+        stream: widget.useGyro ? gyroscopeEvents : const Stream.empty(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // Transform gyroscope data to rotation
+            _rotateY = (snapshot.data!.y * 0.05).clamp(-widget.maxTilt, widget.maxTilt);
+            _rotateX = (snapshot.data!.x * 0.05).clamp(-widget.maxTilt, widget.maxTilt);
+          }
 
-    // ── Pointer-driven mode ────────────────────────────
-    return MouseRegion(
-      onHover: (e) => _onPointer(e.localPosition, e),
-      onExit: (_) => _reset(),
-      child: GestureDetector(
-        onPanUpdate: (d) => _onPointerRaw(d.localPosition),
-        onPanEnd: (_) => _reset(),
-        child: AnimatedContainer(
-          duration: widget.resetDuration,
-          curve: Curves.easeOutBack,
-          child: Transform(
-            alignment: FractionalOffset.center,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001)
-              ..rotateX(_rotateX)
-              ..rotateY(_rotateY),
-            child: widget.child,
-          ),
-        ),
+          return Center(
+            key: _cardKey,
+            child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.002) // Perspective Depth
+                ..rotateX(_rotateX)
+                ..rotateY(_rotateY),
+              child: Stack(
+                children: [
+                  // Shadow (moves in opposite direction for depth)
+                  Transform.translate(
+                    offset: Offset(-_rotateY * 150, -_rotateX * 150),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 40,
+                            spreadRadius: -10,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // The Main Card (Glassmorphism)
+                  Container(
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.1),
+                        width: 1,
+                      ),
+                    ),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: widget.child,
+                    ),
+                  ),
+
+                  // Specular Highlight (Light streak on scroll)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: CustomPaint(
+                        painter: SpecularHighlightPainter(
+                          progress: _scrollProgress,
+                          tiltX: _rotateY,
+                          tiltY: _rotateX,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
+}
 
-  void _onPointer(Offset local, PointerEvent e) {
-    final box = context.findRenderObject() as RenderBox?;
-    if (box == null) return;
-    _onPointerRaw(local);
+class SpecularHighlightPainter extends CustomPainter {
+  final double progress;
+  final double tiltX;
+  final double tiltY;
+
+  SpecularHighlightPainter({
+    required this.progress,
+    required this.tiltX,
+    required this.tiltY,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+
+    // Calculate light position based on scroll and tilt
+    double lightPos = progress * 2.0 - 0.5;
+    lightPos += tiltX * 3.0; // Influence from gyroscope
+
+    paint.shader = LinearGradient(
+      begin: Alignment(lightPos - 0.4, lightPos - 0.4),
+      end: Alignment(lightPos + 0.4, lightPos + 0.4),
+      colors: [
+        Colors.white.withOpacity(0.0),
+        Colors.white.withOpacity(0.6), // Specular flash
+        Colors.white.withOpacity(0.0),
+      ],
+      stops: const [0.0, 0.5, 1.0],
+    ).createShader(rect);
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(24)),
+      paint,
+    );
   }
 
-  void _onPointerRaw(Offset local) {
-    final box = context.findRenderObject() as RenderBox?;
-    if (box == null) return;
-    final size = box.size;
-    // Normalise –1 → +1
-    final nx = (local.dx / size.width  - 0.5) * 2;
-    final ny = (local.dy / size.height - 0.5) * 2;
-
-    setState(() {
-      _rotateY =  nx * widget.maxTilt;
-      _rotateX = -ny * widget.maxTilt;
-    });
-  }
-
-  void _reset() {
-    setState(() {
-      _rotateX = 0;
-      _rotateY = 0;
-    });
-  }
+  @override
+  bool shouldRepaint(SpecularHighlightPainter oldDelegate) => true;
 }

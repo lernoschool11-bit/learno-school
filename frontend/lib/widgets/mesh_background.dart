@@ -1,6 +1,10 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
+/// ──────────────────────────────────────────────────────────────
+/// Upgraded Premium Mesh Background
+/// ──────────────────────────────────────────────────────────────
 class MeshBackground extends StatefulWidget {
   final Widget child;
 
@@ -18,8 +22,8 @@ class _MeshBackgroundState extends State<MeshBackground> with SingleTickerProvid
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 20), // Slower for "life"
-    )..repeat();
+      duration: const Duration(seconds: 15), // Slow fluid motion
+    )..repeat(reverse: true);
   }
 
   @override
@@ -32,17 +36,26 @@ class _MeshBackgroundState extends State<MeshBackground> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // OLED Black base
-        Container(color: Colors.black),
+        // True OLED Black Base
+        Container(color: const Color(0xFF000000)),
         
+        // Moving Light Nebula
         AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
             return CustomPaint(
-              painter: MeshPainter(_controller.value),
+              painter: PremiumMeshPainter(_controller.value),
               size: Size.infinite,
             );
           },
+        ),
+        
+        // The Glass Layer (Optional extra blur for content depth)
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+            child: Container(color: Colors.transparent),
+          ),
         ),
         
         // Content
@@ -52,67 +65,64 @@ class _MeshBackgroundState extends State<MeshBackground> with SingleTickerProvid
   }
 }
 
-class MeshPainter extends CustomPainter {
-  final double animationValue;
+class PremiumMeshPainter extends CustomPainter {
+  final double progress;
 
-  MeshPainter(this.animationValue);
+  PremiumMeshPainter(this.progress);
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 120); // Blurry Gradient
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 100);
 
-    final double phase = animationValue * 2 * pi;
+    final double phase = progress * 2 * pi;
 
-    // Deep Purple Blobs
+    // 1. Midnight Purple Nebula
     _drawBlob(
-      canvas, 
-      size, 
-      paint, 
-      const Color(0xFF6200EA).withAlpha(35), 
-      0.3 + 0.15 * sin(phase), 
-      0.2 + 0.15 * cos(phase), 
+      canvas, size, paint,
+      const Color(0xFF1A0B2E).withOpacity(0.8),
+      0.2 + 0.1 * sin(phase),
+      0.3 + 0.1 * cos(phase),
+      0.8,
+    );
+
+    // 2. Icy Blue Nebula
+    _drawBlob(
+      canvas, size, paint,
+      const Color(0xFF0A1A2E).withOpacity(0.7),
+      0.8 + 0.1 * cos(phase * 0.8),
+      0.2 + 0.1 * sin(phase * 1.2),
       0.7,
     );
 
+    // 3. Deep Indigo Nebula
     _drawBlob(
-      canvas, 
-      size, 
-      paint, 
-      const Color(0xFF7C4DFF).withAlpha(25), 
-      0.8 + 0.1 * cos(phase * 0.8), 
-      0.4 + 0.1 * sin(phase * 1.2), 
+      canvas, size, paint,
+      const Color(0xFF0E0B1A).withOpacity(0.9),
+      0.5 + 0.2 * cos(phase * 0.5),
+      0.8 + 0.2 * sin(phase * 0.5),
+      1.0,
+    );
+
+    // 4. Subtle Violet Flash
+    _drawBlob(
+      canvas, size, paint,
+      const Color(0xFF2E0A1A).withOpacity(0.4),
+      0.1 + 0.3 * cos(phase * 1.5),
+      0.9 + 0.1 * sin(phase * 0.7),
       0.5,
-    );
-
-    // Teal Blobs
-    _drawBlob(
-      canvas, 
-      size, 
-      paint, 
-      const Color(0xFF00BFA5).withAlpha(30), 
-      0.7 + 0.2 * cos(phase), 
-      0.8 + 0.15 * sin(phase), 
-      0.6,
-    );
-
-    _drawBlob(
-      canvas, 
-      size, 
-      paint, 
-      const Color(0xFF1DE9B6).withAlpha(20), 
-      0.2 + 0.1 * sin(phase * 0.7), 
-      0.7 + 0.1 * cos(phase * 1.3), 
-      0.4,
     );
   }
 
-  void _drawBlob(Canvas canvas, Size size, Paint paint, Color color, double xFactor, double yFactor, double sizeFactor) {
+  void _drawBlob(Canvas canvas, Size size, Paint paint, Color color, double x, double y, double radiusFactor) {
     paint.color = color;
-    final center = Offset(size.width * xFactor, size.height * yFactor);
-    canvas.drawCircle(center, size.width * sizeFactor, paint);
+    canvas.drawCircle(
+      Offset(size.width * x, size.height * y),
+      size.width * radiusFactor,
+      paint,
+    );
   }
 
   @override
-  bool shouldRepaint(covariant MeshPainter oldDelegate) => true;
+  bool shouldRepaint(covariant PremiumMeshPainter oldDelegate) => true;
 }

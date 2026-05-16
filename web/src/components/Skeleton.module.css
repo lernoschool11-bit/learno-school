@@ -1,0 +1,161 @@
+/* ═══════════════════════════════════════════════════════════════
+   Skeleton Loading CSS — "خداع البصر"
+   Shimmer animation that makes the app feel 30% faster
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Base Skeleton ────────────────────────────────────────── */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(220, 15%, 18%) 0%,
+    hsl(220, 15%, 25%) 40%,
+    hsl(220, 15%, 18%) 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Text Line ────────────────────────────────────────────── */
+.text {
+  height: 0.9rem;
+  width: 100%;
+}
+
+/* ── Avatar ───────────────────────────────────────────────── */
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Stat Cards Grid ──────────────────────────────────────── */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.statCard {
+  height: 10rem;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: linear-gradient(
+    90deg,
+    hsla(220, 15%, 15%, 0.6) 0%,
+    hsla(220, 15%, 22%, 0.6) 40%,
+    hsla(220, 15%, 15%, 0.6) 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border: 1px solid hsla(220, 20%, 30%, 0.3);
+}
+
+.statNumber {
+  width: 3.5rem;
+  height: 2.2rem;
+  border-radius: 8px;
+}
+
+.statLabel {
+  width: 5rem;
+  height: 0.7rem;
+  border-radius: 4px;
+}
+
+/* ── Table ────────────────────────────────────────────────── */
+.tableWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.tableRow {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+
+.tableHeader {
+  height: 0.7rem;
+  flex: 1;
+  opacity: 0.7;
+}
+
+.tableCell {
+  height: 0.85rem;
+  flex: 1;
+}
+
+/* ── Post Card ────────────────────────────────────────────── */
+.postList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.postCard {
+  padding: 1.25rem;
+  border-radius: 16px;
+  border: 1px solid hsla(220, 20%, 30%, 0.3);
+  background: hsla(220, 15%, 12%, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.postMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+/* ── Dashboard Skeleton ───────────────────────────────────── */
+.dashboardSkeleton {
+  padding: 2rem;
+}
+
+.dashHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+}

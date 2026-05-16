@@ -9,6 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-dev';
 export interface AuthRequest extends Request {
     user?: {
         id: string;
+        fullName: string;
         role: Role;
         nationalId: string;
         schoolId?: string | null;
@@ -34,6 +35,7 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
             where: { id: decoded.id },
             select: { 
                 id: true, 
+                fullName: true,
                 role: true, 
                 nationalId: true, 
                 schoolId: true, 

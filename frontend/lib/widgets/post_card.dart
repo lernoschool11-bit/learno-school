@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../screens/user_profile_screen.dart';
 import 'video_player_widget.dart';
 import 'three_d_transformer.dart';
+import 'premium_visuals.dart';
 
 class PostCard extends StatefulWidget {
   final PostModel post;
@@ -318,40 +319,49 @@ class _PostCardState extends State<PostCard> {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               children: [
-                TextButton.icon(
-                  onPressed: _loadingLike ? null : _toggleLike,
-                  icon: _loadingLike
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(
-                          widget.post.isLiked ? Icons.favorite : Icons.favorite_border,
-                          size: 20,
-                          color: widget.post.isLiked ? Colors.red : null,
-                        ),
-                  label: Text(
-                    '${widget.post.likes}',
-                    style: TextStyle(color: widget.post.isLiked ? Colors.red : null),
+                JellyButton(
+                  onTap: _loadingLike ? () {} : _toggleLike,
+                  child: TextButton.icon(
+                    onPressed: null, // Handled by JellyButton
+                    icon: _loadingLike
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            widget.post.isLiked ? Icons.favorite : Icons.favorite_border,
+                            size: 20,
+                            color: widget.post.isLiked ? Colors.red : null,
+                          ),
+                    label: Text(
+                      '${widget.post.likes}',
+                      style: TextStyle(color: widget.post.isLiked ? Colors.red : null),
+                    ),
                   ),
                 ),
-                TextButton.icon(
-                  onPressed: _toggleComments,
-                  icon: Icon(
-                    _showComments ? Icons.comment : Icons.comment_outlined,
-                    size: 20,
-                    color: _showComments ? const Color(0xFF0A2342) : null,
-                  ),
-                  label: Text(
-                    '${widget.post.comments}',
-                    style: TextStyle(color: _showComments ? const Color(0xFF0A2342) : null),
+                JellyButton(
+                  onTap: _toggleComments,
+                  child: TextButton.icon(
+                    onPressed: null, // Handled by JellyButton
+                    icon: Icon(
+                      _showComments ? Icons.comment : Icons.comment_outlined,
+                      size: 20,
+                      color: _showComments ? const Color(0xFF0A2342) : null,
+                    ),
+                    label: Text(
+                      '${widget.post.comments}',
+                      style: TextStyle(color: _showComments ? const Color(0xFF0A2342) : null),
+                    ),
                   ),
                 ),
-                TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.share_outlined, size: 20),
-                  label: const Text('مشاركة'),
+                JellyButton(
+                  onTap: () {},
+                  child: TextButton.icon(
+                    onPressed: null, // Handled by JellyButton
+                    icon: const Icon(Icons.share_outlined, size: 20),
+                    label: const Text('مشاركة'),
+                  ),
                 ),
               ],
             ),
