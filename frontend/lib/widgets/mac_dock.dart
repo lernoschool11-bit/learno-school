@@ -203,13 +203,13 @@ class _DockIconState extends State<_DockIcon> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: widget.isActive
-                    ? const Color(0xFF480CA8).withOpacity(0.4) // Subtle Purple Glow
+                    ? AppTheme.sovereignTeal.withOpacity(0.15)
                     : Colors.transparent,
                 boxShadow: widget.isActive
                     ? [
                         BoxShadow(
-                          color: const Color(0xFF480CA8).withOpacity(0.5),
-                          blurRadius: 20,
+                          color: AppTheme.sovereignTeal.withOpacity(0.4),
+                          blurRadius: 20, // The Search Glow effect
                           spreadRadius: 2,
                         ),
                       ]
@@ -219,24 +219,24 @@ class _DockIconState extends State<_DockIcon> {
                 widget.item.icon,
                 size: size,
                 color: widget.isActive
-                    ? AppTheme.primaryColor
-                    : AppTheme.textSecondary,
+                    ? AppTheme.sovereignTeal
+                    : Colors.grey[800],
               ),
             ),
             const SizedBox(height: 2),
-            // Active dot
+            // Active Aura
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
-              width: widget.isActive ? 5 : 0,
-              height: widget.isActive ? 5 : 0,
+              width: widget.isActive ? 4 : 0,
+              height: widget.isActive ? 4 : 0,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.primaryColor,
+                color: AppTheme.sovereignTeal,
                 boxShadow: widget.isActive
                     ? [
                         BoxShadow(
-                          color: AppTheme.primaryColor.withAlpha(120),
-                          blurRadius: 6,
+                          color: AppTheme.sovereignTeal.withOpacity(0.8),
+                          blurRadius: 8,
                         ),
                       ]
                     : [],

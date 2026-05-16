@@ -222,15 +222,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const Text(
                     'منشوراتي', 
                     style: TextStyle(
-                      fontSize: 16, 
-                      fontWeight: FontWeight.w300, // Light typography as requested
-                      color: Colors.white70,
+                      fontSize: 18, 
+                      fontWeight: FontWeight.bold, // Titles Bold White
+                      color: Colors.white,
                     )
                   ),
                   const Spacer(),
                   Text(
                     '${posts.length} منشور', 
-                    style: const TextStyle(color: Colors.white24, fontSize: 12)
+                    style: const TextStyle(
+                      color: AppTheme.sovereignTeal, 
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300, // Sub-info w300
+                    )
                   ),
                 ],
               ),

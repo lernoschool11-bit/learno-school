@@ -205,10 +205,10 @@ class _MainNavigationState extends State<MainNavigation> {
                           height: 60,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: const Color(0xFF1A0A2E), // Darker Purple
+                            gradient: AppTheme.sovereignGradient,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF480CA8).withOpacity(0.3),
+                                color: AppTheme.sovereignTeal.withOpacity(0.2),
                                 blurRadius: 20,
                                 spreadRadius: 1,
                               ),

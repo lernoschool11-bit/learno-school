@@ -56,120 +56,117 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
           height: 280,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            // No Border as requested
+            // Border removed as requested
             boxShadow: [
-              // Purple Halo Glow
+              // Sovereign Halo Glow (Low opacity)
               BoxShadow(
-                color: const Color(0xFF480CA8).withOpacity(0.3),
-                blurRadius: 35,
-                spreadRadius: 2,
+                color: AppTheme.sovereignTeal.withOpacity(0.1),
+                blurRadius: 30,
+                spreadRadius: 5,
               ),
             ],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Subtle glass
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
-                  color: const Color(0xFF121212), // Deep gray as requested
+                  color: const Color(0xFF0A0A0A), // Deep Surface color
                 ),
-                child: Stack(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Content
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // School Info
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // School Micro-text
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              school.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white12,
-                                fontSize: 8,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            const Icon(Icons.verified_user_outlined, color: Colors.white10, size: 18),
-                          ],
+                        Text(
+                          school.toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white12,
+                            fontSize: 8,
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.w300,
+                          ),
                         ),
-                        const SizedBox(height: 20),
-                        
-                        Row(
-                          children: [
-                            // Avatar
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: avatarUrl != null
-                                    ? DecorationImage(
-                                        image: NetworkImage(avatarUrl),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null,
-                                color: Colors.white.withOpacity(0.03),
-                              ),
-                              child: avatarUrl == null
-                                  ? const Icon(Icons.person_outline, color: Colors.white12, size: 35)
-                                  : null,
-                            ),
-                            const SizedBox(width: 20),
-                            // Basic Info
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    fullName,
-                                    style: const TextStyle(
-                                      color: AppTheme.offWhite,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    'ID: @$username',
-                                    style: const TextStyle(
-                                      color: Colors.white38,
-                                      fontSize: 11,
-                                      fontFamily: 'monospace',
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  _buildTag('LVL $level', const Color(0xFF480CA8)),
-                                ],
-                              ),
-                            ),
-                          ],
+                        const Icon(Icons.shield_outlined, color: Colors.white10, size: 18),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    Row(
+                      children: [
+                        // Avatar
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: avatarUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(avatarUrl),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                            color: Colors.white.withOpacity(0.02),
+                          ),
+                          child: avatarUrl == null
+                              ? const Icon(Icons.person_outline, color: Colors.white10, size: 35)
+                              : null,
                         ),
-                        
-                        const Spacer(),
-                        
-                        _buildDataRow('المدرسة', school),
-                        if (!isTeacher)
-                          _buildDataRow('الصف', 'الصف $grade "$section"')
-                        else
-                          _buildDataRow('المواد', subjects),
-                        
-                        const SizedBox(height: 15),
-                        const Divider(color: Colors.white10, height: 1),
-                        const SizedBox(height: 15),
+                        const SizedBox(width: 20),
+                        // Basic Info
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                fullName,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold, // Large titles Bold White
+                                ),
+                              ),
+                              Text(
+                                'ID: @$username',
+                                style: const TextStyle(
+                                  color: AppTheme.sovereignTeal,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w300, // Sub-info w300
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              _buildTag('LVL $level', AppTheme.sovereignTeal),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const Spacer(),
+                    
+                    _buildDataRow('المدرسة', school),
+                    if (!isTeacher)
+                      _buildDataRow('الصف الدراسي', 'الصف $grade "$section"')
+                    else
+                      _buildDataRow('المواد الدراسية', subjects),
+                    
+                    const SizedBox(height: 15),
+                    const Divider(color: Colors.white10, height: 1),
+                    const SizedBox(height: 15),
 
-                        // Stats
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStat('المتابعون', followers.toString()),
-                            _buildStat('يتابع', following.toString()),
-                            _buildStat('النقاط', points.toString()),
-                          ],
-                        ),
+                    // Stats
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStat('المتابعون', followers.toString()),
+                        _buildStat('يتابع', following.toString()),
+                        _buildStat('النقاط', points.toString()),
                       ],
                     ),
                   ],
@@ -202,7 +199,14 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
       child: Row(
         children: [
           Text('$label: ', style: const TextStyle(color: Colors.white12, fontSize: 10)),
-          Text(value, style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w300)),
+          Text(
+            value, 
+            style: const TextStyle(
+              color: AppTheme.sovereignTeal, 
+              fontSize: 10, 
+              fontWeight: FontWeight.w300 // Sub-info w300
+            )
+          ),
         ],
       ),
     );
@@ -213,9 +217,16 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
       children: [
         Text(
           value,
-          style: const TextStyle(color: AppTheme.offWhite, fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        Text(label, style: const TextStyle(color: Colors.white10, fontSize: 8)),
+        Text(
+          label, 
+          style: const TextStyle(
+            color: AppTheme.sovereignTeal, 
+            fontSize: 8,
+            fontWeight: FontWeight.w300
+          )
+        ),
       ],
     );
   }

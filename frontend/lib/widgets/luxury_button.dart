@@ -29,18 +29,15 @@ class LuxuryButton extends StatelessWidget {
             width: double.infinity,
             height: 56,
             decoration: BoxDecoration(
+              gradient: onPressed == null ? null : AppTheme.sovereignGradient,
               color: onPressed == null 
                   ? Colors.white.withOpacity(0.05) 
-                  : Colors.black.withOpacity(0.4),
+                  : null,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.05),
-                width: 0.5,
-              ),
               boxShadow: [
                 if (onPressed != null)
                   BoxShadow(
-                    color: const Color(0xFF480CA8).withOpacity(0.1),
+                    color: AppTheme.sovereignTeal.withOpacity(0.15),
                     blurRadius: 15,
                     spreadRadius: 2,
                   ),

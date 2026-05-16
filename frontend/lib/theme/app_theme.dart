@@ -13,15 +13,15 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._(); // prevent instantiation
 
-  // ── Calm & Premium Palette ────────────────────────────────────
+  // ── Sovereign Palette ─────────────────────────────────────────
   static const Color oledBlack      = Color(0xFF000000);
   static const Color surfaceDark    = Color(0xFF0A0A0A);
   static const Color surfaceLight   = Color(0xFF121212);
-  static const Color deepNavy       = Color(0xFF0A2342); // The "Old" calm color
-  static const Color softPurple     = Color(0xFF480CA8);
-  static const Color primaryColor   = deepNavy;
-  static const Color accentColor    = softPurple;
-  static const Color textPrimary    = Color(0xFFE0E0E0);
+  static const Color sovereignTeal  = Color(0xFF56877A); // The new "Calm & Premium" color
+  static const Color darkAccent     = Color(0xFF1A1A1A);
+  static const Color primaryColor   = sovereignTeal;
+  static const Color accentColor    = sovereignTeal;
+  static const Color textPrimary    = Color(0xFFFFFFFF);
   static const Color textSecondary  = Color(0xFF808080);
   static const Color textHint       = Color(0xFF505050);
   static const Color dividerColor   = Color(0xFF1A1A1A);
@@ -36,17 +36,14 @@ class AppTheme {
   static const Color nightPurple    = softPurple;
 
   // ── Gradient helpers ──────────────────────────────────────────
-  static const LinearGradient neonGradient = LinearGradient(
-    colors: [softPurple, deepNavy],
+  static const LinearGradient sovereignGradient = LinearGradient(
+    colors: [sovereignTeal, darkAccent],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient darkButtonGradient = LinearGradient(
-    colors: [Color(0xFF1A0A2E), oledBlack],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  static const LinearGradient neonGradient = sovereignGradient;
+  static const LinearGradient darkButtonGradient = sovereignGradient;
 
   static const LinearGradient surfaceGradient = LinearGradient(
     colors: [Color(0xFF0A0A0A), Color(0xFF000000)],
