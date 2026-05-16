@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import '../theme/app_theme.dart';
 import 'premium_visuals.dart';
 
@@ -20,55 +21,61 @@ class LuxuryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return JellyButton(
       onTap: onPressed ?? () {},
-      child: Container(
-        width: double.infinity,
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: onPressed == null ? null : AppTheme.darkButtonGradient,
-          color: onPressed == null ? AppTheme.surfaceLight : null,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: onPressed == null ? Colors.transparent : AppTheme.electricPurple.withOpacity(0.5),
-            width: 1,
-          ),
-          boxShadow: onPressed == null
-              ? []
-              : [
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            width: double.infinity,
+            height: 56,
+            decoration: BoxDecoration(
+              color: onPressed == null 
+                  ? Colors.white.withOpacity(0.05) 
+                  : Colors.black.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.05),
+                width: 0.5,
+              ),
+              boxShadow: [
+                if (onPressed != null)
                   BoxShadow(
-                    color: AppTheme.electricPurple.withOpacity(0.1),
-                    blurRadius: 12,
+                    color: const Color(0xFF480CA8).withOpacity(0.1),
+                    blurRadius: 15,
                     spreadRadius: 2,
                   ),
-                ],
-        ),
-        child: Center(
-          child: isLoading
-              ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(icon, color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
-                    ],
-                    Text(
-                      label,
-                      style: const TextStyle(
+              ],
+            ),
+            child: Center(
+              child: isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
                         color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
                       ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (icon != null) ...[
+                          Icon(icon, color: AppTheme.offWhite, size: 20),
+                          const SizedBox(width: 8),
+                        ],
+                        Text(
+                          label,
+                          style: const TextStyle(
+                            color: AppTheme.offWhite,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300, // Light typography
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+            ),
+          ),
         ),
       ),
     );

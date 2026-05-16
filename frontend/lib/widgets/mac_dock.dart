@@ -203,14 +203,14 @@ class _DockIconState extends State<_DockIcon> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: widget.isActive
-                    ? AppTheme.primaryColor.withAlpha(30)
+                    ? const Color(0xFF480CA8).withOpacity(0.4) // Subtle Purple Glow
                     : Colors.transparent,
                 boxShadow: widget.isActive
                     ? [
                         BoxShadow(
-                          color: AppTheme.primaryColor.withAlpha(60),
-                          blurRadius: 16,
-                          spreadRadius: 1,
+                          color: const Color(0xFF480CA8).withOpacity(0.5),
+                          blurRadius: 20,
+                          spreadRadius: 2,
                         ),
                       ]
                     : [],

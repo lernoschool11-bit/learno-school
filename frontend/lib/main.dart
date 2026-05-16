@@ -117,20 +117,27 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 
   List<MacDockItem> _getDockItems() {
-    return [
-      const MacDockItem(icon: Icons.home, label: 'الرئيسية'),
-      const MacDockItem(icon: Icons.search, label: 'البحث'),
-      if (_userRole == 'TEACHER' || _userRole == 'STUDENT')
-        const MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'),
-      if (_userRole == 'PRINCIPAL')
-        MacDockItem(icon: Icons.admin_panel_settings, label: 'الإدارة'),
-      const MacDockItem(icon: Icons.groups, label: 'مجتمعي'),
-      // AI moved to separate FAB
-      if (_userRole == 'STUDENT') const MacDockItem(icon: Icons.grade, label: 'علاماتي'),
-      if (_userRole == 'TEACHER') const MacDockItem(icon: Icons.edit_note, label: 'رصد'),
-      if (_userRole == 'PRINCIPAL' || _userRole == 'TEACHER') const MacDockItem(icon: Icons.assessment, label: 'السجل'),
-      const MacDockItem(icon: Icons.person, label: 'حسابي'),
-    ];
+    List<MacDockItem> items = [];
+    items.add(const MacDockItem(icon: Icons.home_outlined, label: 'الرئيسية'));
+    
+    final role = _userRole;
+    if (role == 'PRINCIPAL' || role == 'ADMIN') {
+      items.add(const MacDockItem(icon: Icons.dashboard_outlined, label: 'الإدارة'));
+    }
+    
+    items.add(const MacDockItem(icon: Icons.search_outlined, label: 'البحث'));
+    items.add(const MacDockItem(icon: Icons.add_circle_outline, label: 'نشر'));
+
+    if (role == 'TEACHER') {
+      items.add(const MacDockItem(icon: Icons.edit_note_outlined, label: 'رصد'));
+      items.add(const MacDockItem(icon: Icons.assessment_outlined, label: 'السجل'));
+    } else {
+      items.add(const MacDockItem(icon: Icons.groups_outlined, label: 'مجتمعي'));
+      items.add(const MacDockItem(icon: Icons.grade_outlined, label: 'علاماتي'));
+    }
+
+    items.add(const MacDockItem(icon: Icons.person_outline, label: 'حسابي'));
+    return items;
   }
 
   // ✅ Force Logout - استخدمه للـ debug أو زر تسجيل الخروج
@@ -198,23 +205,19 @@ class _MainNavigationState extends State<MainNavigation> {
                           height: 60,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppTheme.surfaceDark.withAlpha(180),
-                            border: Border.all(
-                              color: AppTheme.primaryColor.withAlpha(100),
-                              width: 1.5,
-                            ),
+                            color: const Color(0xFF1A0A2E), // Darker Purple
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.primaryColor.withAlpha(40),
-                                blurRadius: 15,
-                                spreadRadius: 2,
+                                color: const Color(0xFF480CA8).withOpacity(0.3),
+                                blurRadius: 20,
+                                spreadRadius: 1,
                               ),
                             ],
                           ),
                           child: const Icon(
-                            Icons.auto_awesome, 
-                            color: Colors.white70, 
-                            size: 30
+                            Icons.auto_awesome_outlined, 
+                            color: AppTheme.offWhite, 
+                            size: 28
                           ),
                         ),
                       ),

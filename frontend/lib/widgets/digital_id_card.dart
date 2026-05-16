@@ -44,7 +44,7 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
     final avatarUrl = widget.userData['avatarUrl'];
 
     return JellyButton(
-      onTap: () {}, // Interactive feel
+      onTap: () {},
       child: Transform(
         alignment: Alignment.center,
         transform: Matrix4.identity()
@@ -55,54 +55,29 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
           width: double.infinity,
           height: 280,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(24),
+            // No Border as requested
             boxShadow: [
+              // Purple Halo Glow
               BoxShadow(
-                color: AppTheme.electricPurple.withOpacity(0.15),
-                blurRadius: 40,
-                spreadRadius: -10,
+                color: const Color(0xFF480CA8).withOpacity(0.3),
+                blurRadius: 35,
+                spreadRadius: 2,
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(24),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Subtle glass
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
-                    width: 0.5,
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withOpacity(0.05),
-                      Colors.white.withOpacity(0.02),
-                    ],
-                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  color: const Color(0xFF121212), // Deep gray as requested
                 ),
                 child: Stack(
                   children: [
-                    // Neon Gradient Border (Subtle inner glow)
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(32),
-                          border: Border.all(
-                            color: Colors.transparent,
-                            width: 1,
-                          ),
-                        ),
-                        child: CustomPaint(
-                          painter: NeonBorderPainter(),
-                        ),
-                      ),
-                    ),
-
                     // Content
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,13 +89,12 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
                             Text(
                               school.toUpperCase(),
                               style: const TextStyle(
-                                color: Colors.white24,
+                                color: Colors.white12,
                                 fontSize: 8,
                                 letterSpacing: 1.5,
-                                fontWeight: FontWeight.w300,
                               ),
                             ),
-                            const Icon(Icons.blur_on, color: Colors.white10, size: 20),
+                            const Icon(Icons.verified_user_outlined, color: Colors.white10, size: 18),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -129,14 +103,10 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
                           children: [
                             // Avatar
                             Container(
-                              width: 85,
-                              height: 85,
+                              width: 80,
+                              height: 80,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppTheme.electricPurple.withOpacity(0.3),
-                                  width: 1,
-                                ),
                                 image: avatarUrl != null
                                     ? DecorationImage(
                                         image: NetworkImage(avatarUrl),
@@ -146,7 +116,7 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
                                 color: Colors.white.withOpacity(0.03),
                               ),
                               child: avatarUrl == null
-                                  ? const Icon(Icons.person, color: Colors.white12, size: 35)
+                                  ? const Icon(Icons.person_outline, color: Colors.white12, size: 35)
                                   : null,
                             ),
                             const SizedBox(width: 20),
@@ -158,22 +128,21 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
                                   Text(
                                     fullName,
                                     style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
+                                      color: AppTheme.offWhite,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.5,
                                     ),
                                   ),
                                   Text(
                                     'ID: @$username',
                                     style: const TextStyle(
-                                      color: AppTheme.skyBlue,
+                                      color: Colors.white38,
                                       fontSize: 11,
                                       fontFamily: 'monospace',
                                     ),
                                   ),
                                   const SizedBox(height: 10),
-                                  _buildTag('LVL $level', AppTheme.electricPurple),
+                                  _buildTag('LVL $level', const Color(0xFF480CA8)),
                                 ],
                               ),
                             ),
@@ -182,7 +151,6 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
                         
                         const Spacer(),
                         
-                        // Extra Data (ID Style)
                         _buildDataRow('المدرسة', school),
                         if (!isTeacher)
                           _buildDataRow('الصف', 'الصف $grade "$section"')
@@ -190,10 +158,10 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
                           _buildDataRow('المواد', subjects),
                         
                         const SizedBox(height: 15),
-                        const Divider(color: Colors.white05, height: 1),
+                        const Divider(color: Colors.white10, height: 1),
                         const SizedBox(height: 15),
 
-                        // Stats (Followers / Following)
+                        // Stats
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -220,7 +188,6 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.3), width: 0.5),
       ),
       child: Text(
         text,
@@ -234,8 +201,8 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Text('$label: ', style: const TextStyle(color: Colors.white24, fontSize: 10)),
-          Text(value, style: const TextStyle(color: Colors.white60, fontSize: 10, fontWeight: FontWeight.w300)),
+          Text('$label: ', style: const TextStyle(color: Colors.white12, fontSize: 10)),
+          Text(value, style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w300)),
         ],
       ),
     );
@@ -246,29 +213,10 @@ class _DigitalIDCardState extends State<DigitalIDCard> {
       children: [
         Text(
           value,
-          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: AppTheme.offWhite, fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        Text(label, style: const TextStyle(color: Colors.white24, fontSize: 9)),
+        Text(label, style: const TextStyle(color: Colors.white10, fontSize: 8)),
       ],
     );
   }
-}
-
-class NeonBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0
-      ..shader = AppTheme.neonGradient.createShader(rect);
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(32)),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

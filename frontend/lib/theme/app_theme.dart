@@ -13,25 +13,25 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._(); // prevent instantiation
 
-  // ── Cyber Royal Palette ───────────────────────────────────────
+  // ── Calm & Premium Palette ────────────────────────────────────
   static const Color oledBlack      = Color(0xFF000000);
   static const Color surfaceDark    = Color(0xFF0A0A0A);
   static const Color surfaceLight   = Color(0xFF121212);
-  static const Color electricPurple = Color(0xFF8A2BE2);
-  static const Color skyBlue        = Color(0xFF00D1FF);
-  static const Color iceBlue        = skyBlue;
-  static const Color nightPurple    = electricPurple;
-  static const Color primaryColor   = electricPurple;
-  static const Color accentColor    = skyBlue;
-  static const Color textPrimary    = Color(0xFFF0F0F0);
-  static const Color textSecondary  = Color(0xFFA0A0A0);
+  static const Color deepNavy       = Color(0xFF0A2342); // The "Old" calm color
+  static const Color softPurple     = Color(0xFF480CA8);
+  static const Color primaryColor   = deepNavy;
+  static const Color accentColor    = softPurple;
+  static const Color textPrimary    = Color(0xFFE0E0E0);
+  static const Color textSecondary  = Color(0xFF808080);
   static const Color textHint       = Color(0xFF505050);
   static const Color dividerColor   = Color(0xFF1A1A1A);
   static const Color errorRed       = Color(0xFFFF2D55);
+  static const Color offWhite       = Color(0xFFFAF9F6); // Matte white for icons
+  static const Color searchFieldBg  = Color(0xFF1A1A1A);
 
   // ── Gradient helpers ──────────────────────────────────────────
   static const LinearGradient neonGradient = LinearGradient(
-    colors: [electricPurple, skyBlue],
+    colors: [softPurple, deepNavy],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -93,10 +93,10 @@ class AppTheme {
       // Color scheme
       colorScheme: const ColorScheme.dark(
         surface: oledBlack,
-        primary: iceBlue,
-        secondary: nightPurple,
+        primary: deepNavy,
+        secondary: softPurple,
         error: errorRed,
-        onPrimary: oledBlack,
+        onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: textPrimary,
         onError: Colors.white,
@@ -115,7 +115,7 @@ class AppTheme {
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
         ),
-        iconTheme: IconThemeData(color: primaryColor),
+        iconTheme: IconThemeData(color: offWhite),
       ),
 
       // Cards
@@ -133,12 +133,11 @@ class AppTheme {
       // Elevated buttons
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
+          backgroundColor: primaryColor,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: electricPurple, width: 0.5),
+            borderRadius: BorderRadius.circular(12),
           ),
           elevation: 0,
         ),
@@ -159,27 +158,27 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: primaryColor,
-          side: const BorderSide(color: primaryColor, width: 0.5),
+          side: const BorderSide(color: primaryColor, width: 1.5),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         ),
       ),
 
-      // Input fields
+      // Search bar and Input fields
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceDark,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        hintStyle: const TextStyle(color: textHint),
+        fillColor: searchFieldBg,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30), // Fully rounded
+          borderSide: BorderSide.none,
+        ),
+        hintStyle: const TextStyle(color: Colors.white24, fontSize: 14),
         labelStyle: const TextStyle(color: textSecondary),
         prefixIconColor: primaryColor,
         suffixIconColor: textSecondary,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: dividerColor, width: 0.5),
-        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: dividerColor, width: 0.5),
