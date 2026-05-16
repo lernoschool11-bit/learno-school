@@ -171,11 +171,24 @@ class _PostCardState extends State<PostCard> {
     final isMyPost = widget.post.authorId == widget.currentUserId;
 
     return ThreeDTransformer(
-      child: Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceDark,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppTheme.electricPurple.withOpacity(0.2),
+            width: 0.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.electricPurple.withOpacity(0.05),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // رأس المنشور
@@ -200,9 +213,10 @@ class _PostCardState extends State<PostCard> {
             ),
             subtitle: Text(
               '${isPrincipal ? 'مدير المدرسة' : (isTeacher ? 'معلم' : 'طالب')} • ${widget.post.school}\n${widget.post.timeAgo}',
-              style: TextStyle(
-                fontSize: 12,
+              style: const TextStyle(
+                fontSize: 11,
                 color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w300, // Light typography
               ),
             ),
             isThreeLine: true,
@@ -314,54 +328,31 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
 
-          // أزرار اللايك والكومنت
+          // أزرار التفاعل (Cyber Style)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
-                JellyButton(
+                _buildInteractionBtn(
                   onTap: _loadingLike ? () {} : _toggleLike,
-                  child: TextButton.icon(
-                    onPressed: null, // Handled by JellyButton
-                    icon: _loadingLike
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Icon(
-                            widget.post.isLiked ? Icons.favorite : Icons.favorite_border,
-                            size: 20,
-                            color: widget.post.isLiked ? Colors.red : null,
-                          ),
-                    label: Text(
-                      '${widget.post.likes}',
-                      style: TextStyle(color: widget.post.isLiked ? Colors.red : null),
-                    ),
-                  ),
+                  icon: widget.post.isLiked ? Icons.favorite : Icons.favorite_border,
+                  label: '${widget.post.likes}',
+                  color: widget.post.isLiked ? AppTheme.electricPurple : AppTheme.textSecondary,
+                  isLoading: _loadingLike,
                 ),
-                JellyButton(
+                const SizedBox(width: 12),
+                _buildInteractionBtn(
                   onTap: _toggleComments,
-                  child: TextButton.icon(
-                    onPressed: null, // Handled by JellyButton
-                    icon: Icon(
-                      _showComments ? Icons.comment : Icons.comment_outlined,
-                      size: 20,
-                      color: _showComments ? const Color(0xFF0A2342) : null,
-                    ),
-                    label: Text(
-                      '${widget.post.comments}',
-                      style: TextStyle(color: _showComments ? const Color(0xFF0A2342) : null),
-                    ),
-                  ),
+                  icon: Icons.chat_bubble_outline,
+                  label: '${widget.post.comments}',
+                  color: _showComments ? AppTheme.skyBlue : AppTheme.textSecondary,
                 ),
-                JellyButton(
+                const Spacer(),
+                _buildInteractionBtn(
                   onTap: () {},
-                  child: TextButton.icon(
-                    onPressed: null, // Handled by JellyButton
-                    icon: const Icon(Icons.share_outlined, size: 20),
-                    label: const Text('مشاركة'),
-                  ),
+                  icon: Icons.share_outlined,
+                  label: 'مشاركة',
+                  color: AppTheme.textSecondary,
                 ),
               ],
             ),
@@ -461,6 +452,46 @@ class _PostCardState extends State<PostCard> {
       case 'DOCUMENT': return 'ملف';
       default: return 'نص';
     }
+  }
+
+  Widget _buildInteractionBtn({
+    required VoidCallback onTap,
+    required IconData icon,
+    required String label,
+    required Color color,
+    bool isLoading = false,
+  }) {
+    return JellyButton(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            if (isLoading)
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.skyBlue),
+              )
+            else
+              Icon(icon, size: 18, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

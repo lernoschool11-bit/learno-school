@@ -13,36 +13,37 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._(); // prevent instantiation
 
-  // ── Core palette ──────────────────────────────────────────────
+  // ── Cyber Royal Palette ───────────────────────────────────────
   static const Color oledBlack      = Color(0xFF000000);
-  static const Color surfaceDark    = Color(0xFF0A0A0B);
-  static const Color surfaceLight   = Color(0xFF121214);
-  static const Color iceBlue        = Color(0xFF00D4FF);
-  static const Color nightPurple    = Color(0xFF8A2BE2);
-  static const Color primaryColor   = iceBlue;
-  static const Color accentColor    = nightPurple;
-  static const Color textPrimary    = Color(0xFFFFFFFF);
-  static const Color textSecondary  = Color(0xFFA0A0A5);
-  static const Color textHint       = Color(0xFF505055);
-  static const Color dividerColor   = Color(0xFF1E1E22);
-  static const Color errorRed       = Color(0xFFFF3B30);
-  static const Color goldChip       = Color(0xFFFFD700);
+  static const Color surfaceDark    = Color(0xFF0A0A0A);
+  static const Color surfaceLight   = Color(0xFF121212);
+  static const Color electricPurple = Color(0xFF8A2BE2);
+  static const Color skyBlue        = Color(0xFF00D1FF);
+  static const Color iceBlue        = skyBlue;
+  static const Color nightPurple    = electricPurple;
+  static const Color primaryColor   = electricPurple;
+  static const Color accentColor    = skyBlue;
+  static const Color textPrimary    = Color(0xFFF0F0F0);
+  static const Color textSecondary  = Color(0xFFA0A0A0);
+  static const Color textHint       = Color(0xFF505050);
+  static const Color dividerColor   = Color(0xFF1A1A1A);
+  static const Color errorRed       = Color(0xFFFF2D55);
 
   // ── Gradient helpers ──────────────────────────────────────────
   static const LinearGradient neonGradient = LinearGradient(
-    colors: [iceBlue, nightPurple],
+    colors: [electricPurple, skyBlue],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient subtleGradient = LinearGradient(
-    colors: [Color(0xFF000814), Color(0xFF02010A)],
+  static const LinearGradient darkButtonGradient = LinearGradient(
+    colors: [Color(0xFF1A0A2E), oledBlack],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient buttonGradient = LinearGradient(
-    colors: [iceBlue, Color(0xFF0088AA)],
+  static const LinearGradient surfaceGradient = LinearGradient(
+    colors: [Color(0xFF0A0A0A), Color(0xFF000000)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
@@ -132,19 +133,14 @@ class AppTheme {
       // Elevated buttons
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
+          backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.8,
-          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: electricPurple, width: 0.5),
           ),
-          elevation: 6,
-          shadowColor: primaryColor.withAlpha(80),
+          elevation: 0,
         ),
       ),
 

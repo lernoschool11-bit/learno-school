@@ -214,55 +214,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 16),
 
-            // الإحصائيات
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  _buildStatCard('المنشورات', '${_userProfile!['postsCount'] ?? 0}', Icons.article, null),
-                  const SizedBox(width: 12),
-                  _buildStatCard('المتابعون', '${_userProfile!['followersCount'] ?? 0}', Icons.people, _openFollowersList),
-                  const SizedBox(width: 12),
-                  _buildStatCard('يتابع', '${_userProfile!['followingCount'] ?? 0}', Icons.person_add, _openFollowingList),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // المعلومات
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: Column(
-                  children: [
-                    _buildInfoTile(Icons.school, 'المدرسة', _userProfile!['school'] ?? 'غير محدد'),
-                    if (_userProfile!['directorate'] != null)
-                      _buildInfoTile(Icons.account_balance, 'المديرية', _userProfile!['directorate']),
-                    if (!isTeacher && grade != null) ...[
-                      const Divider(height: 1),
-                      _buildInfoTile(Icons.class_, 'الصف والشعبة', 'الصف $grade - شعبة ${section ?? ''}'),
-                    ],
-                    if (isTeacher && subjects.isNotEmpty) ...[
-                      const Divider(height: 1),
-                      _buildInfoTile(Icons.book, 'المواد', subjects),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
             // المنشورات
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  const Text('منشوراتي', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'منشوراتي', 
+                    style: TextStyle(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.w300, // Light typography as requested
+                      color: Colors.white70,
+                    )
+                  ),
                   const Spacer(),
-                  Text('${posts.length} منشور', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                  Text(
+                    '${posts.length} منشور', 
+                    style: const TextStyle(color: Colors.white24, fontSize: 12)
+                  ),
                 ],
               ),
             ),

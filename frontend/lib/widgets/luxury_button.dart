@@ -24,18 +24,20 @@ class LuxuryButton extends StatelessWidget {
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
-          gradient: onPressed == null
-              ? null
-              : AppTheme.buttonGradient,
+          gradient: onPressed == null ? null : AppTheme.darkButtonGradient,
           color: onPressed == null ? AppTheme.surfaceLight : null,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: onPressed == null ? Colors.transparent : AppTheme.electricPurple.withOpacity(0.5),
+            width: 1,
+          ),
           boxShadow: onPressed == null
               ? []
               : [
                   BoxShadow(
-                    color: AppTheme.primaryColor.withAlpha(80),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
+                    color: AppTheme.electricPurple.withOpacity(0.1),
+                    blurRadius: 12,
+                    spreadRadius: 2,
                   ),
                 ],
         ),
@@ -46,22 +48,22 @@ class LuxuryButton extends StatelessWidget {
                   width: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: AppTheme.oledBlack,
+                    color: Colors.white,
                   ),
                 )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (icon != null) ...[
-                      Icon(icon, color: AppTheme.oledBlack, size: 20),
+                      Icon(icon, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
                     ],
                     Text(
                       label,
                       style: const TextStyle(
-                        color: AppTheme.oledBlack,
+                        color: Colors.white,
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: 0.5,
                       ),
                     ),
