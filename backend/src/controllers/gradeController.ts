@@ -29,8 +29,11 @@ export const addGrade = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Student not found in your school' });
     }
 
-    // 3. تأكد إن المعلم بدرس هاي المادة
-    if (!req.user!.subjects.includes(subject)) {
+    // 3. تأكد إن المعلم بدرس هاي المادة (تحقق مرن)
+    const teacherSubjects = req.user!.subjects.map(s => s.trim().toLowerCase());
+    const targetSubject = subject.trim().toLowerCase();
+
+    if (!teacherSubjects.includes(targetSubject) && req.user!.subjects.length > 0) {
       return res.status(403).json({ error: `You are not authorized to add grades for ${subject}` });
     }
 

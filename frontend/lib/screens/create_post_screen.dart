@@ -247,7 +247,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   items: [
                     const DropdownMenuItem(value: 'TEXT', child: Text('نص')),
                     const DropdownMenuItem(value: 'IMAGE', child: Text('صورة')),
-                    if (widget.userRole == 'TEACHER' || widget.userRole == 'PRINCIPAL') ...[
+                    if (widget.userRole.toUpperCase() == 'TEACHER' || widget.userRole.toUpperCase() == 'PRINCIPAL' || widget.userRole.toUpperCase() == 'ADMIN') ...[
                       const DropdownMenuItem(value: 'STORY', child: Text('قصة')),
                       const DropdownMenuItem(value: 'VIDEO', child: Text('فيديو')),
                       const DropdownMenuItem(value: 'DOCUMENT', child: Text('ملف')),
@@ -319,7 +319,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildAttachmentOption(Icons.image, 'صورة', Colors.green, _pickImage),
-                if (widget.userRole == 'TEACHER' || widget.userRole == 'PRINCIPAL') ...[
+                if (widget.userRole.toUpperCase() == 'TEACHER' || widget.userRole.toUpperCase() == 'PRINCIPAL' || widget.userRole.toUpperCase() == 'ADMIN') ...[
                   _buildAttachmentOption(Icons.video_library, 'فيديو', Colors.red, _pickVideo),
                   _buildAttachmentOption(Icons.attach_file, 'ملف', Colors.blue, _pickFile),
                 ],

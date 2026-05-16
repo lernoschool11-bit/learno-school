@@ -102,16 +102,17 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 
   List<Widget> _getScreens() {
+    final role = _userRole.toUpperCase();
     return [
       const HomeScreen(),
       const SearchScreen(),
-      if (_userRole == 'TEACHER' || _userRole == 'STUDENT') CreatePostScreen(userRole: _userRole),
-      if (_userRole == 'PRINCIPAL') AdminPanel(),
+      if (role == 'TEACHER' || role == 'STUDENT' || role == 'PRINCIPAL' || role == 'ADMIN') CreatePostScreen(userRole: _userRole),
+      if (role == 'PRINCIPAL' || role == 'ADMIN') AdminPanel(),
       const CommunityScreen(),
       const AIChatScreen(),
-      if (_userRole == 'STUDENT') GradesScreen(),
-      if (_userRole == 'TEACHER') EnterGradesScreen(),
-      if (_userRole == 'PRINCIPAL' || _userRole == 'TEACHER') ClassGradesScreen(),
+      if (role == 'STUDENT') GradesScreen(),
+      if (role == 'TEACHER') EnterGradesScreen(),
+      if (role == 'PRINCIPAL' || role == 'TEACHER' || role == 'ADMIN') ClassGradesScreen(),
       const ProfileScreen(),
     ];
   }
@@ -120,7 +121,7 @@ class _MainNavigationState extends State<MainNavigation> {
     List<MacDockItem> items = [];
     items.add(const MacDockItem(icon: Icons.home_outlined, label: 'الرئيسية'));
     
-    final role = _userRole;
+    final role = _userRole.toUpperCase();
     if (role == 'PRINCIPAL' || role == 'ADMIN') {
       items.add(const MacDockItem(icon: Icons.dashboard_outlined, label: 'الإدارة'));
     }
