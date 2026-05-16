@@ -94,7 +94,7 @@ class _MacDockState extends State<MacDock> with SingleTickerProviderStateMixin {
                       spreadRadius: 4,
                     ),
                     BoxShadow(
-                      color: AppTheme.neonMagenta.withAlpha(20),
+                      color: AppTheme.accentColor.withAlpha(20),
                       blurRadius: 60,
                       spreadRadius: -10,
                       offset: const Offset(0, 10),

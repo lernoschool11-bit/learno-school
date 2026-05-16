@@ -156,7 +156,7 @@ class _LoginCharacterWidgetState extends State<LoginCharacterWidget>
                 gradient: RadialGradient(
                   colors: [
                     AppTheme.primaryColor.withAlpha(50),
-                    AppTheme.neonMagenta.withAlpha(20),
+                    AppTheme.accentColor.withAlpha(20),
                     Colors.transparent,
                   ],
                   stops: const [0.5, 0.8, 1.0],
@@ -217,7 +217,7 @@ class _LoginCharacterWidgetState extends State<LoginCharacterWidget>
                           color: const Color(0xFF2A2A4A),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: AppTheme.neonMagenta.withAlpha(100),
+                            color: AppTheme.accentColor.withAlpha(100),
                           ),
                         ),
                       ),
@@ -229,7 +229,7 @@ class _LoginCharacterWidgetState extends State<LoginCharacterWidget>
                           color: const Color(0xFF2A2A4A),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: AppTheme.neonMagenta.withAlpha(100),
+                            color: AppTheme.accentColor.withAlpha(100),
                           ),
                         ),
                       ),
@@ -246,7 +246,7 @@ class _LoginCharacterWidgetState extends State<LoginCharacterWidget>
                 height: coverEyes ? 12 : 8,
                 decoration: BoxDecoration(
                   color: coverEyes
-                      ? AppTheme.neonMagenta.withAlpha(150)
+                      ? AppTheme.accentColor.withAlpha(150)
                       : AppTheme.primaryColor.withAlpha(150),
                   borderRadius: BorderRadius.circular(coverEyes ? 6 : 4),
                 ),

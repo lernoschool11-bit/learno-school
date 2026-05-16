@@ -71,9 +71,9 @@ class AppTheme {
     ),
   ];
 
-  static List<BoxShadow> get neonMagentaGlow => [
+  static List<BoxShadow> get accentColorGlow => [
     BoxShadow(
-      color: neonMagenta.withAlpha(60),
+      color: accentColor.withAlpha(60),
       blurRadius: 20,
       spreadRadius: 2,
     ),

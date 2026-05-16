@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import '../theme/app_theme.dart';
 
 /// 4. Animated Mesh Gradient (Liquid Background)
 class PremiumMeshBackground extends StatefulWidget {

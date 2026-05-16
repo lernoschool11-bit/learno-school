@@ -67,7 +67,7 @@ class _ParallaxLogoState extends State<ParallaxLogo> {
                         spreadRadius: 5,
                       ),
                       BoxShadow(
-                        color: AppTheme.neonMagenta.withAlpha(20),
+                        color: AppTheme.accentColor.withAlpha(20),
                         blurRadius: 80,
                         spreadRadius: -10,
                       ),

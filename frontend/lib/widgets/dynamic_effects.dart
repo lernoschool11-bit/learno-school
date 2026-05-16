@@ -110,7 +110,7 @@ class _GlowScrollFollowerState extends State<GlowScrollFollower> {
                     right: 0,
                     top: ((offset * 1.2) % screenHeight) - 100,
                     child: RepaintBoundary(
-                      child: _NeonGlow(color: AppTheme.neonMagenta),
+                      child: _NeonGlow(color: AppTheme.accentColor),
                     ),
                   ),
                 ],
