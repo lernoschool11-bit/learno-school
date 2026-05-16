@@ -30,10 +30,11 @@ class AppTheme {
   static const Color searchFieldBg  = Color(0xFF1A1A1A);
 
   // ── Aliases for backward compatibility ────────────────────────
-  static const Color iceBlue        = deepNavy;
-  static const Color electricPurple = softPurple;
-  static const Color skyBlue        = Color(0xFF480CA8); // Subtle Purple
-  static const Color nightPurple    = softPurple;
+  // ── Aliases for backward compatibility ────────────────────────
+  static const Color iceBlue        = sovereignTeal;
+  static const Color electricPurple = sovereignTeal;
+  static const Color skyBlue        = sovereignTeal;
+  static const Color nightPurple    = sovereignTeal;
 
   // ── Gradient helpers ──────────────────────────────────────────
   static const LinearGradient sovereignGradient = LinearGradient(
@@ -96,8 +97,8 @@ class AppTheme {
       // Color scheme
       colorScheme: const ColorScheme.dark(
         surface: oledBlack,
-        primary: deepNavy,
-        secondary: softPurple,
+        primary: sovereignTeal,
+        secondary: sovereignTeal,
         error: errorRed,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
