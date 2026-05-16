@@ -621,4 +621,62 @@ class ApiService {
       return response.statusCode == 200;
     } catch (e) { debugPrint('endOnlineClass error: $e'); return false; }
   }
+
+  // ---------------- GAMIFICATION (QUESTS) ----------------
+  Future<Map<String, dynamic>> createQuest({
+    required String title,
+    required String content,
+    int points = 50,
+  }) async {
+    try {
+      final token = await getToken();
+      final response = await http.post(
+        Uri.parse('$baseUrl/gamification/quests'),
+        headers: _headers(token),
+        body: jsonEncode({
+          'title': title,
+          'content': content,
+          'points': points,
+        }),
+      );
+      if (response.statusCode == 201) return jsonDecode(response.body);
+      return {};
+    } catch (e) {
+      debugPrint('createQuest error: $e');
+      return {};
+    }
+  }
+
+  Future<List<dynamic>> getQuests() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(Uri.parse('$baseUrl/gamification/quests'), headers: _headers(token));
+      if (response.statusCode == 200) return jsonDecode(response.body);
+      return [];
+    } catch (e) { return []; }
+  }
+
+  Future<bool> submitQuestAnswer(String questId, String content) async {
+    try {
+      final token = await getToken();
+      final response = await http.post(
+        Uri.parse('$baseUrl/gamification/quests/$questId/answer'),
+        headers: _headers(token),
+        body: jsonEncode({'content': content}),
+      );
+      return response.statusCode == 201;
+    } catch (e) { return false; }
+  }
+
+  Future<bool> validateQuestAnswer(String questId, String answerId) async {
+    try {
+      final token = await getToken();
+      final response = await http.post(
+        Uri.parse('$baseUrl/gamification/quests/validate'),
+        headers: _headers(token),
+        body: jsonEncode({'questId': questId, 'answerId': answerId}),
+      );
+      return response.statusCode == 200;
+    } catch (e) { return false; }
+  }
 }

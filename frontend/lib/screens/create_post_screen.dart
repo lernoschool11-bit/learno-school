@@ -20,6 +20,7 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
   final TextEditingController _contentController = TextEditingController();
+  final TextEditingController _pointsController = TextEditingController(text: '50');
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
   String _loadingText = 'جاري الرفع...';
@@ -127,13 +128,29 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     setState(() => _isLoading = true);
 
     try {
+      if (_selectedType == 'QUEST') {
+        setState(() => _loadingText = 'جاري إنشاء التحدي...');
+        final result = await _apiService.createQuest(
+          title: 'تحدي جديد',
+          content: text,
+          points: int.tryParse(_pointsController.text) ?? 50,
+        );
+        
+        setState(() => _isLoading = false);
+        if (result.isNotEmpty) {
+           _showSuccessAndNavigate();
+        } else {
+           _showError('فشل إنشاء التحدي');
+        }
+        return;
+      }
+
       String? mediaUrl;
       if (_selectedFileBytes != null) {
         mediaUrl = await _uploadToCloudinary();
       }
 
       setState(() => _loadingText = 'جاري النشر...');
-
       final token = await _apiService.getToken();
 
       final response = await http.post(
@@ -153,37 +170,29 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       setState(() => _isLoading = false);
 
       if (response.statusCode == 201) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('تم النشر بنجاح! ✅'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MainNavigation()),
-          );
-        }
+        _showSuccessAndNavigate();
       } else {
         final data = jsonDecode(response.body);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${data['message'] ?? data['error'] ?? 'فشل النشر'} - ${response.statusCode}',
-              ),
-            ),
-          );
-        }
+        _showError('${data['message'] ?? data['error'] ?? 'فشل النشر'}');
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ: $e')),
-        );
-      }
+      _showError('خطأ: $e');
+    }
+  }
+
+  void _showSuccessAndNavigate() {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم النشر بنجاح! ✅'), backgroundColor: Colors.green),
+      );
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigation()));
+    }
+  }
+
+  void _showError(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -251,6 +260,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       const DropdownMenuItem(value: 'STORY', child: Text('قصة')),
                       const DropdownMenuItem(value: 'VIDEO', child: Text('فيديو')),
                       const DropdownMenuItem(value: 'DOCUMENT', child: Text('ملف')),
+                      const DropdownMenuItem(value: 'QUEST', child: Text('تحدي 🏆')),
                     ],
                   ],
                   onChanged: (val) => setState(() => _selectedType = val!),
@@ -258,6 +268,30 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ],
             ),
           ),
+          if (_selectedType == 'QUEST')
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: Colors.amber.withOpacity(0.05),
+              child: Row(
+                children: [
+                  const Icon(Icons.stars, color: Colors.amber, size: 20),
+                  const SizedBox(width: 8),
+                  const Text('النقاط للفائز:', style: TextStyle(color: Colors.amber, fontSize: 13)),
+                  const SizedBox(width: 12),
+                  DropdownButton<String>(
+                    value: _pointsController.text,
+                    dropdownColor: AppTheme.surfaceLight,
+                    underline: const SizedBox(),
+                    items: ['50', '100', '200']
+                        .map((p) => DropdownMenuItem(
+                            value: p,
+                            child: Text(p, style: const TextStyle(color: Colors.amber))))
+                        .toList(),
+                    onChanged: (val) => setState(() => _pointsController.text = val!),
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20),
