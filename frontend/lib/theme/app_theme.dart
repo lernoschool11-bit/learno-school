@@ -29,6 +29,12 @@ class AppTheme {
   static const Color offWhite       = Color(0xFFFAF9F6); // Matte white for icons
   static const Color searchFieldBg  = Color(0xFF1A1A1A);
 
+  // ── Aliases for backward compatibility ────────────────────────
+  static const Color iceBlue        = deepNavy;
+  static const Color electricPurple = softPurple;
+  static const Color skyBlue        = Color(0xFF480CA8); // Subtle Purple
+  static const Color nightPurple    = softPurple;
+
   // ── Gradient helpers ──────────────────────────────────────────
   static const LinearGradient neonGradient = LinearGradient(
     colors: [softPurple, deepNavy],
