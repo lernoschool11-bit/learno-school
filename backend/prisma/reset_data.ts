@@ -22,6 +22,13 @@ async function main() {
     await prisma.question.deleteMany();
     await prisma.quiz.deleteMany();
     await prisma.onlineClass.deleteMany();
+    
+    // New Gamification, Vault, and Audit Tables
+    await prisma.questAnswer.deleteMany();
+    await prisma.quest.deleteMany();
+    await prisma.summary.deleteMany();
+    await prisma.auditLog.deleteMany();
+
     await prisma.user.deleteMany();
     await prisma.school.deleteMany();
 

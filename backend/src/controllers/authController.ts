@@ -484,3 +484,85 @@ export const toggleFollow = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// ==================== FORGOT PASSWORD ====================
+import { sendPasswordResetEmail } from '../utils/mailer';
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const email = req.body.email?.toLowerCase().trim();
+    if (!email) {
+      return res.status(400).json({ message: "البريد الإلكتروني مطلوب" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      // Return success even if user not found to prevent email enumeration
+      return res.json({ message: "إذا كان البريد مسجلاً لدينا، ستتلقى رمز الاسترجاع قريباً" });
+    }
+
+    // Generate 6-digit code
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordToken: resetToken,
+        resetPasswordExpires: expiresAt,
+      },
+    });
+
+    // Send email (async, but await to ensure it doesn't fail silently)
+    await sendPasswordResetEmail(user.email!, resetToken);
+
+    return res.json({ message: "تم إرسال رمز الاسترجاع إلى بريدك الإلكتروني" });
+  } catch (error) {
+    console.error("forgotPassword error:", error);
+    return res.status(500).json({ message: "حدث خطأ أثناء معالجة الطلب" });
+  }
+};
+
+// ==================== RESET PASSWORD ====================
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email, token, newPassword } = req.body;
+    const emailLower = email?.toLowerCase().trim();
+
+    if (!emailLower || !token || !newPassword) {
+      return res.status(400).json({ message: "جميع الحقول مطلوبة" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: emailLower,
+        resetPasswordToken: token,
+        resetPasswordExpires: { gt: new Date() }, // Token must not be expired
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "الرمز غير صحيح أو منتهي الصلاحية" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+      },
+    });
+
+    return res.json({ message: "تم تغيير كلمة المرور بنجاح، يمكنك تسجيل الدخول الآن" });
+  } catch (error) {
+    console.error("resetPassword error:", error);
+    return res.status(500).json({ message: "حدث خطأ أثناء تغيير كلمة المرور" });
+  }
+};

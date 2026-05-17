@@ -8,8 +8,9 @@ import {
   changePassword,
   getUserById,
   toggleFollow,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/authController';
-import { forgotPassword, resetPassword } from '../controllers/passwordResetController';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
