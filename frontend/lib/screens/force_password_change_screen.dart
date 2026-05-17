@@ -20,11 +20,6 @@ class _ForcePasswordChangeScreenState extends State<ForcePasswordChangeScreen> {
   bool _isLoading = false;
   String? _selectedSchool;
 
-  final List<String> _schools = [
-    "Marj Al-Hamam",
-    "Irbid Secondary",
-    "Amman Academy"
-  ];
 
   @override
   void initState() {
@@ -103,21 +98,16 @@ class _ForcePasswordChangeScreenState extends State<ForcePasswordChangeScreen> {
                     const Text('المدرسة الحالية', style: TextStyle(color: Colors.grey, fontSize: 14)),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       decoration: BoxDecoration(
                         color: Colors.white10,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
                       ),
-                      child: DropdownButton<String>(
-                        value: _selectedSchool,
-                        isExpanded: true,
-                        underline: Container(),
-                        dropdownColor: AppTheme.surfaceDark,
-                        items: _schools.map((s) => DropdownMenuItem(
-                          value: s,
-                          child: Text(s, style: const TextStyle(color: Colors.white)),
-                        )).toList(),
-                        onChanged: (val) => setState(() => _selectedSchool = val),
+                      child: Text(
+                        _selectedSchool ?? 'غير محدد',
+                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                     const SizedBox(height: 24),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../widgets/school_picker_widget.dart';
 import '../theme/app_theme.dart';
+import '../widgets/mesh_background.dart';
+import '../widgets/glass_card.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -146,33 +148,65 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_currentPage == 0 ? 'تسجيل حساب جديد' : 'معلومات إضافية'),
-        leading: _currentPage == 1 ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: _prevPage) : null,
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(child: Container(height: 4, decoration: BoxDecoration(color: AppTheme.primaryColor, borderRadius: BorderRadius.circular(2)))),
-                const SizedBox(width: 8),
-                Expanded(child: Container(height: 4, decoration: BoxDecoration(color: _currentPage == 1 ? AppTheme.primaryColor : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
-              ],
-            ),
+    return MeshBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Text(
+            _currentPage == 0 ? 'تسجيل حساب جديد' : 'معلومات إضافية',
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          Text('الخطوة ${_currentPage + 1} من 2', style: const TextStyle(color: Colors.grey, fontSize: 13)),
-          const SizedBox(height: 8),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [_buildPage1(), _buildPage2()],
+          leading: _currentPage == 1
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: _prevPage,
+                )
+              : null,
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: _currentPage == 1 ? AppTheme.primaryColor : Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Text(
+              'الخطوة ${_currentPage + 1} من 2',
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [_buildPage1(), _buildPage2()],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -203,21 +237,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const SizedBox(height: 16),
           _buildField(_dobController, 'تاريخ الميلاد *', Icons.calendar_today, hint: '2000-01-01'),
           const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: 'كلمة المرور *', border: const OutlineInputBorder(), prefixIcon: const Icon(Icons.lock),
-              suffixIcon: IconButton(icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off), onPressed: () => setState(() => _obscurePassword = !_obscurePassword)),
+          GlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            margin: EdgeInsets.zero,
+            opacity: 0.08,
+            child: TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'كلمة المرور *',
+                labelStyle: const TextStyle(color: Colors.grey),
+                prefixIcon: const Icon(Icons.lock, color: AppTheme.primaryColor),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                    color: AppTheme.primaryColor,
+                  ),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),
-          TextFormField(
-            controller: _confirmPasswordController,
-            obscureText: _obscureConfirmPassword,
-            decoration: InputDecoration(
-              labelText: 'تأكيد كلمة المرور *', border: const OutlineInputBorder(), prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off), onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword)),
+          GlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            margin: EdgeInsets.zero,
+            opacity: 0.08,
+            child: TextFormField(
+              controller: _confirmPasswordController,
+              obscureText: _obscureConfirmPassword,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'تأكيد كلمة المرور *',
+                labelStyle: const TextStyle(color: Colors.grey),
+                prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.primaryColor),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                    color: AppTheme.primaryColor,
+                  ),
+                  onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 32),
@@ -378,10 +446,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildField(TextEditingController controller, String label, IconData icon,
       {TextInputType keyboardType = TextInputType.text, String? hint}) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(labelText: label, hintText: hint, border: const OutlineInputBorder(), prefixIcon: Icon(icon)),
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: EdgeInsets.zero,
+      opacity: 0.08,
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.grey),
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.grey),
+          prefixIcon: Icon(icon, color: AppTheme.primaryColor),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+        ),
+      ),
     );
   }
 }

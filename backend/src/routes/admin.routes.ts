@@ -42,9 +42,24 @@ router.post('/verify-teacher-code', async (req, res) => {
         const { code, name } = req.body;
         if (!code || !name) return res.json({ valid: false, message: 'الكود واسم المدرسة مطلوبان' });
 
-        const school = await prisma.school.findFirst({
-            where: { name: name }
+        // Clean name by removing "مدرسة" or "مدرسه" prefix for fuzzy matching
+        const cleanName = name.replace(/^(مدرسة|مدرسه)\s+/i, '').trim();
+
+        let school = await prisma.school.findFirst({
+            where: {
+                name: {
+                    contains: cleanName,
+                    mode: 'insensitive'
+                }
+            }
         });
+
+        if (!school) {
+            // Fallback to exact match
+            school = await prisma.school.findFirst({
+                where: { name: name }
+            });
+        }
         
         if (!school) return res.json({ valid: false, message: 'المدرسة غير موجودة' });
         
