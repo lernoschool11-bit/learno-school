@@ -280,7 +280,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 leading: _buildAvatar(
                   name: member['fullName'] ?? '؟',
                   avatarUrl: avatarUrl,
-                  backgroundColor: isTeacher ? Colors.teal : const Color(0xFF0A2342),
+                  backgroundColor: isTeacher ? Colors.teal : const Color(0xFF56877A),
                 ),
                 title: Text(
                   member['fullName'] ?? '',
@@ -292,14 +292,14 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   decoration: BoxDecoration(
                     color: isTeacher
                         ? Colors.teal.withAlpha(30)
-                        : const Color(0xFF0A2342).withAlpha(20),
+                        : const Color(0xFF56877A).withAlpha(20),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     isTeacher ? 'معلم' : 'طالب',
                     style: TextStyle(
                       fontSize: 11,
-                      color: isTeacher ? Colors.teal : const Color(0xFF0A2342),
+                      color: isTeacher ? Colors.teal : const Color(0xFF56877A),
                       fontWeight: FontWeight.bold,
                     ),
                   ),

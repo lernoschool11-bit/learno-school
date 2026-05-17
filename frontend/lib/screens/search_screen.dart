@@ -227,7 +227,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
       child: ListTile(
         onTap: () => _openUserProfile(user['id'] ?? ''),
         leading: CircleAvatar(
-          backgroundColor: isTeacher ? Colors.teal : const Color(0xFF0A2342),
+          backgroundColor: isTeacher ? Colors.teal : const Color(0xFF56877A),
           radius: 24,
           backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
           child: avatarUrl == null
@@ -259,14 +259,14 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: isTeacher ? Colors.teal.withAlpha(30) : const Color(0xFF0A2342).withAlpha(20),
+            color: isTeacher ? Colors.teal.withAlpha(30) : const Color(0xFF56877A).withAlpha(20),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             isTeacher ? 'معلم' : 'طالب',
             style: TextStyle(
               fontSize: 11,
-              color: isTeacher ? Colors.teal : const Color(0xFF0A2342),
+              color: isTeacher ? Colors.teal : const Color(0xFF56877A),
               fontWeight: FontWeight.bold,
             ),
           ),

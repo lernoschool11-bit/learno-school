@@ -353,7 +353,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               setState(() => _selectedClasses.add(cls));
             }
           },
-          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0A2342), padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12)),
+          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF56877A), padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12)),
           child: const Icon(Icons.add, color: Colors.white),
         ),
       ],
@@ -366,7 +366,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       onTap: () => setState(() => _selectedRole = role),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(color: selected ? const Color(0xFF0A2342) : Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(color: selected ? const Color(0xFF56877A) : Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
         child: Column(children: [
           Icon(icon, color: selected ? Colors.white : Colors.grey.shade400),
           const SizedBox(height: 4),

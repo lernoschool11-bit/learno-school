@@ -198,7 +198,7 @@ class _PostCardState extends State<PostCard> {
               child: _buildAvatar(
                 name: widget.post.authorName,
                 avatarUrl: widget.post.authorAvatar,
-                backgroundColor: isPrincipal ? Colors.amber.shade800 : (isTeacher ? Colors.teal : const Color(0xFF0A2342)),
+                backgroundColor: isPrincipal ? Colors.amber.shade800 : (isTeacher ? Colors.teal : const Color(0xFF56877A)),
               ),
             ),
             title: GestureDetector(
@@ -395,7 +395,7 @@ class _PostCardState extends State<PostCard> {
                       : IconButton(
                           onPressed: _addComment,
                           icon: const Icon(Icons.send),
-                          color: const Color(0xFF0A2342),
+                          color: const Color(0xFF56877A),
                         ),
                 ],
               ),
@@ -440,7 +440,7 @@ class _PostCardState extends State<PostCard> {
       case 'VIDEO': return Colors.red;
       case 'STORY': return Colors.purple;
       case 'DOCUMENT': return Colors.blue;
-      default: return const Color(0xFF0A2342);
+      default: return const Color(0xFF56877A);
     }
   }
 
@@ -523,7 +523,7 @@ class _CommentTile extends StatelessWidget {
             onTap: onTapUser,
             child: CircleAvatar(
               radius: 16,
-              backgroundColor: isPrincipal ? Colors.amber.shade800 : (isTeacher ? Colors.teal : const Color(0xFF0A2342)),
+              backgroundColor: isPrincipal ? Colors.amber.shade800 : (isTeacher ? Colors.teal : const Color(0xFF56877A)),
               backgroundImage: comment.authorAvatar != null
                   ? NetworkImage(comment.authorAvatar!)
                   : null,

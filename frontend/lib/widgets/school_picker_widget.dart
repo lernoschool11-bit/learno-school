@@ -84,7 +84,7 @@ class _SchoolPickerWidgetState extends State<SchoolPickerWidget> {
                         title: Text(school, style: const TextStyle(fontSize: 13)),
                         selected: isSelected,
                         selectedColor: Colors.white,
-                        selectedTileColor: const Color(0xFF0A2342),
+                        selectedTileColor: const Color(0xFF56877A),
                         onTap: () {
                           setState(() => _selectedSchool = school);
                           widget.onSelected(school, _selectedDirectorate!);

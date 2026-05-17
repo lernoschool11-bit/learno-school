@@ -101,7 +101,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
                       return Container(
                         color: isUnread
-                            ? const Color(0xFF0A2342).withAlpha(13)
+                            ? const Color(0xFF56877A).withAlpha(13)
                             : null,
                         child: ListTile(
                           onTap: () {
@@ -144,7 +144,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   width: 10,
                                   height: 10,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFF0A2342),
+                                    color: Color(0xFF56877A),
                                     shape: BoxShape.circle,
                                   ),
                                 )

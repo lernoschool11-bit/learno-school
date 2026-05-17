@@ -143,12 +143,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.lock_reset, size: 80, color: Color(0xFF0A2342)),
+              const Icon(Icons.lock_reset, size: 80, color: Color(0xFF56877A)),
               const SizedBox(height: 16),
               const Text(
                 'إعادة تعيين كلمة المرور',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF56877A)),
               ),
               const SizedBox(height: 32),
 
@@ -168,7 +168,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _sendCode,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0A2342),
+                    backgroundColor: const Color(0xFF56877A),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: _isLoading
@@ -222,7 +222,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _resetPassword,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0A2342),
+                    backgroundColor: const Color(0xFF56877A),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: _isLoading

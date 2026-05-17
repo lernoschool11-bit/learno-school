@@ -51,7 +51,7 @@ class _GradesScreenState extends State<GradesScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+            colors: [Color(0xFF000000), Color(0xFF0A0A0A)],
           ),
         ),
         child: _isLoading

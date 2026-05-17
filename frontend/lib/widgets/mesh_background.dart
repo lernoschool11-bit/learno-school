@@ -77,19 +77,19 @@ class PremiumMeshPainter extends CustomPainter {
 
     final double phase = progress * 2 * pi;
 
-    // 1. Midnight Purple (Deep)
+    // 1. Dark Teal (Deep)
     _drawBlob(
       canvas, size, paint,
-      const Color(0xFF0A0214).withOpacity(0.9), // Very dark purple
+      const Color(0xFF0A1F18).withOpacity(0.9), // Very dark teal
       0.2 + 0.1 * sin(phase),
       0.3 + 0.1 * cos(phase),
       0.8,
     );
 
-    // 2. Deep Navy (Deep)
+    // 2. Sovereign Teal (Deep)
     _drawBlob(
       canvas, size, paint,
-      const Color(0xFF020A14).withOpacity(0.8), // Very dark navy
+      const Color(0xFF13362E).withOpacity(0.8), // Darker Sovereign Teal
       0.8 + 0.1 * cos(phase * 0.8),
       0.2 + 0.1 * sin(phase * 1.2),
       0.7,
@@ -104,10 +104,10 @@ class PremiumMeshPainter extends CustomPainter {
       1.0,
     );
 
-    // 4. Subtle Indigo Flash
+    // 4. Subtle Mint Flash
     _drawBlob(
       canvas, size, paint,
-      const Color(0xFF1A0A2E).withOpacity(0.2),
+      const Color(0xFF2E4C43).withOpacity(0.2), // Light teal flash
       0.1 + 0.3 * cos(phase * 1.5),
       0.9 + 0.1 * sin(phase * 0.7),
       0.5,

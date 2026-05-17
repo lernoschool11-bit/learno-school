@@ -130,7 +130,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 60, bottom: 24),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF0A2342),
+                  color: Color(0xFF56877A),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(32),
                     bottomRight: Radius.circular(32),
@@ -224,7 +224,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                   isFollowing ? Colors.red : Colors.white,
                               foregroundColor: isFollowing
                                   ? Colors.white
-                                  : const Color(0xFF0A2342),
+                                  : const Color(0xFF56877A),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
@@ -239,14 +239,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                     height: 16,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: Color(0xFF0A2342),
+                                      color: Color(0xFF56877A),
                                     ),
                                   )
                                 : const Icon(Icons.message, size: 18),
                             label: const Text('مراسلة'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF0A2342),
+                              foregroundColor: const Color(0xFF56877A),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
@@ -365,19 +365,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF0A2342).withAlpha(15),
+          color: const Color(0xFF56877A).withAlpha(15),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           children: [
-            Icon(icon, color: const Color(0xFF0A2342), size: 22),
+            Icon(icon, color: const Color(0xFF56877A), size: 22),
             const SizedBox(height: 6),
             Text(
               value,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0A2342),
+                color: Color(0xFF56877A),
               ),
             ),
             Text(label,
@@ -390,7 +390,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Widget _infoTile(IconData icon, String label, String value) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF0A2342)),
+      leading: Icon(icon, color: const Color(0xFF56877A)),
       title:
           Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       subtitle: Text(

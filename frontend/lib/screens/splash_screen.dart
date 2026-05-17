@@ -37,13 +37,14 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _navigateToNext() async {
     final prefs = await SharedPreferences.getInstance();
-    final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final token = prefs.getString('auth_token');
+    final bool hasToken = token != null && token.isNotEmpty;
 
     Timer(const Duration(milliseconds: 1500), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => isLoggedIn ? const MainNavigation() : const LoginScreen(),
+            pageBuilder: (_, __, ___) => hasToken ? const MainNavigation() : const LoginScreen(),
             transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
             transitionDuration: const Duration(milliseconds: 800),
           ),

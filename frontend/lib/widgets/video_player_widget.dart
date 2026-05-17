@@ -93,7 +93,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             _controller,
             allowScrubbing: true,
             colors: const VideoProgressColors(
-              playedColor: Color(0xFF0A2342),
+              playedColor: Color(0xFF56877A),
               bufferedColor: Colors.grey,
               backgroundColor: Colors.white24,
             ),

@@ -190,7 +190,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         children: [
                           CircleAvatar(
                             radius: 50,
-                            backgroundColor: const Color(0xFF0A2342),
+                            backgroundColor: const Color(0xFF56877A),
                             backgroundImage: _newAvatarBytes != null
                                 ? MemoryImage(_newAvatarBytes!)
                                 : (_avatarUrl != null ? NetworkImage(_avatarUrl!) as ImageProvider : null),
@@ -207,7 +207,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: const BoxDecoration(
-                                color: Color(0xFF0A2342),
+                                color: Color(0xFF56877A),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.camera_alt, color: Colors.white, size: 18),
@@ -229,7 +229,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             : const Icon(Icons.upload, color: Colors.white),
                         label: const Text('رفع الصورة', style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0A2342),
+                          backgroundColor: const Color(0xFF56877A),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                       )
@@ -269,7 +269,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ElevatedButton(
                       onPressed: _isLoadingProfile ? null : _saveProfile,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0A2342),
+                        backgroundColor: const Color(0xFF56877A),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),

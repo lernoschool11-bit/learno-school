@@ -183,12 +183,12 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen>
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               leading: CircleAvatar(
                 radius: 26,
-                backgroundColor: const Color(0xFF0A2342).withAlpha(30),
+                backgroundColor: const Color(0xFF56877A).withAlpha(30),
                 child: Text(
                   name.isNotEmpty ? name[0] : '؟',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0A2342),
+                    color: Color(0xFF56877A),
                     fontSize: 18,
                   ),
                 ),
@@ -207,7 +207,7 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen>
                 style: const TextStyle(color: Colors.grey, fontSize: 13),
               ),
               trailing: const Icon(Icons.chevron_right,
-                  color: Color(0xFF0A2342)),
+                  color: Color(0xFF56877A)),
               onTap: () {
                 Navigator.push(
                   context,
@@ -266,12 +266,12 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen>
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: const Color(0xFF0A2342).withAlpha(30),
+                    backgroundColor: const Color(0xFF56877A).withAlpha(30),
                     child: Text(
                       name.isNotEmpty ? name[0] : '؟',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0A2342),
+                        color: Color(0xFF56877A),
                         fontSize: 16,
                       ),
                     ),
@@ -295,7 +295,7 @@ class _DirectMessagesScreenState extends State<DirectMessagesScreen>
                     onPressed: () =>
                         _respondRequest(req['id'], 'ACCEPTED'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0A2342),
+                      backgroundColor: const Color(0xFF56877A),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
