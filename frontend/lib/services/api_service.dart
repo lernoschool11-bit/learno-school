@@ -660,12 +660,46 @@ class ApiService {
     try {
       final token = await getToken();
       final response = await http.post(
-        Uri.parse('$baseUrl/gamification/quests/$questId/answer'),
+        Uri.parse('$baseUrl/gamification/quests/$questId/submit'),
         headers: _headers(token),
         body: jsonEncode({'content': content}),
       );
       return response.statusCode == 201;
     } catch (e) { return false; }
+  }
+
+  Future<List<dynamic>> getQuestAnswers(String questId) async {
+    try {
+      final token = await getToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/gamification/quests/$questId/answers'),
+        headers: _headers(token),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getQuestAnswers error: $e');
+      return [];
+    }
+  }
+
+  Future<List<dynamic>> getLeaderboard() async {
+    try {
+      final token = await getToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/gamification/leaderboard'),
+        headers: _headers(token),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getLeaderboard error: $e');
+      return [];
+    }
   }
 
   Future<bool> validateQuestAnswer(String questId, String answerId) async {

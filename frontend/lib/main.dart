@@ -132,9 +132,13 @@ class _MainNavigationState extends State<MainNavigation> {
     if (role == 'TEACHER') {
       items.add(const MacDockItem(icon: Icons.edit_note_outlined, label: 'رصد'));
       items.add(const MacDockItem(icon: Icons.assessment_outlined, label: 'السجل'));
-    } else {
+      items.add(const MacDockItem(icon: Icons.groups_outlined, label: 'مجتمعي'));
+    } else if (role == 'STUDENT') {
       items.add(const MacDockItem(icon: Icons.groups_outlined, label: 'مجتمعي'));
       items.add(const MacDockItem(icon: Icons.grade_outlined, label: 'علاماتي'));
+    } else {
+      items.add(const MacDockItem(icon: Icons.assessment_outlined, label: 'السجل'));
+      items.add(const MacDockItem(icon: Icons.groups_outlined, label: 'مجتمعي'));
     }
 
     items.add(const MacDockItem(icon: Icons.person_outline, label: 'حسابي'));

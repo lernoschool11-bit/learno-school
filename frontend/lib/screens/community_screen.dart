@@ -22,7 +22,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
   String? _error;
   List<Map<String, dynamic>> _messages = [];
   String? _roomId;
-  bool _showMembers = false;
   String? _currentUsername;
   String? _currentUserId;
   String? _currentUserRole;
@@ -33,6 +32,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
   final List<String> _quickEmojis = ['😊', '👍', '❤️', '😂', '🎉', '📚', '✅', '❓', '👏', '🔥'];
 
+  // Gamification & Tabs state
+  int _currentTab = 0; // 0: Chat, 1: Challenges, 2: Leaderboard, 3: Members
+  List<dynamic> _quests = [];
+  List<dynamic> _leaderboard = [];
+  bool _questsLoading = false;
+  bool _leaderboardLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +48,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
   Future<void> _init() async {
     await _loadCurrentUser();
     await _loadCommunity();
-    // Socket connection is handled inside _loadCommunity now for better room management
   }
 
   Future<void> _loadCurrentUser() async {
@@ -77,8 +82,38 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
       // Connect or update socket room
       _connectSocket();
+      
+      // Refresh current tab data
+      if (_currentTab == 1) _loadQuests();
+      if (_currentTab == 2) _loadLeaderboard();
     } catch (e) {
       setState(() { _error = 'فشل تحميل المجتمع'; _isLoading = false; });
+    }
+  }
+
+  Future<void> _loadQuests() async {
+    try {
+      setState(() { _questsLoading = true; });
+      final data = await _apiService.getQuests();
+      setState(() {
+        _quests = data;
+        _questsLoading = false;
+      });
+    } catch (_) {
+      setState(() { _questsLoading = false; });
+    }
+  }
+
+  Future<void> _loadLeaderboard() async {
+    try {
+      setState(() { _leaderboardLoading = true; });
+      final data = await _apiService.getLeaderboard();
+      setState(() {
+        _leaderboard = data;
+        _leaderboardLoading = false;
+      });
+    } catch (_) {
+      setState(() { _leaderboardLoading = false; });
     }
   }
 
@@ -88,19 +123,25 @@ class _CommunityScreenState extends State<CommunityScreen> {
       _socketService.joinRoom(_roomId!);
     }
     _socketService.onRoomHistory((history) {
-      setState(() {
-        _messages = history.map((m) => Map<String, dynamic>.from(m)).toList();
-      });
-      _scrollToBottom();
+      if (mounted) {
+        setState(() {
+          _messages = history.map((m) => Map<String, dynamic>.from(m)).toList();
+        });
+        _scrollToBottom();
+      }
     });
     _socketService.onMessage((message) {
-      setState(() => _messages.add(message));
-      _scrollToBottom();
+      if (mounted) {
+        setState(() => _messages.add(message));
+        _scrollToBottom();
+      }
     });
     _socketService.onMessageDeleted((messageId) {
-      setState(() {
-        _messages.removeWhere((m) => m['id'] == messageId);
-      });
+      if (mounted) {
+        setState(() {
+          _messages.removeWhere((m) => m['id'] == messageId);
+        });
+      }
     });
   }
 
@@ -151,6 +192,470 @@ class _CommunityScreenState extends State<CommunityScreen> {
               ),
             )
           : null,
+    );
+  }
+
+  void _showAnswersSheet(dynamic quest) async {
+    List<dynamic> answers = [];
+    bool loadingAnswers = true;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.surfaceDark,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            if (loadingAnswers) {
+              _apiService.getQuestAnswers(quest['id']).then((data) {
+                setSheetState(() {
+                  answers = data;
+                  loadingAnswers = false;
+                });
+              });
+              return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+            }
+
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'إجابات الطلاب',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const Divider(color: Colors.white24),
+                  Expanded(
+                    child: answers.isEmpty
+                        ? const Center(child: Text('لا توجد إجابات بعد', style: TextStyle(color: Colors.grey)))
+                        : ListView.builder(
+                            itemCount: answers.length,
+                            itemBuilder: (context, index) {
+                              final ans = answers[index];
+                              final user = ans['user'] ?? {};
+                              final isCorrect = ans['isCorrect'] == true;
+                              return Card(
+                                color: Colors.black38,
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                child: ListTile(
+                                  leading: _buildAvatar(
+                                    name: user['fullName'] ?? '؟',
+                                    avatarUrl: user['avatarUrl'],
+                                    backgroundColor: AppTheme.primaryColor,
+                                  ),
+                                  title: Text(user['fullName'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const SizedBox(height: 4),
+                                      Text(ans['content'] ?? '', style: const TextStyle(color: Colors.white70)),
+                                    ],
+                                  ),
+                                  trailing: IconButton(
+                                    icon: Icon(
+                                      isCorrect ? Icons.check_circle : Icons.check_circle_outline,
+                                      color: isCorrect ? Colors.green : Colors.grey,
+                                    ),
+                                    onPressed: isCorrect
+                                        ? null
+                                        : () async {
+                                            final ok = await _apiService.validateQuestAnswer(quest['id'], ans['id']);
+                                            if (ok) {
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('تم اختيار الإجابة الفائزة بنجاح! 🏆'), backgroundColor: Colors.green),
+                                                );
+                                                Navigator.pop(context);
+                                                _loadQuests();
+                                              }
+                                            }
+                                          },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTabBar() {
+    final tabs = [
+      {'label': 'المحادثة', 'icon': Icons.chat_bubble_outline},
+      {'label': 'التحديات', 'icon': Icons.emoji_events_outlined},
+      {'label': 'المتصدرين', 'icon': Icons.leaderboard_outlined},
+      {'label': 'الأعضاء', 'icon': Icons.people_outline},
+    ];
+
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceDark.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: AppTheme.dividerColor.withOpacity(0.3)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(25),
+        child: Row(
+          children: List.generate(tabs.length, (index) {
+            final isSelected = _currentTab == index;
+            final tab = tabs[index];
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _currentTab = index;
+                  });
+                  if (index == 1) {
+                    _loadQuests();
+                  } else if (index == 2) {
+                    _loadLeaderboard();
+                  }
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: isSelected ? AppTheme.sovereignGradient : null,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        tab['icon'] as IconData,
+                        size: 16,
+                        color: isSelected ? Colors.white : AppTheme.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        tab['label'] as String,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? Colors.white : AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestsTab() {
+    if (_questsLoading) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+    }
+    if (_quests.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.stars_outlined, size: 64, color: Colors.amber),
+              const SizedBox(height: 16),
+              const Text(
+                'لا توجد تحديات نشطة حالياً 🏆',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                (_currentUserRole == 'TEACHER' || _currentUserRole == 'PRINCIPAL')
+                    ? 'بإمكانك إضافة تحدٍ جديد للطلاب من زر النشر في القائمة السفلية!'
+                    : 'ترقب التحديات والأسئلة من معلميك للحصول على النقاط والجوائز!',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final isStudent = _currentUserRole == 'STUDENT';
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: _quests.length,
+      itemBuilder: (context, index) {
+        final quest = _quests[index];
+        final author = quest['author'] ?? {};
+        final questId = quest['id'] as String;
+
+        // Controller for fast answers
+        final TextEditingController answerController = TextEditingController();
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceDark.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.dividerColor.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.emoji_events, color: Colors.amber, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        quest['title'] ?? 'تحدي جديد',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                    ),
+                    child: Text(
+                      '+${quest['points'] ?? 50} نقطة',
+                      style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                quest['content'] ?? '',
+                style: const TextStyle(color: Colors.white90, fontSize: 14, height: 1.4),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      _buildAvatar(
+                        name: author['fullName'] ?? '؟',
+                        avatarUrl: author['avatarUrl'],
+                        backgroundColor: AppTheme.primaryColor,
+                        radius: 12,
+                        fontSize: 9,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'بواسطة المعلم: ${author['fullName'] ?? ''}',
+                        style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                      ),
+                    ],
+                  ),
+                  if (!isStudent)
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      ),
+                      onPressed: () => _showAnswersSheet(quest),
+                      icon: const Icon(Icons.visibility, size: 14),
+                      label: const Text('عرض الإجابات', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    ),
+                ],
+              ),
+              if (isStudent) ...[
+                const Divider(color: Colors.white24, height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: answerController,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: InputDecoration(
+                          hintText: 'اكتب إجابتك هنا بأسرع وقت...',
+                          hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppTheme.dividerColor),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppTheme.dividerColor),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      onPressed: () async {
+                        final ans = answerController.text.trim();
+                        if (ans.isEmpty) return;
+                        final ok = await _apiService.submitQuestAnswer(questId, ans);
+                        if (ok) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('تم تقديم إجابتك بنجاح! انتظر تصحيح المعلم ✅'), backgroundColor: Colors.green),
+                            );
+                            answerController.clear();
+                            _loadQuests();
+                          }
+                        } else {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('فشل تقديم الإجابة (قد تكون أجبت مسبقاً) ⚠️'), backgroundColor: Colors.red),
+                            );
+                          }
+                        }
+                      },
+                      child: const Text('إرسال', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLeaderboardTab() {
+    if (_leaderboardLoading) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+    }
+    if (_leaderboard.isEmpty) {
+      return const Center(
+        child: Text('لا يوجد متصدرين بعد\nكن أول من يكسب نقاطاً! 🏆', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: _leaderboard.length,
+      itemBuilder: (context, index) {
+        final student = _leaderboard[index];
+        final rankNum = index + 1;
+        
+        Color cardColor = AppTheme.surfaceDark.withOpacity(0.5);
+        BorderSide borderSide = BorderSide(color: AppTheme.dividerColor.withOpacity(0.3));
+        Widget? trailingIcon;
+        double avatarRadius = 20;
+
+        if (rankNum == 1) {
+          cardColor = Colors.amber.withOpacity(0.15);
+          borderSide = const BorderSide(color: Colors.amber, width: 1.5);
+          trailingIcon = const Icon(Icons.emoji_events, color: Colors.amber, size: 28);
+          avatarRadius = 24;
+        } else if (rankNum == 2) {
+          cardColor = Colors.grey.withOpacity(0.15);
+          borderSide = const BorderSide(color: Colors.grey, width: 1.2);
+          trailingIcon = const Icon(Icons.emoji_events, color: Colors.grey, size: 24);
+          avatarRadius = 22;
+        } else if (rankNum == 3) {
+          cardColor = Colors.brown.withOpacity(0.15);
+          borderSide = const BorderSide(color: Colors.brown, width: 1.0);
+          trailingIcon = const Icon(Icons.emoji_events, color: Colors.brown, size: 22);
+          avatarRadius = 20;
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.fromBorderSide(borderSide),
+          ),
+          child: ListTile(
+            leading: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 25,
+                  child: Text(
+                    '#$rankNum',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: rankNum <= 3 ? 18 : 14,
+                      color: rankNum == 1 ? Colors.amber : (rankNum == 2 ? Colors.grey : (rankNum == 3 ? Colors.brown : Colors.white70)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _buildAvatar(
+                  name: student['fullName'] ?? '؟',
+                  avatarUrl: student['avatarUrl'],
+                  backgroundColor: rankNum == 1 ? Colors.amber : (rankNum == 2 ? Colors.grey.shade400 : (rankNum == 3 ? Colors.brown.shade400 : AppTheme.primaryColor)),
+                  radius: avatarRadius,
+                ),
+              ],
+            ),
+            title: Text(
+              student['fullName'] ?? '',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: rankNum == 1 ? 16 : 14,
+                color: Colors.white,
+              ),
+            ),
+            subtitle: Text(
+              '${student['rank'] ?? "طالب متميز"}',
+              style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${student['points'] ?? 0}',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber, fontSize: 16),
+                    ),
+                    const Text('نقطة', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  ],
+                ),
+                if (trailingIcon != null) ...[
+                  const SizedBox(width: 8),
+                  trailingIcon,
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -226,15 +731,38 @@ class _CommunityScreenState extends State<CommunityScreen> {
           : null,
         actions: [
           IconButton(
-            icon: Icon(_showMembers ? Icons.chat : Icons.people, color: AppTheme.primaryColor),
-            onPressed: () => setState(() => _showMembers = !_showMembers),
-            tooltip: _showMembers ? 'المحادثة' : 'الأعضاء',
+            icon: const Icon(Icons.refresh, color: AppTheme.primaryColor),
+            onPressed: () {
+              if (_currentTab == 0) {
+                _loadCommunity();
+              } else if (_currentTab == 1) {
+                _loadQuests();
+              } else if (_currentTab == 2) {
+                _loadLeaderboard();
+              } else {
+                _loadCommunity();
+              }
+            },
+            tooltip: 'تحديث',
           ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.only(bottom: 16), // Rely on MainNavigation for most of the dock space
-        child: _showMembers ? _buildMembersList() : _buildChat(),
+        child: Column(
+          children: [
+            _buildTabBar(),
+            Expanded(
+              child: _currentTab == 0
+                  ? _buildChat()
+                  : (_currentTab == 1
+                      ? _buildQuestsTab()
+                      : (_currentTab == 2
+                          ? _buildLeaderboardTab()
+                          : _buildMembersList())),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -367,50 +895,50 @@ class _CommunityScreenState extends State<CommunityScreen> {
         SafeArea(
           child: Container(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceDark,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(100),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      style: const TextStyle(color: AppTheme.textPrimary),
-                      decoration: InputDecoration(
-                        hintText: 'اكتب رسالة...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide(color: AppTheme.dividerColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide(color: AppTheme.dividerColor),
-                        ),
-                        filled: true,
-                        fillColor: AppTheme.oledBlack,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceDark,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(100),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    style: const TextStyle(color: AppTheme.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'اكتب رسالة...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(color: AppTheme.dividerColor),
                       ),
-                      onSubmitted: _sendMessage,
-                      textInputAction: TextInputAction.send,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(color: AppTheme.dividerColor),
+                      ),
+                      filled: true,
+                      fillColor: AppTheme.oledBlack,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     ),
+                    onSubmitted: _sendMessage,
+                    textInputAction: TextInputAction.send,
                   ),
-                  const SizedBox(width: 8),
-                  CircleAvatar(
-                    backgroundColor: AppTheme.primaryColor,
-                    child: IconButton(
-                      icon: const Icon(Icons.send, color: AppTheme.oledBlack, size: 20),
-                      onPressed: () => _sendMessage(_messageController.text),
-                    ),
+                ),
+                const SizedBox(width: 8),
+                CircleAvatar(
+                  backgroundColor: AppTheme.primaryColor,
+                  child: IconButton(
+                    icon: const Icon(Icons.send, color: AppTheme.oledBlack, size: 20),
+                    onPressed: () => _sendMessage(_messageController.text),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
