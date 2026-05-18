@@ -451,7 +451,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               const SizedBox(height: 8),
               Text(
                 quest['content'] ?? '',
-                style: const TextStyle(color: Colors.white90, fontSize: 14, height: 1.4),
+                style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14, height: 1.4),
               ),
               const SizedBox(height: 12),
               Row(
