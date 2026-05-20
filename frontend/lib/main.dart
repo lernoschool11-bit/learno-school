@@ -25,10 +25,19 @@ import 'services/notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  await NotificationService().init();
+  try {
+    await NotificationService().init();
+  } catch (e) {
+    debugPrint('⚠️ Error initializing NotificationService: $e');
+  }
 
-  final prefs = await SharedPreferences.getInstance();
-  final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  bool isLoggedIn = false;
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  } catch (e) {
+    debugPrint('⚠️ Error initializing SharedPreferences: $e');
+  }
 
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
