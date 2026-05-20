@@ -12,7 +12,8 @@ import '../main.dart';
 
 class CreatePostScreen extends StatefulWidget {
   final String userRole;
-  const CreatePostScreen({super.key, required this.userRole});
+  final String? initialType;
+  const CreatePostScreen({super.key, required this.userRole, this.initialType});
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -24,7 +25,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
   String _loadingText = 'جاري الرفع...';
-  String _selectedType = 'TEXT';
+  late String _selectedType;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedType = widget.initialType ?? 'TEXT';
+  }
   Uint8List? _selectedFileBytes;
   String? _selectedFileName;
   String? _selectedFileMime;

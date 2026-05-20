@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lottie/lottie.dart';
 import 'login_screen.dart';
 import '../main.dart';
 
@@ -13,26 +13,12 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+  late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
-    _controller.forward();
-    
-    _navigateToNext();
+    _controller = AnimationController(vsync: this);
   }
 
   Future<void> _navigateToNext() async {
@@ -40,17 +26,15 @@ class _SplashScreenState extends State<SplashScreen>
     final token = prefs.getString('auth_token');
     final bool hasToken = token != null && token.isNotEmpty;
 
-    Timer(const Duration(milliseconds: 1500), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) => hasToken ? const MainNavigation() : const LoginScreen(),
-            transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
-            transitionDuration: const Duration(milliseconds: 800),
-          ),
-        );
-      }
-    });
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => hasToken ? const MainNavigation() : const LoginScreen(),
+          transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
+          transitionDuration: const Duration(milliseconds: 800),
+        ),
+      );
+    }
   }
 
   @override
@@ -62,22 +46,21 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: const Color(0xFF000000),
       body: Center(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: const Text(
-              'مرحباً',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 72,
-                fontWeight: FontWeight.w200,
-                letterSpacing: 8,
-              ),
-            ),
-          ),
+        child: Lottie.network(
+          'https://lottie.host/25f804e5-3261-44c7-8708-bfcb6c159480/L7QjCOILSv.json',
+          width: 300,
+          height: 300,
+          fit: BoxFit.contain,
+          controller: _controller,
+          onLoaded: (composition) {
+            _controller
+              ..duration = composition.duration
+              ..forward().then((_) {
+                _navigateToNext();
+              });
+          },
         ),
       ),
     );

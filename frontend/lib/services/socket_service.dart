@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'api_service.dart';
 import 'notification_service.dart';
@@ -12,9 +13,25 @@ class SocketService {
 
   IO.Socket? get socket => _socket;
 
+  // Active tracking for in-app push notification filtering
+  static String? activeRoomId;
+  static String? activeConversationId;
+  String? _currentUserId;
+
+  // Single dispatched listeners to prevent duplicate listener accumulation
+  Function(Map<String, dynamic>)? _onMessageScreenCallback;
+  Function(Map<String, dynamic>)? _onDirectMessageScreenCallback;
+
   Future<void> connect() async {
     final token = await _apiService.getToken();
     if (token == null) return;
+
+    try {
+      final profile = await _apiService.getUserProfile();
+      _currentUserId = profile['id'];
+    } catch (e) {
+      debugPrint('SocketService profile load error: $e');
+    }
 
     _socket = IO.io('https://learno-school.onrender.com', <String, dynamic>{
       'transports': ['websocket'],
@@ -25,11 +42,62 @@ class SocketService {
     _socket!.connect();
 
     _socket!.onConnect((_) {
-      print('Socket connected ✅');
+      debugPrint('Socket connected ✅');
       joinDirect(); // انضم لغرفتك الخاصة تلقائياً
+      _setupGlobalListeners();
     });
-    _socket!.onDisconnect((_) => print('Socket disconnected ❌'));
-    _socket!.onError((data) => print('Socket error: $data'));
+    _socket!.onDisconnect((_) => debugPrint('Socket disconnected ❌'));
+    _socket!.onError((data) => debugPrint('Socket error: $data'));
+  }
+
+  void _setupGlobalListeners() {
+    // 1. Listen for new community room messages globally
+    _socket?.off('new_message');
+    _socket?.on('new_message', (data) {
+      final msg = Map<String, dynamic>.from(data);
+      final roomId = msg['roomId']?.toString();
+      final senderId = msg['userId']?.toString();
+      final senderName = msg['fullName'] ?? 'عضو في المجتمع';
+      final content = msg['content'] ?? '';
+
+      // Trigger notification if not in this active room and not the sender
+      if (roomId != activeRoomId && senderId != _currentUserId && _currentUserId != null) {
+        NotificationService().showNotification(
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title: 'المجتمع 👥 - $senderName',
+          body: content,
+        );
+      }
+
+      // Dispatch to screen if registered
+      if (_onMessageScreenCallback != null) {
+        _onMessageScreenCallback!(msg);
+      }
+    });
+
+    // 2. Listen for new direct messages globally
+    _socket?.off('new_direct_message');
+    _socket?.on('new_direct_message', (data) {
+      final msg = Map<String, dynamic>.from(data);
+      final conversationId = msg['conversationId']?.toString();
+      final senderId = msg['senderId']?.toString();
+      final senderName = msg['sender']?['fullName'] ?? 'رسالة خاصة';
+      final content = msg['content'] ?? '';
+
+      // Trigger notification if not in this active conversation and not the sender
+      if (conversationId != activeConversationId && senderId != _currentUserId && _currentUserId != null) {
+        NotificationService().showNotification(
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title: 'رسالة خاصة 💬 - $senderName',
+          body: content,
+        );
+      }
+
+      // Dispatch to screen if registered
+      if (_onDirectMessageScreenCallback != null) {
+        _onDirectMessageScreenCallback!(msg);
+      }
+    });
   }
 
   // ════════ الغرف العامة ════════
@@ -43,7 +111,11 @@ class SocketService {
   }
 
   void onMessage(Function(Map<String, dynamic>) callback) {
-    _socket?.on('new_message', (data) => callback(Map<String, dynamic>.from(data)));
+    _onMessageScreenCallback = callback;
+  }
+
+  void removeMessageScreenCallback() {
+    _onMessageScreenCallback = null;
   }
 
   void deleteMessage(String roomId, String messageId) {
@@ -72,17 +144,11 @@ class SocketService {
   }
 
   void onDirectMessage(Function(Map<String, dynamic>) callback) {
-    _socket?.off('new_direct_message'); // إزالة المستمعين القديمين
-    _socket?.on('new_direct_message', (data) {
-      final msg = Map<String, dynamic>.from(data);
-      // Show Push Notification
-      NotificationService().showNotification(
-          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          title: 'رسالة جديدة',
-          body: msg['content'] ?? 'لديك رسالة جديدة',
-      );
-      callback(msg);
-    });
+    _onDirectMessageScreenCallback = callback;
+  }
+
+  void removeDirectMessageScreenCallback() {
+    _onDirectMessageScreenCallback = null;
   }
 
   void notifyDmRequest(String receiverId) {
@@ -96,5 +162,8 @@ class SocketService {
   void disconnect() {
     _socket?.disconnect();
     _socket = null;
+    _currentUserId = null;
+    _onMessageScreenCallback = null;
+    _onDirectMessageScreenCallback = null;
   }
 }

@@ -19,32 +19,48 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
   final List<String> _grades = ['4', '5', '6', '7', '8', '9', '10'];
   final List<String> _sections = ['أ', 'ب', 'ج', 'د'];
 
+  List<String> _teacherSubjects = [];
+  String? _selectedSubject;
   String _subject = '';
   String _title = '';
   double _score = 0;
   double _maxScore = 100;
   bool _isLoading = false;
-  bool _isFetchingStudents = true;
+  bool _isFetchingData = true;
 
   @override
   void initState() {
     super.initState();
-    _loadStudents();
+    _loadAllData();
   }
 
-  Future<void> _loadStudents() async {
-    setState(() => _isFetchingStudents = true);
+  Future<void> _loadAllData() async {
+    setState(() => _isFetchingData = true);
     try {
-      final students = await _apiService.getSchoolUsers();
-      debugPrint('Loaded ${students.length} school users');
+      final results = await Future.wait([
+        _apiService.getSchoolUsers(),
+        _apiService.getUserProfile(),
+      ]);
+
+      final students = results[0] as List<dynamic>;
+      final profile = results[1] as Map<String, dynamic>;
+
       setState(() {
         _students = students.where((u) => u['role'] == 'STUDENT').toList();
         debugPrint('Found ${_students.length} students');
-        _isFetchingStudents = false;
+
+        if (profile['subjects'] != null) {
+          _teacherSubjects = List<String>.from(profile['subjects']);
+          if (_teacherSubjects.isNotEmpty) {
+            _selectedSubject = _teacherSubjects[0];
+            _subject = _selectedSubject!;
+          }
+        }
+        _isFetchingData = false;
       });
     } catch (e) {
-      debugPrint('Error loading students: $e');
-      setState(() => _isFetchingStudents = false);
+      debugPrint('Error loading data: $e');
+      setState(() => _isFetchingData = false);
     }
   }
 
@@ -66,26 +82,46 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
     }
     _formKey.currentState!.save();
 
+    final finalSubject = _teacherSubjects.isNotEmpty ? _selectedSubject : _subject;
+    if (finalSubject == null || finalSubject.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('يرجى اختيار أو كتابة المادة')));
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
       final result = await _apiService.addGrade(
         studentId: _selectedStudentId!,
-        subject: _subject,
+        subject: finalSubject,
         title: _title,
         score: _score,
         maxScore: _maxScore,
       );
 
       setState(() => _isLoading = false);
-      if (result.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تم حفظ العلامة بنجاح')));
+      if (result.containsKey('error')) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(result['error'].toString()),
+          backgroundColor: Colors.redAccent,
+        ));
+      } else if (result.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('تم حفظ العلامة بنجاح'),
+          backgroundColor: Colors.green,
+        ));
         Navigator.pop(context);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فشل في حفظ العلامة')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('فشل في حفظ العلامة'),
+          backgroundColor: Colors.redAccent,
+        ));
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('خطأ في الاتصال بالخادم')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('خطأ في الاتصال بالخادم'),
+        backgroundColor: Colors.redAccent,
+      ));
     }
   }
 
@@ -106,7 +142,7 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
             colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
           ),
         ),
-        child: _isFetchingStudents 
+        child: _isFetchingData 
           ? Center(child: CircularProgressIndicator(color: Colors.blueAccent))
           : SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(20, 120, 20, 20),
@@ -118,7 +154,9 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
                     SizedBox(height: 20),
                     _buildDropdown(),
                     SizedBox(height: 20),
-                    _buildTextField('المادة (مثلاً: رياضيات)', (val) => _subject = val),
+                    _teacherSubjects.isNotEmpty
+                      ? _buildSubjectDropdown()
+                      : _buildTextField('المادة (مثلاً: رياضيات)', (val) => _subject = val),
                     SizedBox(height: 20),
                     _buildTextField('عنوان الاختبار (مثلاً: الشهر الأول)', (val) => _title = val),
                     SizedBox(height: 20),
@@ -243,6 +281,40 @@ class _EnterGradesScreenState extends State<EnterGradesScreen> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
       ),
       onSaved: (val) => onSave(val!),
+    );
+  }
+
+  Widget _buildSubjectDropdown() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButtonFormField<String>(
+          value: _selectedSubject,
+          dropdownColor: Color(0xFF1E293B),
+          style: TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            labelText: 'المادة الدراسية',
+            labelStyle: TextStyle(color: Colors.blueAccent),
+            border: InputBorder.none,
+          ),
+          icon: Icon(Icons.keyboard_arrow_down, color: Colors.blueAccent),
+          items: _teacherSubjects.map((subject) {
+            return DropdownMenuItem<String>(
+              value: subject,
+              child: Text(subject, style: TextStyle(color: Colors.white)),
+            );
+          }).toList(),
+          onChanged: (val) => setState(() {
+            _selectedSubject = val;
+            _subject = val ?? '';
+          }),
+        ),
+      ),
     );
   }
 }

@@ -32,12 +32,17 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   @override
   void initState() {
     super.initState();
+    SocketService.activeConversationId = widget.conversationId;
     _loadMessages();
     _listenSocket();
   }
 
   @override
   void dispose() {
+    if (SocketService.activeConversationId == widget.conversationId) {
+      SocketService.activeConversationId = null;
+    }
+    _socket.removeDirectMessageScreenCallback();
     _msgController.dispose();
     _scrollController.dispose();
     super.dispose();

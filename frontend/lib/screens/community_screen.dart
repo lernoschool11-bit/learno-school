@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../services/socket_service.dart';
 import '../theme/app_theme.dart';
 import 'user_profile_screen.dart';
+import 'create_post_screen.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -121,6 +122,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
     await _socketService.connect();
     if (_roomId != null) {
       _socketService.joinRoom(_roomId!);
+      SocketService.activeRoomId = _roomId;
     }
     _socketService.onRoomHistory((history) {
       if (mounted) {
@@ -370,10 +372,96 @@ class _CommunityScreenState extends State<CommunityScreen> {
     if (_questsLoading) {
       return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
     }
+
+    final canCreateQuest = _currentUserRole == 'TEACHER' || _currentUserRole == 'PRINCIPAL' || _currentUserRole == 'ADMIN';
+    final isStudent = _currentUserRole == 'STUDENT';
+    
+    final List<Widget> listItems = [];
+
+    if (canCreateQuest) {
+      listItems.add(
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CreatePostScreen(
+                  userRole: _currentUserRole ?? 'TEACHER',
+                  initialType: 'QUEST',
+                ),
+              ),
+            ).then((_) {
+              _loadQuests();
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryColor.withOpacity(0.15),
+                  Colors.amber.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.amber.withOpacity(0.4)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.stars, color: Colors.amber, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'إضافة سؤال تحدي للطلاب 🏆',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'انشر سؤالاً تفاعلياً يحفز الطلاب ويمنحهم نقاطاً!',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios, color: Colors.amber, size: 16),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     if (_quests.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+      listItems.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -385,8 +473,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                (_currentUserRole == 'TEACHER' || _currentUserRole == 'PRINCIPAL')
-                    ? 'بإمكانك إضافة تحدٍ جديد للطلاب من زر النشر في القائمة السفلية!'
+                canCreateQuest
+                    ? 'بإمكانك إضافة تحدٍ جديد للطلاب من زر النشر في الأعلى أو القائمة السفلية!'
                     : 'ترقب التحديات والأسئلة من معلميك للحصول على النقاط والجوائز!',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.grey),
@@ -395,159 +483,157 @@ class _CommunityScreenState extends State<CommunityScreen> {
           ),
         ),
       );
-    }
-
-    final isStudent = _currentUserRole == 'STUDENT';
-
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: _quests.length,
-      itemBuilder: (context, index) {
-        final quest = _quests[index];
+    } else {
+      for (final quest in _quests) {
         final author = quest['author'] ?? {};
         final questId = quest['id'] as String;
-
-        // Controller for fast answers
         final TextEditingController answerController = TextEditingController();
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceDark.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.dividerColor.withOpacity(0.3)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.emoji_events, color: Colors.amber, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        quest['title'] ?? 'تحدي جديد',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.amber.withOpacity(0.5)),
-                    ),
-                    child: Text(
-                      '+${quest['points'] ?? 50} نقطة',
-                      style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                quest['content'] ?? '',
-                style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14, height: 1.4),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      _buildAvatar(
-                        name: author['fullName'] ?? '؟',
-                        avatarUrl: author['avatarUrl'],
-                        backgroundColor: AppTheme.primaryColor,
-                        radius: 12,
-                        fontSize: 9,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'بواسطة المعلم: ${author['fullName'] ?? ''}',
-                        style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
-                      ),
-                    ],
-                  ),
-                  if (!isStudent)
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      ),
-                      onPressed: () => _showAnswersSheet(quest),
-                      icon: const Icon(Icons.visibility, size: 14),
-                      label: const Text('عرض الإجابات', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                    ),
-                ],
-              ),
-              if (isStudent) ...[
-                const Divider(color: Colors.white24, height: 20),
+        listItems.add(
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceDark.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.dividerColor.withOpacity(0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: TextField(
-                        controller: answerController,
-                        style: const TextStyle(color: Colors.white, fontSize: 13),
-                        decoration: InputDecoration(
-                          hintText: 'اكتب إجابتك هنا بأسرع وقت...',
-                          hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppTheme.dividerColor),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppTheme.dividerColor),
-                          ),
+                    Row(
+                      children: [
+                        const Icon(Icons.emoji_events, color: Colors.amber, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          quest['title'] ?? 'تحدي جديد',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.amber.withOpacity(0.5)),
                       ),
-                      onPressed: () async {
-                        final ans = answerController.text.trim();
-                        if (ans.isEmpty) return;
-                        final ok = await _apiService.submitQuestAnswer(questId, ans);
-                        if (ok) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('تم تقديم إجابتك بنجاح! انتظر تصحيح المعلم ✅'), backgroundColor: Colors.green),
-                            );
-                            answerController.clear();
-                            _loadQuests();
-                          }
-                        } else {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('فشل تقديم الإجابة (قد تكون أجبت مسبقاً) ⚠️'), backgroundColor: Colors.red),
-                            );
-                          }
-                        }
-                      },
-                      child: const Text('إرسال', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      child: Text(
+                        '+${quest['points'] ?? 50} نقطة',
+                        style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  quest['content'] ?? '',
+                  style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14, height: 1.4),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        _buildAvatar(
+                          name: author['fullName'] ?? '؟',
+                          avatarUrl: author['avatarUrl'],
+                          backgroundColor: AppTheme.primaryColor,
+                          radius: 12,
+                          fontSize: 9,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'بواسطة المعلم: ${author['fullName'] ?? ''}',
+                          style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                        ),
+                      ],
+                    ),
+                    if (!isStudent)
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        ),
+                        onPressed: () => _showAnswersSheet(quest),
+                        icon: const Icon(Icons.visibility, size: 14),
+                        label: const Text('عرض الإجابات', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                  ],
+                ),
+                if (isStudent) ...[
+                  const Divider(color: Colors.white24, height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: answerController,
+                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          decoration: InputDecoration(
+                            hintText: 'اكتب إجابتك هنا بأسرع وقت...',
+                            hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.dividerColor),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.dividerColor),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                        onPressed: () async {
+                          final ans = answerController.text.trim();
+                          if (ans.isEmpty) return;
+                          final ok = await _apiService.submitQuestAnswer(questId, ans);
+                          if (ok) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('تم تقديم إجابتك بنجاح! انتظر تصحيح المعلم ✅'), backgroundColor: Colors.green),
+                              );
+                              answerController.clear();
+                              _loadQuests();
+                            }
+                          } else {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('فشل تقديم الإجابة (قد تكون أجبت مسبقاً) ⚠️'), backgroundColor: Colors.red),
+                              );
+                            }
+                          }
+                        },
+                        child: const Text('إرسال', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         );
-      },
+      }
+    }
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      children: listItems,
     );
   }
 
@@ -661,6 +747,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
   @override
   void dispose() {
+    if (SocketService.activeRoomId == _roomId) {
+      SocketService.activeRoomId = null;
+    }
+    _socketService.removeMessageScreenCallback();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();

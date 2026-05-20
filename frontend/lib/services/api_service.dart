@@ -539,10 +539,15 @@ class ApiService {
       if (response.statusCode == 201 || response.statusCode == 200) {
         return jsonDecode(response.body);
       }
-      return {};
+      try {
+        final decoded = jsonDecode(response.body);
+        return {'error': decoded['error'] ?? decoded['message'] ?? 'فشل في حفظ العلامة'};
+      } catch (_) {
+        return {'error': 'فشل حفظ العلامة (حالة السيرفر: ${response.statusCode})'};
+      }
     } catch (e) {
       debugPrint('addGrade error: $e');
-      return {};
+      return {'error': 'خطأ في الاتصال بالخادم: $e'};
     }
   }
 

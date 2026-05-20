@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../models/post_model.dart';
 import '../services/api_service.dart';
@@ -298,8 +299,17 @@ class _PostCardState extends State<PostCard> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: InkWell(
-                onTap: () {
-                   // فتح الملف في المتصفح أو تطبيق خارجي
+                onTap: () async {
+                  final url = Uri.parse(widget.post.mediaUrl!);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('تعذر فتح الملف')),
+                      );
+                    }
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.all(16),

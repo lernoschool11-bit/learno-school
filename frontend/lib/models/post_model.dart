@@ -66,6 +66,28 @@ class PostModel {
     if (difference.inMinutes > 0) return 'منذ ${difference.inMinutes} دقائق';
     return 'الآن';
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'content': content,
+      'author': {
+        'id': authorId,
+        'fullName': authorName,
+        'role': authorRole,
+        'avatarUrl': authorAvatar,
+        'school': school,
+      },
+      'type': type,
+      'createdAt': DateTime.now().toIso8601String(),
+      'likesCount': likes,
+      'commentsCount': comments,
+      'mediaUrl': mediaUrl,
+      'isLiked': isLiked,
+      'comments': commentsList.map((c) => c.toJson()).toList(),
+    };
+  }
 }
 
 class CommentModel {
@@ -97,5 +119,19 @@ class CommentModel {
       authorAvatar: json['author']?['avatarUrl'],
       timeAgo: PostModel._calculateTimeAgo(json['createdAt']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'content': content,
+      'author': {
+        'id': authorId,
+        'fullName': authorName,
+        'role': authorRole,
+        'avatarUrl': authorAvatar,
+      },
+      'createdAt': DateTime.now().toIso8601String(),
+    };
   }
 }

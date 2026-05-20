@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'dart:math';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/post_model.dart';
@@ -41,41 +43,121 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _loadCachedData();
     _loadData();
   }
 
+  Future<void> _loadCachedData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      final cachedProfileStr = prefs.getString('cached_user_profile');
+      Map<String, dynamic> cachedProfile = {};
+      if (cachedProfileStr != null) {
+        cachedProfile = jsonDecode(cachedProfileStr);
+      }
+
+      final cachedPostsStr = prefs.getString('cached_posts');
+      List<PostModel> cachedPosts = [];
+      if (cachedPostsStr != null) {
+        final List<dynamic> decodedList = jsonDecode(cachedPostsStr);
+        cachedPosts = decodedList.map((p) => PostModel.fromJson(p)).toList();
+      }
+
+      final cachedUnreadCount = prefs.getInt('cached_unread_count') ?? 0;
+      final cachedActivityScore = prefs.getInt('cached_activity_score') ?? 0;
+      final cachedActiveClassesCount = prefs.getInt('cached_active_classes_count') ?? 0;
+
+      if (cachedProfile.isNotEmpty || cachedPosts.isNotEmpty) {
+        setState(() {
+          _userProfile = cachedProfile;
+          _currentUserId = cachedProfile['id'] ?? '';
+          _posts = cachedPosts;
+          _unreadCount = cachedUnreadCount;
+          _activityScore = cachedActivityScore;
+          _activeClassesCount = cachedActiveClassesCount;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading cached data: $e');
+    }
+  }
+
+  Future<void> _saveToCache({
+    required Map<String, dynamic> profile,
+    required List<PostModel> posts,
+    required int unreadCount,
+    required int activityScore,
+    required int activeClassesCount,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cached_user_profile', jsonEncode(profile));
+      
+      final List<Map<String, dynamic>> serializedPosts = posts.map((p) => p.toJson()).toList();
+      await prefs.setString('cached_posts', jsonEncode(serializedPosts));
+      
+      await prefs.setInt('cached_unread_count', unreadCount);
+      await prefs.setInt('cached_activity_score', activityScore);
+      await prefs.setInt('cached_active_classes_count', activeClassesCount);
+    } catch (e) {
+      debugPrint('Error saving to cache: $e');
+    }
+  }
+
   Future<void> _loadData() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    if (_posts.isEmpty) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    } else {
+      setState(() {
+        _error = null;
+      });
+    }
     try {
       final results = await Future.wait([
         _apiService.getUserProfile(),
         _apiService.getPosts(),
         _apiService.getUnreadCount(),
         _apiService.getSchoolStats(),
+        _apiService.getActiveOnlineClasses(),
       ]);
 
       final profile = results[0] as Map<String, dynamic>;
       final posts = results[1] as List<PostModel>;
       final unreadCount = results[2] as int;
       final stats = results[3] as Map<String, dynamic>;
-      
-      final activeClasses = await _apiService.getActiveOnlineClasses();
+      final activeClasses = results[4] as List<dynamic>;
+
+      final activityScore = stats['activityScore'] ?? 0;
+      final activeClassesCount = activeClasses.length;
 
       setState(() {
         _userProfile = profile;
         _currentUserId = profile['id'] ?? '';
         _posts = posts;
         _unreadCount = unreadCount;
-        _activityScore = stats['activityScore'] ?? 0;
-        _activeClassesCount = activeClasses.length;
+        _activityScore = activityScore;
+        _activeClassesCount = activeClassesCount;
         _isLoading = false;
       });
+
+      _saveToCache(
+        profile: profile,
+        posts: posts,
+        unreadCount: unreadCount,
+        activityScore: activityScore,
+        activeClassesCount: activeClassesCount,
+      );
     } catch (e) {
+      debugPrint('HomeScreen loadData error: $e');
       setState(() {
-        _error = 'تعذر تحميل المنشورات';
+        if (_posts.isEmpty) {
+          _error = 'تعذر تحميل المنشورات';
+        }
         _isLoading = false;
       });
     }

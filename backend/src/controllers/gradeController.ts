@@ -31,11 +31,14 @@ export const addGrade = async (req: AuthRequest, res: Response) => {
 
     // 3. تأكد إن المعلم بدرس هاي المادة (تحقق مرن)
     const teacherSubjects = req.user!.subjects.map(s => s.trim().toLowerCase());
-    const targetSubject = subject.trim().toLowerCase();
+    const targetSubject = subject ? subject.trim().toLowerCase() : '';
 
     if (!teacherSubjects.includes(targetSubject) && req.user!.subjects.length > 0) {
-      return res.status(403).json({ error: `You are not authorized to add grades for ${subject}` });
+      return res.status(403).json({ error: `غير مصرح لك برصد علامات مادة "${subject}"` });
     }
+
+    const parsedScore = typeof score === 'number' ? score : parseFloat(score) || 0;
+    const parsedMaxScore = typeof maxScore === 'number' ? maxScore : parseFloat(maxScore) || 100;
 
     // 4. حفظ العلامة
     const grade = await prisma.grade.create({
@@ -44,8 +47,8 @@ export const addGrade = async (req: AuthRequest, res: Response) => {
         teacherId,
         subject,
         title,
-        score: parseFloat(score),
-        maxScore: parseFloat(maxScore),
+        score: parsedScore,
+        maxScore: parsedMaxScore,
       },
       include: {
         student: {
@@ -59,8 +62,8 @@ export const addGrade = async (req: AuthRequest, res: Response) => {
       action: 'ADD_GRADE',
       entity: 'grade',
       entityId: String(grade.id),
-      newValue: { studentId, subject, title, score: parseFloat(score), maxScore: parseFloat(maxScore) },
-      description: `المعلم أضاف علامة "${title}" للطالب ${grade.student.fullName} — ${score}/${maxScore} في مادة ${subject}`,
+      newValue: { studentId, subject, title, score: parsedScore, maxScore: parsedMaxScore },
+      description: `المعلم أضاف علامة "${title}" للطالب ${grade.student.fullName} — ${parsedScore}/${parsedMaxScore} في مادة ${subject}`,
     });
 
     return res.status(201).json(grade);

@@ -190,7 +190,8 @@ class _MainNavigationState extends State<MainNavigation> {
                 ),
               ),
               // AI Floating Circle (Glassmorphism)
-              if (_currentIndex != screens.indexWhere((s) => s is AIChatScreen))
+              if (_currentIndex != screens.indexWhere((s) => s is AIChatScreen) &&
+                  _currentIndex != screens.indexWhere((s) => s is CommunityScreen))
                 Positioned(
                   right: 20,
                   bottom: 110, // Positioned well above the Dock
