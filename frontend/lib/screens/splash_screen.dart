@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import '../main.dart';
@@ -13,35 +14,28 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animController;
-  late Animation<double> _fadeAnim;
-  late Animation<double> _scaleAnim;
+  late final AnimationController _controller;
+  bool _hasNavigated = false;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(vsync: this);
 
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-
-    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
-    );
-
-    _scaleAnim = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOutBack),
-    );
-
-    // Start fade-in then navigate after 1.5s
-    _animController.forward();
-    Future.delayed(const Duration(milliseconds: 1500), _navigateToNext);
+    // Safety Fallback Timeout: If Lottie fails to load or takes > 4 seconds,
+    // transition to the next screen anyway to avoid a stuck/white screen.
+    Future.delayed(const Duration(seconds: 4), () {
+      if (!_hasNavigated) {
+        debugPrint('⚠️ Lottie load timeout. Fallback navigation triggered.');
+        _navigateToNext();
+      }
+    });
   }
 
   Future<void> _navigateToNext() async {
-    if (!mounted) return;
-    
+    if (_hasNavigated || !mounted) return;
+    _hasNavigated = true;
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
@@ -70,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _animController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -79,14 +73,21 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       backgroundColor: AppTheme.oledBlack,
       body: Center(
-        child: FadeTransition(
-          opacity: _fadeAnim,
-          child: ScaleTransition(
-            scale: _scaleAnim,
-            child: Column(
+        child: Lottie.network(
+          'https://lottie.host/25f804e5-3261-44c7-8708-bfcb6c159480/L7QjCOILSv.json',
+          width: 300,
+          height: 300,
+          fit: BoxFit.contain,
+          controller: _controller,
+          errorBuilder: (context, error, stackTrace) {
+            // If network fails to fetch, show a nice fallback logo and navigate immediately
+            debugPrint('⚠️ Lottie network error: $error');
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _navigateToNext();
+            });
+            return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // App icon / logo circle
                 Container(
                   width: 100,
                   height: 100,
@@ -121,18 +122,18 @@ class _SplashScreenState extends State<SplashScreen>
                     letterSpacing: 3,
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'المنصة التعليمية المستقبلية',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppTheme.textSecondary,
-                    letterSpacing: 1,
-                  ),
-                ),
               ],
-            ),
-          ),
+            );
+          },
+          onLoaded: (composition) {
+            // Configure the controller duration to match the Lottie file exactly
+            _controller
+              ..duration = composition.duration
+              ..forward().then((_) {
+                // Rule: No Loop. Navigate to Next Screen immediately after animation ends
+                _navigateToNext();
+              });
+          },
         ),
       ),
     );
