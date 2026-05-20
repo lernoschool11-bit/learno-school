@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:lottie/lottie.dart';
 import 'login_screen.dart';
 import '../main.dart';
+import '../theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,25 +13,34 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  bool _hasNavigated = false;
+  late AnimationController _animController;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _scaleAnim;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
 
-    // ── Safety timeout: navigate after 4s even if Lottie fails to load ──
-    Future.delayed(const Duration(seconds: 4), () {
-      _navigateToNext();
-    });
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+
+    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
+    );
+
+    _scaleAnim = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.easeOutBack),
+    );
+
+    // Start fade-in then navigate after 1.5s
+    _animController.forward();
+    Future.delayed(const Duration(milliseconds: 1500), _navigateToNext);
   }
 
   Future<void> _navigateToNext() async {
-    // Guard: only navigate once
-    if (_hasNavigated || !mounted) return;
-    _hasNavigated = true;
-
+    if (!mounted) return;
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
     final bool hasToken = token != null && token.isNotEmpty;
@@ -43,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
               hasToken ? const MainNavigation() : const LoginScreen(),
           transitionsBuilder: (_, anim, __, child) =>
               FadeTransition(opacity: anim, child: child),
-          transitionDuration: const Duration(milliseconds: 800),
+          transitionDuration: const Duration(milliseconds: 600),
         ),
       );
     }
@@ -51,35 +60,69 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF000000),
+      backgroundColor: AppTheme.oledBlack,
       body: Center(
-        child: Lottie.network(
-          'https://lottie.host/25f804e5-3261-44c7-8708-bfcb6c159480/L7QjCOILSv.json',
-          width: 300,
-          height: 300,
-          fit: BoxFit.contain,
-          controller: _controller,
-          errorBuilder: (context, error, stackTrace) {
-            // If Lottie fails to load, navigate immediately
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _navigateToNext();
-            });
-            return const SizedBox.shrink();
-          },
-          onLoaded: (composition) {
-            _controller
-              ..duration = composition.duration
-              ..forward().then((_) {
-                _navigateToNext();
-              });
-          },
+        child: FadeTransition(
+          opacity: _fadeAnim,
+          child: ScaleTransition(
+            scale: _scaleAnim,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // App icon / logo circle
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [AppTheme.sovereignTeal, Color(0xFF0A1F18)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.sovereignTeal.withOpacity(0.4),
+                        blurRadius: 30,
+                        spreadRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.school_rounded,
+                    size: 52,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Learno',
+                  style: TextStyle(
+                    fontSize: 38,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 3,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'المنصة التعليمية المستقبلية',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textSecondary,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
