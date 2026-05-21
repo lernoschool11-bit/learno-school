@@ -12,23 +12,16 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+class _SplashScreenState extends State<SplashScreen> {
   bool _hasNavigated = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
 
-    // Safety Fallback Timeout: If Lottie fails to load or takes > 4 seconds,
-    // transition to the next screen anyway to avoid a stuck/white screen.
-    Future.delayed(const Duration(seconds: 4), () {
-      if (!_hasNavigated) {
-        debugPrint('⚠️ Lottie load timeout. Fallback navigation triggered.');
-        _navigateToNext();
-      }
+    // مؤقت زمني ذكي: ينتقل تلقائياً بعد ثانيتين ونصف (2500 مللي ثانية)
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      _navigateToNext();
     });
   }
 
@@ -63,28 +56,20 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.oledBlack,
+      backgroundColor: AppTheme.oledBlack, // خلفية سوداء فاخرة متوافقة مع شاشات OLED
       body: Center(
-        child: Lottie.network(
-          'https://lottie.host/25f804e5-3261-44c7-8708-bfcb6c159480/L7QjCOILSv.json',
+        child: Lottie.asset(
+          'assets/Hello (apple).json', // Local apple welcome asset
           width: 300,
           height: 300,
           fit: BoxFit.contain,
-          controller: _controller,
+          animate: true, // تشغيل فوري وتلقائي
+          repeat: false, // يعمل لمرة واحدة فقط دون تكرار
           errorBuilder: (context, error, stackTrace) {
-            // If network fails to fetch, show a nice fallback logo and navigate immediately
-            debugPrint('⚠️ Lottie network error: $error');
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _navigateToNext();
-            });
+            // واجهة الطوارئ البديلة في حال حدوث أي خطأ في الملف
+            debugPrint('⚠️ Lottie asset error: $error');
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -124,15 +109,6 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ],
             );
-          },
-          onLoaded: (composition) {
-            // Configure the controller duration to match the Lottie file exactly
-            _controller
-              ..duration = composition.duration
-              ..forward().then((_) {
-                // Rule: No Loop. Navigate to Next Screen immediately after animation ends
-                _navigateToNext();
-              });
           },
         ),
       ),

@@ -38,3 +38,4 @@ flutter:
   assets:
     - assets/character.riv
     - assets/character_logo.json
+    - "assets/Hello (apple).json"

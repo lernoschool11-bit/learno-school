@@ -26,7 +26,7 @@ class GeminiService {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'model': 'google/gemini-flash-1.5-exp:free',
+          'model': 'google/gemini-1.5-flash',
           'messages': messages,
           'temperature': 0.7,
         }),
